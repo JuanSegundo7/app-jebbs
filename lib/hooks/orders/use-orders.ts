@@ -3,6 +3,10 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
 import type { Order, OrderStatus, OrderWithItems } from "@/lib/types";
+import {
+  syncOrderStockForStatus,
+  type OrderStockResult,
+} from "./use-order-stock";
 
 export function useOrders() {
   const supabase = createClient();
@@ -140,7 +144,23 @@ export function useUpdateOrderStatus() {
 
       if (error) throw error;
 
-      return { orderId, status };
+      // Status write succeeded first, stock sync second, deliberately in
+      // that order and deliberately non-fatal: if stock sync fails, the
+      // status change is real and must not be rolled back (this mutation
+      // has optimistic-update rollback below — rethrowing here would
+      // visually revert the card to its old status even though the DB
+      // genuinely says otherwise, which is worse than a stock discrepancy
+      // the user can be told about separately). The result carries
+      // whatever happened so the caller can toast it.
+      let stockResult: OrderStockResult | null = null;
+      let stockError: unknown = null;
+      try {
+        stockResult = await syncOrderStockForStatus(orderId, status);
+      } catch (e) {
+        stockError = e;
+      }
+
+      return { orderId, status, stockResult, stockError };
     },
 
     onMutate: async ({ orderId, status }) => {
@@ -179,6 +199,10 @@ export function useUpdateOrderStatus() {
         queryKey: ["orders-history"],
         exact: false,
       });
+
+      queryClient.invalidateQueries({ queryKey: ["supplies"] });
+      queryClient.invalidateQueries({ queryKey: ["burgers-with-recipes"] });
+      queryClient.invalidateQueries({ queryKey: ["extras-with-recipes"] });
     },
   });
 }
@@ -238,6 +262,23 @@ export function useCancelOrder() {
         .eq("id", orderId);
 
       if (error) throw error;
+
+      // Status write succeeded first, stock sync second, deliberately
+      // non-fatal — same rationale as useUpdateOrderStatus. Canceling a
+      // completed order reverses its deduction; canceling a new/ready order
+      // is a no-op since nothing was ever deducted — syncOrderStockForStatus
+      // handles both correctly with zero extra logic here, because
+      // reverseOrderStockDeduction's own ledger-emptiness check is what
+      // makes the no-op case free.
+      let stockResult: OrderStockResult | null = null;
+      let stockError: unknown = null;
+      try {
+        stockResult = await syncOrderStockForStatus(orderId, "canceled");
+      } catch (e) {
+        stockError = e;
+      }
+
+      return { orderId, stockResult, stockError };
     },
 
     onMutate: async ({ orderId }) => {
@@ -274,6 +315,10 @@ export function useCancelOrder() {
         queryKey: ["orders-history"],
         exact: false,
       });
+
+      queryClient.invalidateQueries({ queryKey: ["supplies"] });
+      queryClient.invalidateQueries({ queryKey: ["burgers-with-recipes"] });
+      queryClient.invalidateQueries({ queryKey: ["extras-with-recipes"] });
     },
   });
 }
@@ -299,6 +344,25 @@ export function useReactivateOrder() {
         .eq("id", orderId);
 
       if (error) throw error;
+
+      // Status write succeeded first, stock sync second, deliberately
+      // non-fatal — same rationale as useUpdateOrderStatus. A single call
+      // handles both directions nextStatus can take: reactivating to
+      // "completed" deducts fresh since a canceled order's ledger was
+      // already cleared by the cancel that led to it being "canceled";
+      // reactivating to "new" reverses, which will almost always be a
+      // no-op in practice since canceling already reversed it, but costs
+      // only one empty-result SELECT and keeps the rule uniform with no
+      // special-casing.
+      let stockResult: OrderStockResult | null = null;
+      let stockError: unknown = null;
+      try {
+        stockResult = await syncOrderStockForStatus(orderId, nextStatus);
+      } catch (e) {
+        stockError = e;
+      }
+
+      return { orderId, nextStatus, stockResult, stockError };
     },
 
     onMutate: async ({ orderId, nextStatus }) => {
@@ -329,10 +393,18 @@ export function useReactivateOrder() {
         queryKey: ["orders-history"],
         exact: false,
       });
+
+      queryClient.invalidateQueries({ queryKey: ["supplies"] });
+      queryClient.invalidateQueries({ queryKey: ["burgers-with-recipes"] });
+      queryClient.invalidateQueries({ queryKey: ["extras-with-recipes"] });
     },
   });
 }
 
+// DEAD CODE: zero call sites anywhere in the app. Does NOT deduct stock —
+// see lib/hooks/orders/use-order-stock.ts for the real completion path
+// (wired into useUpdateOrderStatus). Delete this function in a follow-up;
+// do not extend it or wire deduction into it — it isn't reachable.
 export function useCompleteOrder() {
   const supabase = createClient();
   const queryClient = useQueryClient();
