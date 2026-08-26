@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import { useNextStep } from "nextstepjs";
 import { Header } from "@/components/layout/header";
+import { HelpButton } from "@/components/onboarding/help-button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -49,13 +51,18 @@ import {
 import type { Burger } from "@/lib/types";
 import { formatCurrency } from "@/lib/utils/format";
 import { cn } from "@/lib/utils";
+import { normalizeIngredientName } from "@/lib/utils/costing";
 import { useImageUpload } from "@/lib/hooks/use-image-upload";
+import { useSupplies } from "@/lib/hooks/use-supplies";
 
 export default function MenuPage() {
   const { data: burgers, isLoading } = useAllBurgers();
   const createBurger = useCreateBurger();
   const updateBurger = useUpdateBurger();
   const deleteBurger = useDeleteBurger();
+  // Only for the ingredient-name datalist/match badges below — /costos owns
+  // the actual burger_supplies linkage, this page never writes to it.
+  const { data: supplies } = useSupplies();
   const { uploadImage, deleteImage, isUploading, uploadProgress } =
     useImageUpload();
 
@@ -100,6 +107,34 @@ export default function MenuPage() {
     setImagePreview(null);
     setDialogOpen(true);
   };
+
+  // The "Ingredientes" tour step targets a field that only exists once the
+  // create/edit Dialog is open — same problem the /costos and /gastos tours
+  // solve for their tabbed content (Radix unmounts what isn't active/open).
+  // This opens the create dialog for that one step instead of leaving the
+  // step with nothing to highlight. `tourOpenedRef` tracks whether *this*
+  // effect opened it (mirrors components/costos/recipes-tab.tsx's demo-burger
+  // pattern), so a dialog the user opened by hand outside a tour is never
+  // touched here, and the dialog closes itself if the tour is skipped/closed
+  // instead of being left open and empty.
+  const { currentTour, currentStep } = useNextStep();
+  const tourOpenedRef = useRef(false);
+  useEffect(() => {
+    const inTourStep = currentTour === "menu" && currentStep >= 1;
+
+    if (inTourStep) {
+      if (!dialogOpen) {
+        tourOpenedRef.current = true;
+        handleOpenCreate();
+      }
+      return;
+    }
+
+    if (tourOpenedRef.current) {
+      tourOpenedRef.current = false;
+      setDialogOpen(false);
+    }
+  }, [currentTour, currentStep]);
 
   const handleOpenEdit = (burger: Burger) => {
     setEditingBurger(burger);
@@ -160,13 +195,16 @@ export default function MenuPage() {
   };
 
   const handleAddIngredient = () => {
-    if (
-      ingredientInput.trim() &&
-      !ingredientsList.includes(ingredientInput.trim())
-    ) {
-      setIngredientsList([...ingredientsList, ingredientInput.trim()]);
-      setIngredientInput("");
-    }
+    const trimmed = ingredientInput.trim();
+    if (!trimmed) return;
+    // Dedupe on the NORMALIZED name (case/accent-insensitive), not raw
+    // equality — otherwise "Carne" and "carne" coexist as two different tags
+    // pointing at the same real ingredient, and the /costos matching in
+    // buildIngredientSuggestions would offer both separately.
+    const normalized = normalizeIngredientName(trimmed);
+    if (ingredientsList.some((i) => normalizeIngredientName(i) === normalized)) return;
+    setIngredientsList([...ingredientsList, trimmed]);
+    setIngredientInput("");
   };
 
   const handleRemoveIngredient = (ingredient: string) => {
@@ -233,7 +271,11 @@ export default function MenuPage() {
 
   return (
     <section className="flex h-screen flex-col">
-      <Header title="Menú" subtitle="Administra las hamburguesas del menú" />
+      <Header
+        title="Menú"
+        subtitle="Administra las hamburguesas del menú"
+        extraActions={<HelpButton tour="menu" />}
+      />
 
       <div className="flex-1 overflow-auto p-6 md:py-6 md:px-0">
         {/* Header */}
@@ -245,7 +287,7 @@ export default function MenuPage() {
                 `(${burgers.filter((b) => b.is_available).length} disponibles)`}
             </p>
           </div>
-          <Button onClick={handleOpenCreate}>
+          <Button id="menu-add-burger-button" onClick={handleOpenCreate}>
             <Plus className="mr-2 h-4 w-4" />
             Nueva hamburguesa
           </Button>
@@ -538,10 +580,11 @@ export default function MenuPage() {
             </div>
 
             {/* Ingredients */}
-            <div>
+            <div id="menu-ingredients-field">
               <Label>Ingredientes</Label>
               <div className="mt-2 flex gap-2">
                 <Input
+                  list="menu-supplies-datalist"
                   value={ingredientInput}
                   onChange={(e) => setIngredientInput(e.target.value)}
                   placeholder="Agregar ingrediente"
@@ -558,20 +601,60 @@ export default function MenuPage() {
                   <Plus className="h-4 w-4" />
                 </Button>
               </div>
+              {/* Native datalist, not a custom dropdown — zero new deps.
+                  Suggests existing /costos supply names so an ingredient
+                  typed here matches its recipe supply by construction,
+                  instead of relying on the fuzzy matching in
+                  buildIngredientSuggestions to guess it later. Typing
+                  anything else still works: not every menu ingredient needs
+                  a costed supply behind it. */}
+              <datalist id="menu-supplies-datalist">
+                {supplies
+                  ?.filter((s) => s.is_active !== false)
+                  .map((s) => (
+                    <option key={s.id} value={s.name} />
+                  ))}
+              </datalist>
               {ingredientsList.length > 0 && (
                 <div className="mt-2 flex flex-wrap gap-1">
-                  {ingredientsList.map((ing) => (
-                    <Badge key={ing} variant="secondary" className="gap-1">
-                      {ing}
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveIngredient(ing)}
-                        className="hover:text-destructive"
+                  {ingredientsList.map((ing) => {
+                    // Same normalized-name comparison buildIngredientSuggestions
+                    // uses on the /costos side — a dot here just previews
+                    // whether this ingredient will show up there as an
+                    // exact match, no explanatory copy needed.
+                    const linkedSupply = supplies?.find(
+                      (s) =>
+                        s.is_active !== false &&
+                        normalizeIngredientName(s.name) === normalizeIngredientName(ing)
+                    );
+                    return (
+                      <Badge
+                        key={ing}
+                        variant="secondary"
+                        className="gap-1"
+                        title={
+                          linkedSupply
+                            ? `Vinculado al insumo "${linkedSupply.name}"`
+                            : "Sin insumo asociado en /costos"
+                        }
                       >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </Badge>
-                  ))}
+                        {linkedSupply && (
+                          <span
+                            className="h-1.5 w-1.5 shrink-0 rounded-full"
+                            style={{ backgroundColor: "var(--color-chart-3)" }}
+                          />
+                        )}
+                        {ing}
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveIngredient(ing)}
+                          className="hover:text-destructive"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </Badge>
+                    );
+                  })}
                 </div>
               )}
             </div>
