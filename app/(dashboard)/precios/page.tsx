@@ -9,12 +9,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Check, X } from "lucide-react";
+import { toast } from "sonner";
 import { useAllBurgers, useUpdateBurger } from "@/lib/hooks/use-menu-crud";
 import { useAllExtras, useUpdateExtra } from "@/lib/hooks/use-menu-crud";
 import { formatCurrency } from "@/lib/utils/format";
 import type { ExtraCategory } from "@/lib/types";
 
 const DEFAULT_DELIVERY_FEE_KEY = "jebbs_default_delivery_fee";
+const PEDIDOSYA_COMMISSION_PCT_KEY = "jebbs_pedidosya_commission_pct";
 
 const categoryLabels: Record<ExtraCategory, string> = {
   extra: "Extras",
@@ -36,16 +38,49 @@ export default function PricingPage() {
   const [editingDeliveryFee, setEditingDeliveryFee] = useState(false);
   const [deliveryFeeInput, setDeliveryFeeInput] = useState("");
 
+  const [pedidosYaCommissionPct, setPedidosYaCommissionPct] = useState(0);
+  const [editingCommissionPct, setEditingCommissionPct] = useState(false);
+  const [commissionPctInput, setCommissionPctInput] = useState("");
+
   useEffect(() => {
     const stored = localStorage.getItem(DEFAULT_DELIVERY_FEE_KEY);
-    if (stored) setDefaultDeliveryFee(Number(stored));
+    if (!stored) return;
+    // Guard against a corrupted "NaN" string persisted before this fix (e.g.
+    // from typing "2.500,50" when Number() didn't normalize the comma) —
+    // fall back to the 2000 default instead of propagating NaN.
+    const parsed = Number(stored);
+    if (Number.isFinite(parsed)) setDefaultDeliveryFee(parsed);
+  }, []);
+
+  useEffect(() => {
+    const stored = localStorage.getItem(PEDIDOSYA_COMMISSION_PCT_KEY);
+    if (!stored) return;
+    const parsed = Number(stored);
+    if (Number.isFinite(parsed)) setPedidosYaCommissionPct(parsed);
   }, []);
 
   const saveDeliveryFee = () => {
-    const value = Math.max(0, Number(deliveryFeeInput));
+    const parsed = Number(deliveryFeeInput.trim().replace(",", "."));
+    if (!Number.isFinite(parsed) || parsed < 0) {
+      toast.error("Ingresá un valor válido");
+      return;
+    }
+    const value = Math.max(0, parsed);
     localStorage.setItem(DEFAULT_DELIVERY_FEE_KEY, String(value));
     setDefaultDeliveryFee(value);
     setEditingDeliveryFee(false);
+  };
+
+  const saveCommissionPct = () => {
+    const parsed = Number(commissionPctInput.trim().replace(",", "."));
+    if (!Number.isFinite(parsed) || parsed < 0 || parsed > 100) {
+      toast.error("Ingresá un porcentaje válido (0-100)");
+      return;
+    }
+    const value = Math.min(100, Math.max(0, parsed));
+    localStorage.setItem(PEDIDOSYA_COMMISSION_PCT_KEY, String(value));
+    setPedidosYaCommissionPct(value);
+    setEditingCommissionPct(false);
   };
 
   const handleStartEdit = (id: string, currentPrice: number) => {
@@ -85,7 +120,7 @@ export default function PricingPage() {
           <CardHeader>
             <CardTitle>Configuración general</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-3">
             <div className="flex items-center justify-between rounded-lg bg-secondary/30 p-3">
               <div>
                 <p className="font-medium">Costo de delivery por defecto</p>
@@ -98,8 +133,8 @@ export default function PricingPage() {
                 <div className="flex items-center gap-2">
                   <span className="text-muted-foreground">$</span>
                   <Input
-                    type="number"
-                    min={0}
+                    type="text"
+                    inputMode="decimal"
                     value={deliveryFeeInput}
                     onChange={(e) => setDeliveryFeeInput(e.target.value)}
                     className="w-28"
@@ -136,6 +171,60 @@ export default function PricingPage() {
                   }}
                 >
                   {formatCurrency(defaultDeliveryFee)}
+                </Button>
+              )}
+            </div>
+
+            <div className="flex items-center justify-between rounded-lg bg-secondary/30 p-3">
+              <div>
+                <p className="font-medium">Comisión de PedidosYa</p>
+                <p className="text-xs text-muted-foreground">
+                  Se aplica sobre el total al crear un pedido marcado como PedidosYa
+                </p>
+              </div>
+
+              {editingCommissionPct ? (
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="text"
+                    inputMode="decimal"
+                    value={commissionPctInput}
+                    onChange={(e) => setCommissionPctInput(e.target.value)}
+                    className="w-20"
+                    autoFocus
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") saveCommissionPct();
+                      if (e.key === "Escape") setEditingCommissionPct(false);
+                    }}
+                  />
+                  <span className="text-muted-foreground">%</span>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-8 w-8 text-primary"
+                    onClick={saveCommissionPct}
+                  >
+                    <Check className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-8 w-8"
+                    onClick={() => setEditingCommissionPct(false)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  variant="ghost"
+                  className="font-bold text-primary"
+                  onClick={() => {
+                    setCommissionPctInput(pedidosYaCommissionPct.toString());
+                    setEditingCommissionPct(true);
+                  }}
+                >
+                  {pedidosYaCommissionPct}%
                 </Button>
               )}
             </div>

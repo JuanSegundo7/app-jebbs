@@ -6,10 +6,18 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Search, User, Plus, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { Customer } from "@/lib/types";
+import type { Customer, OrderSource } from "@/lib/types";
 import { CustomerAddressSelect } from "@/components/orders/customer-adress-select";
 
 interface CustomerStepProps {
+  // Order source. `null` only ever occurs in edit mode, for a legacy order
+  // that predates this column — the toggle below is hidden in edit mode
+  // (mode !== "create"), so this case never actually renders any of the
+  // source === comparisons below, but the prop type has to allow it since
+  // it flows straight from settings.source.
+  source: OrderSource | null;
+  onSourceChange: (source: OrderSource) => void;
+
   // Search & Selection
   customerSearch: string;
   onCustomerSearchChange: (value: string) => void;
@@ -50,6 +58,8 @@ interface CustomerStepProps {
 }
 
 export function CustomerStep({
+  source,
+  onSourceChange,
   customerSearch,
   onCustomerSearchChange,
   filteredCustomers,
@@ -80,6 +90,26 @@ export function CustomerStep({
 
   return (
     <div className="space-y-4">
+      {/* Origen del pedido (ocultar en modo edit — no es editable) */}
+      {mode === "create" && (
+        <div className="flex gap-2">
+          <Button
+            variant={source === "local" ? "default" : "outline"}
+            className="flex-1 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-700"
+            onClick={() => onSourceChange("local")}
+          >
+            🏠 Local
+          </Button>
+          <Button
+            variant={source === "pedidosya" ? "default" : "outline"}
+            className="flex-1 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-700"
+            onClick={() => onSourceChange("pedidosya")}
+          >
+            🛵 PedidosYa
+          </Button>
+        </div>
+      )}
+
       {/* Cliente Seleccionado (solo en modo edit) */}
       {showSelectedCustomerCard && (
         <Card className="border-2 border-primary bg-card">
@@ -114,8 +144,8 @@ export function CustomerStep({
         </Card>
       )}
 
-      {/* Toggle New/Existing (ocultar en modo edit) */}
-      {mode === "create" && (
+      {/* Toggle New/Existing (ocultar en modo edit y para pedidos de PedidosYa) */}
+      {mode === "create" && source === "local" && (
         <div className="flex gap-2">
           <Button
             variant={!isNewCustomer ? "default" : "outline"}
@@ -136,8 +166,8 @@ export function CustomerStep({
         </div>
       )}
 
-      {/* Existing Customer (solo en modo create) */}
-      {mode === "create" && !isNewCustomer ? (
+      {/* Existing Customer (solo en modo create, pedidos locales) */}
+      {mode === "create" && source === "local" && !isNewCustomer ? (
         <div className="space-y-3">
           <div className="relative bg-card">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -205,7 +235,7 @@ export function CustomerStep({
             })}
           </div>
         </div>
-      ) : mode === "create" && isNewCustomer ? (
+      ) : mode === "create" && source === "local" && isNewCustomer ? (
         /* New Customer (solo en modo create) */
         <div className="space-y-4">
           <div className="space-y-3">
@@ -287,6 +317,27 @@ export function CustomerStep({
           </div>
         </div>
       ) : null}
+
+      {/* Pedido de PedidosYa: sin búsqueda ni alta de cliente — no se crea
+          registro en `customers`. Reutiliza newCustomerData.name solo como
+          etiqueta libre para la comanda; si queda vacío, el submit lo
+          completa con "PedidosYa" (ver use-order-wizard.ts). */}
+      {mode === "create" && source === "pedidosya" && (
+        <div className="space-y-3">
+          <Label>Nombre (opcional)</Label>
+          <Input
+            value={newCustomerData.name}
+            onChange={(e) =>
+              onNewCustomerDataChange({
+                ...newCustomerData,
+                name: e.target.value,
+              })
+            }
+            className="bg-card"
+            placeholder="PedidosYa"
+          />
+        </div>
+      )}
 
       {/* Mensaje informativo en modo edit */}
       {mode === "edit" && (
