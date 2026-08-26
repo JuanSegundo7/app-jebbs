@@ -37,6 +37,7 @@ import { formatCurrency, formatDateTime } from "@/lib/utils/format";
 import { OrderDetailsModal } from "@/components/orders/order-details-modal";
 import { usePrintOrder } from "@/lib/hooks/use-print-order";
 import { orderStatusConfig } from "@/lib/utils/order-status";
+import { orderSourceConfig } from "@/lib/utils/order-source";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -140,16 +141,51 @@ export default function OrdersHistoryPage() {
 
   const confirmCancelOrder = () => {
     if (!orderToCancel) return;
-    cancelOrder.mutate({ orderId: orderToCancel.id });
+    cancelOrder.mutate(
+      { orderId: orderToCancel.id },
+      {
+        // Reversal never produces itemsWithoutRecipe/malformedComboItems
+        // (reverseOrderStockDeduction always returns them as 0), so only
+        // the error branch can actually fire here.
+        onSuccess: (result) => {
+          if (result.stockError) {
+            toast.error(
+              "Pedido cancelado, pero falló la reversión de stock. Revisá el stock manualmente.",
+            );
+          }
+        },
+      },
+    );
     setCancelDialogOpen(false);
     setOrderToCancel(null);
   };
 
   const handleReactivateOrder = (order: Order) => {
-    reactivateOrder.mutate({
-      orderId: order.id,
-      nextStatus: order.is_paid ? "completed" : "new",
-    });
+    const nextStatus = order.is_paid ? "completed" : "new";
+    reactivateOrder.mutate(
+      { orderId: order.id, nextStatus },
+      {
+        onSuccess: (result) => {
+          if (result.stockError) {
+            toast.error(
+              nextStatus === "completed"
+                ? "Pedido reactivado, pero falló el descuento de stock. Revisá el stock manualmente."
+                : "Pedido reactivado, pero falló la reversión de stock. Revisá el stock manualmente.",
+            );
+          } else if (
+            nextStatus === "completed" &&
+            result.stockResult?.itemsWithoutRecipe
+          ) {
+            // Only the "completed" direction deducts and can hit
+            // recipe-less items; reactivating to "new" only reverses, which
+            // never sets itemsWithoutRecipe.
+            toast.info(
+              `Pedido reactivado. ${result.stockResult.itemsWithoutRecipe} ítem(s) sin receta no descontaron stock.`,
+            );
+          }
+        },
+      },
+    );
   };
 
   return (
@@ -263,7 +299,19 @@ export default function OrdersHistoryPage() {
                         return (
                           <TableRow key={order.id}>
                             <TableCell className="font-mono font-medium">
-                              #{order.order_number}
+                              <div className="flex items-center gap-2">
+                                <span>#{order.order_number}</span>
+                                {order.source && (
+                                  <Badge
+                                    className={
+                                      orderSourceConfig[order.source]
+                                        .className
+                                    }
+                                  >
+                                    {orderSourceConfig[order.source].label}
+                                  </Badge>
+                                )}
+                              </div>
                             </TableCell>
                             <TableCell>{order.customer_name}</TableCell>
                             <TableCell>

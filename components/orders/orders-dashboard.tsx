@@ -44,6 +44,8 @@ import {
 import { useOrderForEdit } from "@/lib/hooks/orders/use-order-for-edit";
 import { useQueryClient } from "@tanstack/react-query";
 import type { OrderStatus } from "@/lib/types";
+import { toast } from "sonner";
+import type { OrderStockResult } from "@/lib/hooks/orders/use-order-stock";
 
 export function OrdersDashboard() {
   const queryClient = useQueryClient();
@@ -67,6 +69,25 @@ export function OrdersDashboard() {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
   );
+
+  // Shared with every updateStatus.mutate(...) call that can transition an
+  // order to "completed". Stays silent on a clean completion (no stock
+  // error, no recipe-less items) — this is the highest-frequency action in
+  // the app, so a toast on every clean completion would be noise.
+  const handleStockToast = (result: {
+    stockResult: OrderStockResult | null;
+    stockError: unknown;
+  }) => {
+    if (result.stockError) {
+      toast.error(
+        "Pedido completado, pero falló el descuento de stock. Revisá el stock manualmente.",
+      );
+    } else if (result.stockResult?.itemsWithoutRecipe) {
+      toast.info(
+        `Pedido completado. ${result.stockResult.itemsWithoutRecipe} ítem(s) sin receta no descontaron stock.`,
+      );
+    }
+  };
 
   useEffect(() => {
     if (orderToEdit && orderIdToEdit) {
@@ -112,6 +133,10 @@ export function OrdersDashboard() {
     });
 
     setActiveOrder(null);
+    // No stock toast here: the drag-and-drop columns only target "new"/
+    // "ready", so this call can never resolve to a "completed" status
+    // transition — there's nothing meaningful for handleStockToast to react
+    // to. Left out rather than wired in for consistency's sake.
     updateStatus.mutate({ orderId, status: newStatus });
   };
 
@@ -120,7 +145,10 @@ export function OrdersDashboard() {
       setOrderToComplete(order);
       setPaymentDialogOpen(true);
     } else {
-      updateStatus.mutate({ orderId: order.id, status: "completed" });
+      updateStatus.mutate(
+        { orderId: order.id, status: "completed" },
+        { onSuccess: handleStockToast },
+      );
     }
   };
 
@@ -131,10 +159,13 @@ export function OrdersDashboard() {
       { orderId: orderToComplete.id, isPaid: true },
       {
         onSuccess: () => {
-          updateStatus.mutate({
-            orderId: orderToComplete.id,
-            status: "completed",
-          });
+          updateStatus.mutate(
+            {
+              orderId: orderToComplete.id,
+              status: "completed",
+            },
+            { onSuccess: handleStockToast },
+          );
         },
       },
     );
