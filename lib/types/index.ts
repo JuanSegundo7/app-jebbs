@@ -7,6 +7,7 @@ export type ExtraCategory = "extra" | "drink" | "fries" | "sides";
 export type DeliveryType = "pickup" | "delivery";
 export type PaymentMethod = "cash" | "transfer";
 export type DiscountType = "amount" | "percentage" | "none";
+export type OrderSource = "local" | "pedidosya";
 
 // ============================================
 // CUSTOMER
@@ -81,6 +82,10 @@ export interface Order {
   discount_type: DiscountType | null; // 🆕 Agregado de DB
   discount_value: number; // 🆕 Agregado de DB
   discount_amount: number; // 🆕 Agregado de DB
+  source: OrderSource | null; // 🆕 Agregado de DB
+  commission_amount: number; // 🆕 Agregado de DB
+  commission_rate: number | null; // 🆕 Agregado de DB — % congelado al crear el pedido
+  price_adjustment: number; // 🆕 Agregado de DB — ajuste manual, solo PedidosYa
   notes: string | null;
   created_at: string;
   updated_at: string;
@@ -134,6 +139,141 @@ export interface ExternalIncome {
   amount: number;
   description: string | null;
   created_at: string;
+}
+
+// ============================================
+// EXPENSES
+// ============================================
+
+export type ExpenseCategory = "supplies" | "services" | "salaries" | "rent" | "other";
+export type RecurringExpenseFrequency = "weekly" | "biweekly" | "monthly";
+
+export interface Expense {
+  id: string;
+  date: string; // YYYY-MM-DD
+  amount: number;
+  category: ExpenseCategory;
+  description: string | null;
+  created_at: string;
+  // Optional link to the supply this expense purchased — only meaningful
+  // when category === 'supplies' and the user picked a specific supply
+  // instead of leaving it as free text. See scripts/008-expense-supply-link.sql.
+  supply_id?: string | null;
+  quantity?: number | null;
+}
+
+export interface RecurringExpense {
+  id: string;
+  amount: number | null; // null for weekly/biweekly templates — informational-only, no fixed amount
+  category: ExpenseCategory;
+  description: string;
+  frequency: RecurringExpenseFrequency;
+  start_date: string; // YYYY-MM-DD
+  end_date: string | null; // YYYY-MM-DD, null = still active
+  created_at: string;
+}
+
+// ============================================
+// SUPPLIES & RECIPES (COSTING)
+// ============================================
+
+// How the create/edit modal computed `cost_per_unit`, kept so re-editing a
+// supply reopens the same inputs instead of just the derived result. See
+// scripts/009-supply-purchase-basis.sql.
+export type SupplyPurchaseMode = "unit" | "package" | "weight";
+
+// Which configuration knob a burger_supplies line scales with. Unconstrained
+// DB column (no CHECK), validated here instead — see
+// scripts/014-burger-supply-scaling.sql for the storage semantics.
+export type RecipeScaling = "meat" | "fries";
+
+export interface Supply {
+  id: string;
+  name: string;
+  unit: string;
+  cost_per_unit: number;
+  stock_quantity: number;
+  is_active: boolean;
+  created_at: string;
+  // Grams that one unit of `unit` weighs, when this supply is tracked in a
+  // discrete portion (e.g. "medallón") but purchased in bulk weight (kilos
+  // of raw meat). Null for the common case: a supply already tracked in the
+  // same unit it's purchased in. See scripts/007-supply-unit-weight.sql.
+  unit_weight_grams: number | null;
+  // Purchase-basis provenance for cost_per_unit. Null = legacy row, created
+  // or last edited before this column existed — the UI treats that as
+  // "unit" mode pre-filled with the existing cost_per_unit.
+  purchase_mode?: SupplyPurchaseMode | null;
+  // Package price ('package' mode) or price per kilo ('weight' mode). Null
+  // in 'unit' mode and for legacy rows.
+  purchase_price?: number | null;
+  // Units per package. Only meaningful in 'package' mode.
+  purchase_units?: number | null;
+}
+
+export interface BurgerSupply {
+  id: string;
+  burger_id: string;
+  supply_id: string;
+  quantity: number;
+  created_at: string;
+  // Which configuration knob this line scales with, if any. NULL means
+  // "fixed quantity", the only behavior that existed before this column —
+  // see scripts/014-burger-supply-scaling.sql.
+  scales_with: RecipeScaling | null;
+}
+
+export interface BurgerSupplyWithDetails extends BurgerSupply {
+  supply: Supply;
+}
+
+// Recipe (bill of materials) for an extra — mirrors BurgerSupply, minus
+// scaling (extras have no meat/fries-quantity analogue to scale by). See
+// scripts/013-extra-supplies.sql.
+export interface ExtraSupply {
+  id: string;
+  extra_id: string;
+  supply_id: string;
+  quantity: number;
+  created_at: string;
+}
+
+export interface ExtraSupplyWithDetails extends ExtraSupply {
+  supply: Supply;
+}
+
+// The structural minimum every recipe-line consumer actually reads. Both
+// BurgerSupplyWithDetails and ExtraSupplyWithDetails satisfy it structurally
+// — it lets the costing helpers work on either kind of recipe without
+// knowing which FK column backs it. `scales_with` is optional and
+// burger-only (see scripts/014-burger-supply-scaling.sql) — an extra line
+// simply never has it.
+export interface RecipeLineWithDetails {
+  id: string;
+  supply_id: string;
+  quantity: number;
+  scales_with?: RecipeScaling | null;
+  supply: Supply;
+}
+
+export interface ExtraWithRecipes extends Extra {
+  extra_supplies: ExtraSupplyWithDetails[];
+}
+
+export interface BurgerCost {
+  burgerId: string;
+  unitCost: number;
+  // Produced by calculateCostBreakdown() in lib/utils/costing.ts, sorted by
+  // lineCost descending. `share` is lineCost / unitCost (0 for every line
+  // when unitCost is 0, to avoid NaN).
+  breakdown: {
+    supplyId: string;
+    name: string;
+    unit: string;
+    quantity: number;
+    lineCost: number;
+    share: number;
+  }[];
 }
 
 // ============================================
