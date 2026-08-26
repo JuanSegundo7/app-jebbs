@@ -149,6 +149,7 @@ export class OrderPriceCalculator {
     friesExtra?: { price: number } | null;
     discountType?: string;
     discountValue?: number;
+    priceAdjustment?: number;
   }) {
     const safeBurgers = Array.isArray(params.selectedBurgers)
       ? params.selectedBurgers
@@ -188,7 +189,9 @@ export class OrderPriceCalculator {
 
     console.log("🔍 DELIVERY FEE:", deliveryFee);
 
-    const total = subtotal - discountAmount + deliveryFee;
+    const priceAdjustment = Number(params.priceAdjustment) || 0;
+
+    const total = subtotal - discountAmount + deliveryFee + priceAdjustment;
 
     console.log("🔍 TOTAL FINAL:", total);
 

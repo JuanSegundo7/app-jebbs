@@ -435,6 +435,17 @@ export function OrderDetailsModal({
               </div>
             )}
 
+            {orderWithItems.price_adjustment > 0 && (
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">
+                  Ajuste PedidosYa
+                </span>
+                <span className="font-medium">
+                  +{formatCurrency(orderWithItems.price_adjustment)}
+                </span>
+              </div>
+            )}
+
             <Separator />
 
             {/* Total */}

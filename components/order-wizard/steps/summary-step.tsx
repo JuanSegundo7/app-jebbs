@@ -6,7 +6,7 @@ import { Separator } from "@/components/ui/separator";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { User, MapPin, Phone, Info, AlertCircle, Clock } from "lucide-react";
 import { formatCurrency } from "@/lib/utils/format";
-import { CustomerAddress } from "@/lib/types";
+import { CustomerAddress, OrderSource } from "@/lib/types";
 import { useMemo, useEffect, useRef } from "react";
 import {
   Tooltip,
@@ -82,12 +82,17 @@ interface SummaryStepProps {
   friesExtra?: { price: number } | null;
 
   // Delivery & Payment
+  source: OrderSource | null;
   deliveryType: "delivery" | "pickup";
   onDeliveryTypeChange: (type: "delivery" | "pickup") => void;
   deliveryFee: number;
   onDeliveryFeeChange: (fee: number) => void;
   paymentMethod: "cash" | "transfer";
   onPaymentMethodChange: (method: "cash" | "transfer") => void;
+
+  // PedidosYa price adjustment
+  priceAdjustment: number;
+  onPriceAdjustmentChange: (value: number) => void;
 
   // Discount
   subtotal: number;
@@ -118,12 +123,15 @@ export function SummaryStep({
   orderTotal,
   meatExtra,
   friesExtra,
+  source,
   deliveryType,
   onDeliveryTypeChange,
   deliveryFee,
   onDeliveryFeeChange,
   paymentMethod,
   onPaymentMethodChange,
+  priceAdjustment,
+  onPriceAdjustmentChange,
   discountType,
   discountValue,
   discountAmount,
@@ -150,7 +158,7 @@ export function SummaryStep({
 
   const hasAddress = useMemo(() => {
     if (isNewCustomer) {
-      return newAddressData?.address?.trim().length ?? 0 > 0;
+      return (newAddressData?.address?.trim().length ?? 0) > 0;
     }
     return selectedAddress !== null;
   }, [isNewCustomer, newAddressData?.address, selectedAddress]);
@@ -210,84 +218,93 @@ export function SummaryStep({
         <CardContent className="p-4 space-y-4">
           <h3 className="text-sm font-medium">Entrega</h3>
 
-          <div className="space-y-2">
-            <Label>Método de entrega</Label>
-            <RadioGroup
-              value={deliveryType}
-              onValueChange={(value: "delivery" | "pickup") =>
-                onDeliveryTypeChange(value)
-              }
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="pickup" id="pickup" />
-                <Label htmlFor="pickup" className="font-normal cursor-pointer">
-                  🏃 Retira en el local
-                </Label>
-              </div>
+          {source !== "pedidosya" ? (
+            <>
+              <div className="space-y-2">
+                <Label>Método de entrega</Label>
+                <RadioGroup
+                  value={deliveryType}
+                  onValueChange={(value: "delivery" | "pickup") =>
+                    onDeliveryTypeChange(value)
+                  }
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="pickup" id="pickup" />
+                    <Label htmlFor="pickup" className="font-normal cursor-pointer">
+                      🏃 Retira en el local
+                    </Label>
+                  </div>
 
-              <div className="flex items-center justify-between space-x-2">
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem
-                    value="delivery"
-                    id="delivery"
-                    disabled={!hasAddress}
-                  />
-                  <Label
-                    htmlFor="delivery"
-                    className={cn(
-                      "font-normal",
-                      hasAddress
-                        ? "cursor-pointer"
-                        : "cursor-not-allowed opacity-50",
+                  <div className="flex items-center justify-between space-x-2">
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem
+                        value="delivery"
+                        id="delivery"
+                        disabled={!hasAddress}
+                      />
+                      <Label
+                        htmlFor="delivery"
+                        className={cn(
+                          "font-normal",
+                          hasAddress
+                            ? "cursor-pointer"
+                            : "cursor-not-allowed opacity-50",
+                        )}
+                      >
+                        🛵 Envío a domicilio
+                      </Label>
+                    </div>
+
+                    {!hasAddress && (
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="h-4 w-4 text-muted-foreground" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="text-xs">
+                              Selecciona una dirección en el paso 1 para habilitar
+                              envío
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     )}
-                  >
-                    🛵 Envío a domicilio
-                  </Label>
-                </div>
+                  </div>
+                </RadioGroup>
 
                 {!hasAddress && (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Info className="h-4 w-4 text-muted-foreground" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p className="text-xs">
-                          Selecciona una dirección en el paso 1 para habilitar
-                          envío
-                        </p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+                  <div className="flex items-start gap-2 rounded-md bg-orange-50 dark:bg-orange-950 border border-orange-200 dark:border-orange-800 p-3">
+                    <AlertCircle className="h-4 w-4 text-orange-600 dark:text-orange-400 mt-0.5" />
+                    <div className="text-xs text-orange-900 dark:text-orange-100">
+                      <p className="font-medium mb-1">Envío no disponible</p>
+                      <p className="text-orange-700 dark:text-orange-300">
+                        {isNewCustomer
+                          ? "Agrega una dirección en el paso 1 para habilitar el envío a domicilio"
+                          : "Selecciona o agrega una dirección en el paso 1"}
+                      </p>
+                    </div>
+                  </div>
                 )}
               </div>
-            </RadioGroup>
 
-            {!hasAddress && (
-              <div className="flex items-start gap-2 rounded-md bg-orange-50 dark:bg-orange-950 border border-orange-200 dark:border-orange-800 p-3">
-                <AlertCircle className="h-4 w-4 text-orange-600 dark:text-orange-400 mt-0.5" />
-                <div className="text-xs text-orange-900 dark:text-orange-100">
-                  <p className="font-medium mb-1">Envío no disponible</p>
-                  <p className="text-orange-700 dark:text-orange-300">
-                    {isNewCustomer
-                      ? "Agrega una dirección en el paso 1 para habilitar el envío a domicilio"
-                      : "Selecciona o agrega una dirección en el paso 1"}
-                  </p>
+              {deliveryType === "delivery" && hasAddress && (
+                <div className="space-y-1">
+                  <Label>Costo de envío</Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={deliveryFee}
+                    onChange={(e) => onDeliveryFeeChange(Number(e.target.value))}
+                  />
                 </div>
-              </div>
-            )}
-          </div>
-
-          {deliveryType === "delivery" && hasAddress && (
-            <div className="space-y-1">
-              <Label>Costo de envío</Label>
-              <Input
-                type="number"
-                min={0}
-                value={deliveryFee}
-                onChange={(e) => onDeliveryFeeChange(Number(e.target.value))}
-              />
-            </div>
+              )}
+            </>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              🛵 PedidosYa gestiona su propio envío — este pedido se
+              retira/gestiona por su cuenta.
+            </p>
           )}
 
           {onDeliveryTimeChange && (
@@ -316,6 +333,35 @@ export function SummaryStep({
           )}
         </CardContent>
       </Card>
+
+      {/* PedidosYa price adjustment */}
+      {source === "pedidosya" && (
+        <Card className="bg-card">
+          <CardContent className="p-4 space-y-3">
+            <h3 className="text-sm font-medium">Ajuste de precio PedidosYa</h3>
+            <div className="space-y-2">
+              <Label>Diferencia sobre el precio de menú</Label>
+              <Input
+                type="number"
+                min={0}
+                value={priceAdjustment === 0 ? "" : priceAdjustment}
+                onChange={(e) =>
+                  onPriceAdjustmentChange(
+                    e.target.value === "" ? 0 : Number(e.target.value),
+                  )
+                }
+                onFocus={(e) => e.target.select()}
+                placeholder="Ej: 1500"
+              />
+              {priceAdjustment > 0 && (
+                <p className="text-xs text-muted-foreground">
+                  Se suma al total y a la base de la comisión de PedidosYa.
+                </p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Discount */}
       <Card className="bg-card">
@@ -699,6 +745,12 @@ export function SummaryStep({
               <div className="flex justify-between text-muted-foreground line-through opacity-50">
                 <span>Envío</span>
                 <span>{formatCurrency(deliveryFee)}</span>
+              </div>
+            )}
+            {priceAdjustment > 0 && (
+              <div className="flex justify-between text-muted-foreground">
+                <span>Ajuste PedidosYa</span>
+                <span>+{formatCurrency(priceAdjustment)}</span>
               </div>
             )}
             <div className="flex justify-between text-sm text-muted-foreground">

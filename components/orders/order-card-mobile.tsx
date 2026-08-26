@@ -21,6 +21,7 @@ import type { Order } from "@/lib/types";
 import { formatCurrency, getRelativeTime } from "@/lib/utils/format";
 import { useTogglePaymentStatus, useQuickPatchOrder } from "@/lib/hooks/orders/use-orders";
 import { cn } from "@/lib/utils";
+import { orderSourceConfig } from "@/lib/utils/order-source";
 import { formatOrderForWhatsapp } from "@/lib/utils/formatOrderWhatsapp";
 import { formatOrderForDelivery } from "@/lib/utils/formatOrderDelivery";
 import { toast } from "sonner";
@@ -155,6 +156,11 @@ export function OrderCardMobile({
             >
               <DollarSign className="h-4 w-4" />
             </button>
+            {order.source && (
+              <Badge className={orderSourceConfig[order.source].className}>
+                {orderSourceConfig[order.source].label}
+              </Badge>
+            )}
             <Badge className={config.className}>{config.label}</Badge>
           </div>
         </div>

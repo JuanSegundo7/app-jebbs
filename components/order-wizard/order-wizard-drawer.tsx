@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { toast } from "sonner";
 import {
   Sheet,
   SheetContent,
@@ -24,7 +25,7 @@ import {
   BurgersStep,
   SummaryStep,
 } from "./steps/index";
-import type { OrderWithItems } from "@/lib/types";
+import type { OrderSource, OrderWithItems } from "@/lib/types";
 import { SidesStep } from "./steps/side-step";
 
 interface OrderWizardDrawerProps {
@@ -163,6 +164,13 @@ export function OrderWizardDrawer({
     try {
       await wizard.handleSubmit();
       handleClose(false);
+    } catch (error) {
+      // Without this catch, any error thrown inside wizard.handleSubmit
+      // (e.g. a Supabase insert failure) became an unhandled rejection: the
+      // drawer stayed open, isSubmittingRef reset silently in `finally`,
+      // and the user had zero indication the order was never created.
+      console.error("Error al guardar el pedido:", error);
+      toast.error("Error al guardar el pedido");
     } finally {
       isSubmittingRef.current = false;
     }
@@ -170,6 +178,26 @@ export function OrderWizardDrawer({
 
   const handleEditCustomer = () => {
     wizard.customer.setIsEditingCustomer(true);
+  };
+
+  // A PedidosYa order must never carry a `customers` row (see
+  // use-order-wizard.ts's handleSubmit, which skips createCustomer for this
+  // source). If a customer was already selected before switching source,
+  // clear it — same reasoning as handleToggleNewCustomer below. Also clear
+  // isNewCustomer/newAddressData: customer-step.tsx hides those fields once
+  // source is "pedidosya", but the state itself survives underneath, and a
+  // leftover address there could otherwise make hasAddress read as true in
+  // summary-step.tsx. use-order-wizard.ts's handleSubmit forces pickup for
+  // any "pedidosya" order regardless, so this is defense in depth, not the
+  // only thing preventing a bad submit.
+  const handleSourceChange = (source: OrderSource) => {
+    wizard.settings.setSource(source);
+    if (source === "pedidosya") {
+      wizard.customer.setSelectedCustomer(null);
+      wizard.customer.setSelectedAddress(undefined);
+      wizard.customer.setIsNewCustomer(false);
+      wizard.customer.setNewAddressData({ label: "", address: "", notes: "" });
+    }
   };
 
   // 🔑 FIX: When toggling to "new customer", clear the previously selected
@@ -261,6 +289,8 @@ export function OrderWizardDrawer({
             <div className="p-6">
               {step === "customer" && (
                 <CustomerStep
+                  source={wizard.settings.source}
+                  onSourceChange={handleSourceChange}
                   customerSearch={wizard.customer.customerSearch}
                   onCustomerSearchChange={wizard.customer.setCustomerSearch}
                   filteredCustomers={filteredCustomers}
@@ -372,12 +402,23 @@ export function OrderWizardDrawer({
                   orderTotal={wizard.orderTotal}
                   meatExtra={meatExtra}
                   friesExtra={friesExtra}
+                  source={wizard.settings.source}
+                  priceAdjustment={wizard.settings.priceAdjustment}
+                  onPriceAdjustmentChange={wizard.settings.setPriceAdjustment}
                   discountType={wizard.settings.discountType}
                   discountValue={wizard.settings.discountValue}
                   discountAmount={wizard.discountAmount}
                   onDiscountTypeChange={wizard.settings.setDiscountType}
                   onDiscountValueChange={wizard.settings.setDiscountValue}
-                  deliveryType={wizard.settings.deliveryType}
+                  // Effective, not raw: for PedidosYa this reads "pickup"
+                  // regardless of what settings.deliveryType still holds
+                  // (see use-order-wizard.ts's effectiveDeliveryType) — so
+                  // the "Envío" line in the Pedido breakdown below never
+                  // shows a delivery charge that won't actually be saved.
+                  // onDeliveryTypeChange still writes the real underlying
+                  // setter; that's safe because the radio that calls it is
+                  // hidden entirely for PedidosYa.
+                  deliveryType={wizard.effectiveDeliveryType}
                   onDeliveryTypeChange={wizard.settings.setDeliveryType}
                   deliveryFee={wizard.settings.deliveryFee}
                   onDeliveryFeeChange={wizard.settings.setDeliveryFee}

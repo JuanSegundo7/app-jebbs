@@ -41,9 +41,27 @@ function loadSettings(order: OrderWithItems) {
     deliveryFee: order.delivery_fee || 0,
     deliveryTime: order.delivery_time || "",
     paymentMethod: order.payment_method as "cash" | "transfer",
+    // Legacy orders predating this column have `source = null`. Passed
+    // through as-is — NOT defaulted to "local" — so that saving an edit to
+    // an old order (e.g. fixing a quantity) doesn't silently reclassify it.
+    // The "unknown" bucket in bucketBySource (use-orders-history.ts) is
+    // meant to hold these forever; defaulting here would corrupt it on the
+    // first routine edit. The source toggle itself is hidden in edit mode
+    // (it's not re-editable), so `null` always round-trips back to `null`.
+    source: order.source,
+    // Frozen commission rate this order was created with (null for local
+    // orders / legacy rows). Re-threaded into wizard state so an edit
+    // recomputes commission_amount from the ORIGINAL rate, not today's
+    // live default — see use-order-settings.ts's commissionRate comment.
+    commissionRate: order.commission_rate ?? 0,
     discountType:
       (order.discount_type as "amount" | "percentage" | "none") || "none",
     discountValue: order.discount_value || 0,
+    // Frozen manual PedidosYa adjustment this order was created with (0 for
+    // local orders / legacy rows). Re-threaded into wizard state so editing
+    // an existing PedidosYa order doesn't lose it — see
+    // use-order-settings.ts's loadSettings and scripts/016-order-price-adjustment.sql.
+    priceAdjustment: order.price_adjustment || 0,
     notes: order.notes || "",
   };
 }

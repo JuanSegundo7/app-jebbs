@@ -11,9 +11,12 @@ export interface UpdateOrderPayload {
   delivery_type: "delivery" | "pickup";
   delivery_fee: number;
   payment_method: "cash" | "transfer";
+  source?: "local" | "pedidosya" | null;
+  commission_rate?: number | null;
   discount_type: "amount" | "percentage" | "none" | null;
   discount_value: number;
   discount_amount: number;
+  price_adjustment?: number;
   items: OrderItemInput[];
   notes: string | null;
   delivery_time?: string | null;
@@ -58,7 +61,22 @@ export function useUpdateOrder() {
       }, 0);
 
       const finalTotal =
-        totalAmount - payload.discount_amount + payload.delivery_fee;
+        totalAmount -
+        payload.discount_amount +
+        payload.delivery_fee +
+        (payload.price_adjustment ?? 0);
+
+      // Same frozen-commission logic as use-create-order.ts: recomputed
+      // from the current total, but at the ORIGINAL rate the order was
+      // created with (payload.commission_rate, resolved by the caller from
+      // the order's own commission_rate via order-data-loader.ts — never
+      // from today's live % in localStorage). Editing an order can change
+      // its items/total, so the amount must be redone, but the rate itself
+      // must never drift just because someone edited an old order.
+      const commissionAmount =
+        payload.source === "pedidosya" && payload.commission_rate
+          ? Math.round(finalTotal * (payload.commission_rate / 100) * 100) / 100
+          : 0;
 
       // 4️⃣ Actualizar order
       const { data: updatedOrder, error: orderError } = await supabase
@@ -70,10 +88,14 @@ export function useUpdateOrder() {
           delivery_type: payload.delivery_type,
           delivery_fee: payload.delivery_fee,
           payment_method: payload.payment_method,
+          source: payload.source ?? null,
+          commission_amount: commissionAmount,
+          commission_rate: payload.commission_rate ?? null,
           delivery_time: payload.delivery_time ?? null,
           discount_type: payload.discount_type,
           discount_value: payload.discount_value,
           discount_amount: payload.discount_amount,
+          price_adjustment: payload.price_adjustment ?? 0,
           total_amount: finalTotal,
           notes: payload.notes,
           updated_at: new Date().toISOString(),

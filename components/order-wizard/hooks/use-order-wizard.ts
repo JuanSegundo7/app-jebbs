@@ -79,17 +79,34 @@ export function useOrderWizard({
     );
   }, [subtotal, settings.discountType, settings.discountValue]);
 
+  // PedidosYa handles its own delivery — the shop's delivery type/fee must
+  // never factor into a PedidosYa order's total, regardless of whatever
+  // `settings.deliveryType` happens to hold (it defaults to "delivery" on
+  // reset, and nothing else resets it when source switches to "pedidosya",
+  // since the radio that would do that is hidden for PedidosYa — see
+  // summary-step.tsx). Mirrors handleSubmit's own `effectiveDeliveryType`
+  // below for the "pedidosya forces pickup" rule specifically, so the total
+  // shown on screen during the wizard always matches what actually gets
+  // saved. Exposed on the hook's return value so the drawer can also pass
+  // it down as SummaryStep's `deliveryType` prop, keeping every on-screen
+  // "Envío" line consistent with this same total.
+  const effectiveDeliveryType = useMemo(
+    () => (settings.source === "pedidosya" ? "pickup" : settings.deliveryType),
+    [settings.source, settings.deliveryType],
+  );
+
   const orderTotal = useMemo(() => {
     const raw = OrderPriceCalculator.calculateOrderTotal({
       selectedBurgers: burgers.selectedBurgers,
       selectedCombos: combos.selectedCombos,
       selectedSides: sides.selectedSides,
-      deliveryType: settings.deliveryType,
+      deliveryType: effectiveDeliveryType,
       deliveryFee: settings.deliveryFee,
       meatExtra,
       friesExtra,
       discountType: settings.discountType,
       discountValue: settings.discountValue,
+      priceAdjustment: settings.priceAdjustment,
     });
 
     // Si el descuento es 100%, el total es 0 (incluye delivery fee)
@@ -105,19 +122,23 @@ export function useOrderWizard({
     burgers.selectedBurgers,
     combos.selectedCombos,
     sides.selectedSides,
-    settings.deliveryType,
+    effectiveDeliveryType,
     settings.deliveryFee,
     meatExtra,
     friesExtra,
     settings.discountType,
     settings.discountValue,
+    settings.priceAdjustment,
   ]);
 
   const extrasTotal = useMemo(() => {
     return OrderPriceCalculator.calculateExtrasTotal(burgers.selectedBurgers);
   }, [burgers.selectedBurgers]);
 
-  const canProceedFromCustomer = customer.canProceed;
+  // A PedidosYa order has no customer to select or create (see handleSubmit
+  // below), so the customer-selection gate doesn't apply to it.
+  const canProceedFromCustomer =
+    settings.source === "pedidosya" ? true : customer.canProceed;
 
   const canProceedFromBurgers = true;
 
@@ -192,7 +213,10 @@ export function useOrderWizard({
       let customerId = customer.selectedCustomer?.id;
       let customerAddressId = customer.selectedAddress;
 
-      if (!customerId && mode === "create") {
+      // PedidosYa orders never get a `customers` row — the customer belongs
+      // to PedidosYa, not to us, and creating one would pollute the
+      // customer list / ranking with a false top entry.
+      if (!customerId && mode === "create" && settings.source !== "pedidosya") {
         const newCustomer = await createCustomer.mutateAsync({
           name: customer.newCustomerData.name,
           phone: customer.newCustomerData.phone,
@@ -203,7 +227,8 @@ export function useOrderWizard({
       if (
         !customerAddressId &&
         settings.deliveryType === "delivery" &&
-        mode === "create"
+        mode === "create" &&
+        settings.source !== "pedidosya"
       ) {
         if (!customerId)
           throw new Error("Customer ID is required to create address");
@@ -217,16 +242,29 @@ export function useOrderWizard({
         customerAddressId = address.id;
       }
 
+      // PedidosYa handles its own delivery — never attach the shop's own
+      // delivery type/fee/address to one of these orders, regardless of
+      // whatever the delivery/address fields happen to hold (they can carry
+      // stale state from before the source was switched to PedidosYa).
       // 🔑 Si quedó "delivery" sin dirección resuelta, cae a retiro en el local
       const effectiveDeliveryType =
-        settings.deliveryType === "delivery" && !customerAddressId
+        settings.source === "pedidosya"
           ? "pickup"
-          : settings.deliveryType;
+          : settings.deliveryType === "delivery" && !customerAddressId
+            ? "pickup"
+            : settings.deliveryType;
 
       const orderPayload = {
         customer_id: customerId ?? null,
         customer_name:
-          customer.selectedCustomer?.name ?? customer.newCustomerData.name,
+          settings.source === "pedidosya"
+            ? customer.newCustomerData.name.trim() || "PedidosYa"
+            : (customer.selectedCustomer?.name ?? customer.newCustomerData.name),
+        source: settings.source,
+        commission_rate:
+          settings.source === "pedidosya" ? settings.commissionRate : null,
+        price_adjustment:
+          settings.source === "pedidosya" ? settings.priceAdjustment : 0,
         customer_address_id:
           effectiveDeliveryType === "delivery"
             ? (customerAddressId ?? null)
@@ -262,10 +300,16 @@ export function useOrderWizard({
         orderId = created.id;
       }
 
-      try {
-        await printOrder.mutateAsync(orderId);
-      } catch (printError) {
-        console.warn("⚠️ No se pudo imprimir automáticamente:", printError);
+      // PedidosYa orders skip the auto-print — that's kitchen-comanda
+      // printing for orders we prepare, and PedidosYa manages its own
+      // fulfillment. The manual reprint button in /historial stays
+      // available for any order regardless of source (deliberate).
+      if (settings.source !== "pedidosya") {
+        try {
+          await printOrder.mutateAsync(orderId);
+        } catch (printError) {
+          console.warn("⚠️ No se pudo imprimir automáticamente:", printError);
+        }
       }
     } catch (error) {
       console.error("Error en submit:", error);
@@ -292,6 +336,7 @@ export function useOrderWizard({
 
     subtotal,
     orderTotal,
+    effectiveDeliveryType,
     extrasTotal,
     discountAmount,
     canProceedFromCustomer,

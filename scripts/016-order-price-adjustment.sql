@@ -1,0 +1,63 @@
+-- PedidosYa price adjustment
+-- Adds one column to `orders`:
+--   - `price_adjustment`: PedidosYa's own listed burger prices differ from
+--     the shop's menu prices (the platform applies its own markup). Until
+--     now there was no way to reflect that difference on an order, so a
+--     PedidosYa order's total_amount always priced the sale using the
+--     shop's own menu, not what PedidosYa actually charged the customer.
+--     This field lets staff record that flat difference at order time so
+--     the order total — and, since PedidosYa's commission is computed off
+--     the final total_amount, the commission base too — reflects what
+--     PedidosYa actually charged.
+--
+--     A "negative discount" approach (reusing discount_value/discount_amount
+--     with a value <= 0) was considered and rejected: calculateDiscountAmount
+--     zeroes any value <= 0, and every site that displays the discount
+--     (order summary, WhatsApp message to the customer, order detail modal)
+--     is gated on discount_amount > 0. A negative discount would inflate the
+--     total in silence, with no line anywhere explaining why. This is a new,
+--     dedicated column instead.
+--
+-- BEFORE RUNNING ON PRODUCTION: run these two checks first, in a separate
+-- query, since scripts/001-create-schema.sql is known to be out of date vs.
+-- production (payment_method, delivery_type, discount_* etc. were all added
+-- directly in Supabase, never scripted) and this repo cannot verify the live
+-- schema on its own.
+--
+--   -- (a) must return exactly ONE row:
+--   SELECT tablename FROM pg_tables
+--   WHERE schemaname = 'public' AND tablename = 'orders';
+--
+--   -- (b) must return ZERO rows:
+--   SELECT column_name, data_type FROM information_schema.columns
+--   WHERE table_schema = 'public'
+--     AND table_name = 'orders'
+--     AND column_name = 'price_adjustment';
+--
+-- If (a) returns zero rows, scripts/001-create-schema.sql was never
+-- applied — STOP. If (b) returns any row, the column already exists
+-- (possibly with a different type) — STOP and inspect it instead of
+-- running this.
+--
+-- ADD COLUMN IF NOT EXISTS is deliberately NOT used: it would silently
+-- succeed against a pre-existing column of the wrong type, which is exactly
+-- the failure this script needs to be loud about.
+--
+-- The script is wrapped in a transaction: if any statement fails, nothing
+-- partially applies.
+--
+-- Undo, if ever needed:
+--   ALTER TABLE orders DROP COLUMN price_adjustment;
+
+BEGIN;
+
+-- DECIMAL(10, 2) matches total_amount's precision (both are currency).
+-- NOT NULL DEFAULT 0 so every pre-existing row reads as "no adjustment"
+-- without needing a backfill, and is safe to add in place on modern
+-- Postgres (metadata-only, no table rewrite). No CHECK constraint, same
+-- convention as commission_amount/commission_rate in
+-- scripts/010-order-source.sql — this schema validates values in the
+-- UI/TS layer rather than with constraints.
+ALTER TABLE orders ADD COLUMN price_adjustment DECIMAL(10, 2) NOT NULL DEFAULT 0;
+
+COMMIT;

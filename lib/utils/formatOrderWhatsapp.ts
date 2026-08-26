@@ -153,6 +153,9 @@ export function formatOrderForWhatsapp(order: Order) {
     const label = order.discount_type === "percentage" ? `Desc. ${order.discount_value}%` : "Desc.";
     totalParts.push(`${label} -${formatCurrency(order.discount_amount)}`);
   }
+  if (order.price_adjustment > 0) {
+    totalParts.push(`Ajuste PedidosYa +${formatCurrency(order.price_adjustment)}`);
+  }
 
   return `*JEBBS BURGERS*
 🧾 *PEDIDO #${order.order_number}* · ${formatDateTime(order.created_at)}
