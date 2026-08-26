@@ -1,20 +1,10 @@
 "use client";
 
-import { useState } from "react";
 import { Header } from "@/components/layout/header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Calendar } from "@/components/ui/calendar";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  ChevronLeft,
-  ChevronRight,
   TrendingDown,
   TrendingUp,
   ShoppingBag,
@@ -26,16 +16,18 @@ import {
   XCircle,
   UtensilsCrossed,
 } from "lucide-react";
-import type { DateRange } from "react-day-picker";
 import {
   useOrdersAnalytics,
   useMonthlyComparison,
   useTopBurgers,
   useProductStats,
 } from "@/lib/hooks/orders/use-orders-history";
+import { usePeriodSelector } from "@/lib/hooks/use-period-selector";
+import { PeriodSelector } from "@/components/shared/period-selector";
 import { formatCurrency } from "@/lib/utils/format";
 import { ExternalIncomePanel } from "@/components/analytics/external-income-panel";
 import { PaymentMethodBreakdown } from "@/components/analytics/payment-method-breakdown";
+import { SourceBreakdownCard } from "@/components/analytics/source-breakdown";
 import {
   ChartContainer,
   ChartTooltip,
@@ -50,51 +42,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-
-const TZ = "America/Argentina/Buenos_Aires";
-
-type ViewMode = "month" | "week" | "custom";
-
-// Get display label for current period
-function getPeriodLabel(date: Date, mode: ViewMode, customRange?: { from: Date; to: Date }): string {
-  if (mode === "custom" && customRange) {
-    const fmt = (d: Date) =>
-      d.toLocaleDateString("es-AR", { day: "2-digit", month: "short", year: "numeric", timeZone: TZ });
-    return `${fmt(customRange.from)} – ${fmt(customRange.to)}`;
-  }
-  if (mode === "month") {
-    return date.toLocaleDateString("es-AR", {
-      month: "long",
-      year: "numeric",
-      timeZone: TZ,
-    });
-  }
-  // Week range label
-  const arDate = new Date(date.toLocaleString("en-US", { timeZone: TZ }));
-  const day = arDate.getDay();
-  const diffToMonday = day === 0 ? -6 : 1 - day;
-  const monday = new Date(arDate);
-  monday.setDate(arDate.getDate() + diffToMonday);
-  const sunday = new Date(monday);
-  sunday.setDate(monday.getDate() + 6);
-  const fmt = (d: Date) =>
-    d.toLocaleDateString("es-AR", {
-      day: "2-digit",
-      month: "short",
-      timeZone: TZ,
-    });
-  return `${fmt(monday)} – ${fmt(sunday)}`;
-}
-
-function navigate(date: Date, mode: ViewMode, direction: -1 | 1): Date {
-  const newDate = new Date(date);
-  if (mode === "month") {
-    newDate.setMonth(newDate.getMonth() + direction);
-  } else {
-    newDate.setDate(newDate.getDate() + direction * 7);
-  }
-  return newDate;
-}
 
 // Rank config
 const RANK_CONFIG = [
@@ -134,42 +81,10 @@ const RANK_CONFIG = [
 ];
 
 export default function AnalyticsPage() {
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [viewMode, setViewMode] = useState<ViewMode>("month");
-  const [customRange, setCustomRange] = useState<{ from: Date; to: Date } | undefined>(undefined);
-  const [calendarOpen, setCalendarOpen] = useState(false);
-  const [calendarSelection, setCalendarSelection] = useState<DateRange | undefined>(undefined);
+  const period = usePeriodSelector();
+  const { selectedDate, viewMode, customRange, periodLabel, startDate: panelStartDate, endDate: panelEndDate } = period;
 
   const resolvedCustomRange = viewMode === "custom" ? customRange : undefined;
-
-  // Compute date range strings (YYYY-MM-DD in AR time) for the external income panel
-  const { panelStartDate, panelEndDate } = (() => {
-    const toArStr = (d: Date) => d.toLocaleDateString("en-CA", { timeZone: TZ });
-    if (viewMode === "custom" && customRange) {
-      return {
-        panelStartDate: toArStr(customRange.from),
-        panelEndDate: toArStr(customRange.to),
-      };
-    }
-    const arDate = new Date(selectedDate.toLocaleString("en-US", { timeZone: TZ }));
-    if (viewMode === "week") {
-      const day = arDate.getDay();
-      const diffToMonday = day === 0 ? -6 : 1 - day;
-      const monday = new Date(arDate);
-      monday.setDate(arDate.getDate() + diffToMonday);
-      const sunday = new Date(monday);
-      sunday.setDate(monday.getDate() + 6);
-      return { panelStartDate: toArStr(monday), panelEndDate: toArStr(sunday) };
-    }
-    // month
-    const year = arDate.getFullYear();
-    const month = arDate.getMonth();
-    const lastDate = new Date(year, month + 1, 0).getDate();
-    return {
-      panelStartDate: `${year}-${String(month + 1).padStart(2, "0")}-01`,
-      panelEndDate: `${year}-${String(month + 1).padStart(2, "0")}-${String(lastDate).padStart(2, "0")}`,
-    };
-  })();
 
   const { data: analytics, isLoading: analyticsLoading } = useOrdersAnalytics(
     selectedDate,
@@ -188,11 +103,6 @@ export default function AnalyticsPage() {
     viewMode,
     resolvedCustomRange
   );
-
-  const handlePrev = () =>
-    setSelectedDate((d) => navigate(d, viewMode, -1));
-  const handleNext = () =>
-    setSelectedDate((d) => navigate(d, viewMode, 1));
 
   const metrics = [
     {
@@ -242,8 +152,6 @@ export default function AnalyticsPage() {
     },
   ];
 
-  const periodLabel = getPeriodLabel(selectedDate, viewMode, customRange);
-
   const ordersChartConfig = {
     orders: { label: "Pedidos", color: "var(--color-chart-1)" },
   };
@@ -270,86 +178,7 @@ export default function AnalyticsPage() {
 
       <div className="flex-1 overflow-auto py-4">
         {/* Period selector */}
-        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          {/* View mode toggle */}
-          <div className="flex items-center gap-1 rounded-xl border bg-card p-1 w-fit">
-            <Button
-              variant={viewMode === "month" ? "default" : "ghost"}
-              size="sm"
-              className="rounded-lg h-8 px-4 text-sm"
-              onClick={() => setViewMode("month")}
-            >
-              Mes
-            </Button>
-            <Button
-              variant={viewMode === "week" ? "default" : "ghost"}
-              size="sm"
-              className="rounded-lg h-8 px-4 text-sm"
-              onClick={() => setViewMode("week")}
-            >
-              Semana
-            </Button>
-            <Button
-              variant={viewMode === "custom" ? "default" : "ghost"}
-              size="sm"
-              className="rounded-lg h-8 px-4 text-sm"
-              onClick={() => setViewMode("custom")}
-            >
-              Custom
-            </Button>
-          </div>
-
-          {/* Navigation or custom date picker */}
-          {viewMode === "custom" ? (
-            <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
-              <PopoverTrigger asChild>
-                <Button variant="outline" className="bg-card h-9 gap-2 text-sm font-medium">
-                  <CalendarIcon className="h-4 w-4" />
-                  {customRange
-                    ? periodLabel
-                    : "Elegir rango de fechas"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="end">
-                <Calendar
-                  mode="range"
-                  selected={calendarSelection}
-                  onSelect={(range) => {
-                    setCalendarSelection(range);
-                    if (range?.from && range?.to) {
-                      setCustomRange({ from: range.from, to: range.to });
-                      setCalendarOpen(false);
-                    }
-                  }}
-                  numberOfMonths={2}
-                  disabled={{ after: new Date() }}
-                />
-              </PopoverContent>
-            </Popover>
-          ) : (
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={handlePrev}
-                className="bg-card h-9 w-9"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <span className="min-w-52 text-center text-sm font-medium capitalize tabular-nums">
-                {periodLabel}
-              </span>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={handleNext}
-                className="bg-card h-9 w-9"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
-          )}
-        </div>
+        <PeriodSelector period={period} className="mb-6" />
 
         {/* Metrics cards */}
         {analyticsLoading ? (
@@ -407,10 +236,15 @@ export default function AnalyticsPage() {
           </div>
         )}
 
-        {/* Payment method breakdown */}
-        <div className="mt-4">
+        {/* Payment method + source breakdown */}
+        <div className="mt-4 grid gap-4 lg:grid-cols-2">
           <PaymentMethodBreakdown
             breakdown={analytics?.paymentBreakdown}
+            isLoading={analyticsLoading}
+            showChange={viewMode !== "custom"}
+          />
+          <SourceBreakdownCard
+            breakdown={analytics?.sourceBreakdown}
             isLoading={analyticsLoading}
             showChange={viewMode !== "custom"}
           />
