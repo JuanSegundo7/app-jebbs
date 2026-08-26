@@ -1,0 +1,101 @@
+-- Configuration scaling for burger recipe lines (doble vs simple, papas)
+--
+-- WHY: a burger recipe today is flat — the same list of supply quantities
+-- regardless of `burgers.default_meat_quantity`/`default_fries_quantity`.
+-- Selling a "doble" (two patties) reports the same cost/margin as a
+-- "simple" (one patty), which inflates the shown margin on every multi-patty
+-- burger and would, in a future stock-deduction feature, under-deduct stock
+-- on every such sale. This adds a single nullable column,
+-- `burger_supplies.scales_with`, that lets a recipe line declare it should
+-- scale with one of those two configuration knobs.
+--
+-- SEMANTICS (read this carefully before writing UI/costing code against it):
+--
+--   scales_with IS NULL   -> `quantity` is the TOTAL amount consumed per
+--                            burger, exactly as before. This is the only
+--                            behavior that existed prior to this column, and
+--                            every existing row keeps it (no backfill).
+--
+--   scales_with = 'meat'  -> `quantity` is the amount consumed PER PATTY
+--                            (medallón). The effective amount at the
+--                            burger's default configuration is:
+--                              quantity * burgers.default_meat_quantity
+--
+--   scales_with = 'fries' -> `quantity` is the amount consumed PER FRIES
+--                            PORTION. Effective amount:
+--                              quantity * burgers.default_fries_quantity
+--
+-- WHY store the per-driver-unit quantity instead of an already-multiplied
+-- total: it's the only form that stays correct if the burger's default
+-- configuration changes later (e.g. default_meat_quantity goes from 1 to
+-- 2) — an already-multiplied total would silently go stale. It is also the
+-- only form a future "deduct stock on order completion" feature (NOT built
+-- in this phase, out of scope) can reuse directly against the order's own
+-- actual meat/fries count instead of being locked to the burger's default.
+--
+-- This phase does NOT deduct `stock_quantity` from any order. This column
+-- only feeds cost/margin/"alcanza para" math in /finanzas -> Recetas
+-- (lib/utils/costing.ts). Stock still only changes via manual edits,
+-- restocks, and linked expenses.
+--
+-- No CHECK constraint restricting the values ('meat'/'fries'): this schema
+-- validates in the UI/TS layer rather than with constraints, same
+-- precedent as purchase_mode (scripts/009-supply-purchase-basis.sql) and
+-- source (scripts/010-order-source.sql).
+--
+-- No backfill: there is no way to infer which existing lines "should" be
+-- marked as scaling, and guessing would silently corrupt cost data. Every
+-- pre-existing row gets scales_with = NULL, meaning "fixed quantity,
+-- unaffected by burger config" — the only behavior that existed before.
+--
+-- BEFORE RUNNING ON PRODUCTION: run these three checks first, in a separate
+-- query, since scripts/001-create-schema.sql is known to be out of date vs.
+-- production and this repo cannot verify the live schema on its own.
+--
+--   -- (a) must return exactly ONE row:
+--   SELECT tablename FROM pg_tables
+--   WHERE schemaname = 'public' AND tablename = 'burger_supplies';
+--
+--   -- (b) must return ZERO rows:
+--   SELECT column_name, data_type FROM information_schema.columns
+--   WHERE table_schema = 'public'
+--     AND table_name = 'burger_supplies'
+--     AND column_name = 'scales_with';
+--
+--   -- (c) must return exactly TWO rows (both columns must already exist —
+--   -- they were added directly in Supabase and were never scripted
+--   -- anywhere in this repo, so this column is meaningless without them):
+--   SELECT column_name, data_type FROM information_schema.columns
+--   WHERE table_schema = 'public'
+--     AND table_name = 'burgers'
+--     AND column_name IN ('default_meat_quantity', 'default_fries_quantity');
+--
+-- If (a) returns zero rows, scripts/003-costs-schema.sql was never applied —
+-- STOP. If (b) returns a row, `scales_with` already exists (possibly with a
+-- different type) — STOP and inspect it instead of running this. If (c)
+-- returns fewer than two rows, `burgers.default_meat_quantity` and/or
+-- `burgers.default_fries_quantity` are missing in this environment — STOP,
+-- this column has nothing to scale against without them.
+--
+-- ADD COLUMN (not ADD COLUMN IF NOT EXISTS) is deliberately used: it would
+-- silently succeed against a pre-existing column of the wrong type, which
+-- is exactly the failure this script needs to be loud about.
+--
+-- The script is wrapped in a transaction: if any statement fails, nothing
+-- partially applies.
+--
+-- Undo, if ever needed:
+--   ALTER TABLE burger_supplies DROP COLUMN scales_with;
+--
+--   CAVEAT: this loses which lines were marked as scaling. Every line that
+--   was 'meat' or 'fries' becomes indistinguishable from a NULL line, so its
+--   stored per-patty/per-portion quantity would then be misread as a flat
+--   total — silently under-costing every "doble" burger that used it. Do
+--   not run this undo casually; confirm nothing still depends on the
+--   scaling data first.
+
+BEGIN;
+
+ALTER TABLE burger_supplies ADD COLUMN scales_with TEXT;
+
+COMMIT;

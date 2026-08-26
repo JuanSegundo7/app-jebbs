@@ -12,6 +12,7 @@ import {
   Component,
   User,
   LogOut,
+  Wallet,
 } from "lucide-react";
 import {
   Sidebar,
@@ -43,6 +44,7 @@ const navigation = [
   { name: "Pedidos", href: "/", icon: LayoutDashboard },
   { name: "Historial", href: "/historial", icon: ClipboardList },
   { name: "Rendimiento", href: "/rendimiento", icon: BarChart3 },
+  { name: "Finanzas", href: "/finanzas", icon: Wallet },
   { name: "Clientes", href: "/clientes", icon: User },
   { name: "Menú", href: "/menu", icon: UtensilsCrossed },
   { name: "Combos", href: "/combos", icon: Component },
