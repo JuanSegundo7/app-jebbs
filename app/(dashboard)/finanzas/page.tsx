@@ -41,10 +41,11 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { Plus, Trash2, CalendarIcon, ChevronLeft, ChevronRight, RefreshCcw } from "lucide-react";
+import { Plus, Trash2, Pencil, CalendarIcon, ChevronLeft, ChevronRight, RefreshCcw } from "lucide-react";
 import {
   useExpenses,
   useCreateExpense,
+  useUpdateExpense,
   useDeleteExpense,
   useRecurringExpenses,
   useCreateRecurringExpense,
@@ -52,6 +53,7 @@ import {
   useDeleteRecurringExpense,
   isStockUpdateFailure,
   isStockRevertFailure,
+  isStockAdjustFailure,
 } from "@/lib/hooks/use-expenses";
 import { useOrdersAnalytics } from "@/lib/hooks/orders/use-orders-history";
 import { useSupplies } from "@/lib/hooks/use-supplies";
@@ -257,6 +259,7 @@ function FinanzasPageContent() {
   // ── One-off expenses ──
   const { data: expenses, isLoading: expensesLoading } = useExpenses(startDate, endDate);
   const createExpense = useCreateExpense(startDate, endDate);
+  const updateExpense = useUpdateExpense(startDate, endDate);
   const deleteExpense = useDeleteExpense(startDate, endDate);
 
   // This month's expenses, scoped to the real current calendar month
@@ -279,6 +282,7 @@ function FinanzasPageContent() {
   const [expenseSupplyQuantity, setExpenseSupplyQuantity] = useState("");
   const [expenseSupplyMode, setExpenseSupplyMode] = useState<SupplyQuantityMode>("native");
   const [deletingExpense, setDeletingExpense] = useState<Expense | null>(null);
+  const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
 
   const { data: supplies } = useSupplies();
   const activeSupplies = useMemo(() => supplies?.filter((s) => s.is_active) ?? [], [supplies]);
@@ -309,6 +313,24 @@ function FinanzasPageContent() {
     setExpenseSupplyId(null);
     setExpenseSupplyQuantity("");
     setExpenseSupplyMode("native");
+    setEditingExpense(null);
+  }
+
+  // Prefills the same dialog/form used for "Nuevo gasto" from an existing
+  // row. The supply quantity is always prefilled in "native" mode: it's
+  // already the resolved (native-unit) value stored on the expense, not a
+  // per-kilo entry the user typed — showing it any other way would silently
+  // re-convert it on save.
+  function openEditExpense(expense: Expense) {
+    setEditingExpense(expense);
+    setExpenseDate(expense.date);
+    setExpenseAmount(String(expense.amount));
+    setExpenseCategory(expense.category);
+    setExpenseDescription(expense.description ?? "");
+    setExpenseSupplyId(expense.supply_id ?? null);
+    setExpenseSupplyQuantity(expense.quantity != null ? String(expense.quantity) : "");
+    setExpenseSupplyMode("native");
+    setExpenseDialogOpen(true);
   }
 
   async function handleCreateExpense() {
@@ -343,6 +365,38 @@ function FinanzasPageContent() {
         resetExpenseForm();
       } else {
         toast.error("Error al registrar el gasto");
+      }
+    }
+  }
+
+  async function handleUpdateExpense() {
+    if (!editingExpense) return;
+    const parsed = parseFloat(expenseAmount.replace(",", "."));
+    if (isNaN(parsed) || parsed <= 0) return;
+
+    const hasSupplyQuantity =
+      expenseCategory === "supplies" && !!expenseSupplyId && !!resolvedExpenseSupplyQuantity;
+
+    try {
+      await updateExpense.mutateAsync({
+        id: editingExpense.id,
+        date: expenseDate,
+        amount: parsed,
+        category: expenseCategory,
+        description: expenseDescription.trim() || null,
+        supply_id: hasSupplyQuantity ? expenseSupplyId : null,
+        quantity: hasSupplyQuantity ? resolvedExpenseSupplyQuantity : null,
+      });
+      toast.success("Gasto actualizado");
+      setExpenseDialogOpen(false);
+      resetExpenseForm();
+    } catch (error) {
+      if (isStockAdjustFailure(error)) {
+        toast.error("El gasto se actualizó, pero no se pudo ajustar el stock. Corregilo desde Insumos.");
+        setExpenseDialogOpen(false);
+        resetExpenseForm();
+      } else {
+        toast.error("Error al actualizar el gasto");
       }
     }
   }
@@ -689,6 +743,14 @@ function FinanzasPageContent() {
                             <Button
                               size="icon"
                               variant="ghost"
+                              className="h-7 w-7 text-muted-foreground shrink-0"
+                              onClick={() => openEditExpense(expense)}
+                            >
+                              <Pencil className="h-3.5 w-3.5" />
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="ghost"
                               className="h-7 w-7 text-muted-foreground hover:text-destructive shrink-0"
                               onClick={() => setDeletingExpense(expense)}
                             >
@@ -885,7 +947,7 @@ function FinanzasPageContent() {
       >
         <DialogContent className="sm:max-w-xl ios-glass rounded-2xl">
           <DialogHeader>
-            <DialogTitle>Nuevo gasto</DialogTitle>
+            <DialogTitle>{editingExpense ? "Editar gasto" : "Nuevo gasto"}</DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4 py-2">
@@ -1037,8 +1099,13 @@ function FinanzasPageContent() {
               Cancelar
             </Button>
             <Button
-              onClick={handleCreateExpense}
-              disabled={!expenseAmount || parseFloat(expenseAmount) <= 0 || createExpense.isPending}
+              onClick={editingExpense ? handleUpdateExpense : handleCreateExpense}
+              disabled={
+                !expenseAmount ||
+                parseFloat(expenseAmount) <= 0 ||
+                createExpense.isPending ||
+                updateExpense.isPending
+              }
             >
               Guardar
             </Button>

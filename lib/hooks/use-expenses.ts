@@ -55,6 +55,27 @@ export function isStockRevertFailure(error: unknown): error is StockRevertError 
   return error instanceof StockRevertError;
 }
 
+// Thrown by useUpdateExpense when the expense row itself saved successfully
+// but a stock adjustment (reversing the old link and/or applying the new
+// one) failed partway — the row update already committed, so this needs to
+// be distinguishable from a generic update failure the same way
+// StockUpdateError/StockRevertError are for create/delete.
+export class StockAdjustError extends Error {
+  readonly expenseId: string;
+  readonly cause: unknown;
+
+  constructor(expenseId: string, cause: unknown) {
+    super("El gasto se guardó pero no se pudo ajustar el stock");
+    this.name = "StockAdjustError";
+    this.expenseId = expenseId;
+    this.cause = cause;
+  }
+}
+
+export function isStockAdjustFailure(error: unknown): error is StockAdjustError {
+  return error instanceof StockAdjustError;
+}
+
 function recurringExpensesQueryKey() {
   return ["recurring-expenses"];
 }
@@ -215,6 +236,114 @@ export function useDeleteExpense(startDate: string, endDate: string) {
       // not — refresh so the row disappears instead of looking like it's
       // still there.
       if (isStockRevertFailure(error)) {
+        queryClient.invalidateQueries({ queryKey: expensesQueryKey(startDate, endDate) });
+        queryClient.invalidateQueries({ queryKey: ["orders-analytics"] });
+      }
+    },
+  });
+}
+
+export function useUpdateExpense(startDate: string, endDate: string) {
+  const supabase = createClient();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (input: {
+      id: string;
+      date: string;
+      amount: number;
+      category: ExpenseCategory;
+      description: string | null;
+      supply_id?: string | null;
+      quantity?: number | null;
+    }) => {
+      // Read the OLD supply_id/quantity before overwriting the row — once
+      // it's updated there is no way to know what stock effect to reverse.
+      const { data: previous, error: fetchError } = await supabase
+        .from("expenses")
+        .select("supply_id, quantity")
+        .eq("id", input.id)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      const { data, error } = await supabase
+        .from("expenses")
+        .update({
+          date: input.date,
+          amount: input.amount,
+          category: input.category,
+          description: input.description,
+          supply_id: input.supply_id ?? null,
+          quantity: input.quantity ?? null,
+        })
+        .eq("id", input.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      const expense = data as Expense;
+
+      // The row above is already committed — from here on, any stock
+      // adjustment failure must be surfaced as a distinct error type so the
+      // caller doesn't tell the user to retry (which would re-apply an
+      // adjustment on top of one that may have partially succeeded).
+      try {
+        // Reverse the old link first, mirroring useDeleteExpense exactly.
+        if (previous.supply_id && previous.quantity) {
+          const { data: oldSupply, error: oldSupplyError } = await supabase
+            .from("supplies")
+            .select("stock_quantity")
+            .eq("id", previous.supply_id)
+            .maybeSingle();
+
+          if (oldSupplyError) throw oldSupplyError;
+
+          if (oldSupply) {
+            // No floor at 0 — same reasoning as useDeleteExpense's reversal.
+            const reverted = Number(oldSupply.stock_quantity) - Number(previous.quantity);
+            const { error: revertError } = await supabase
+              .from("supplies")
+              .update({ stock_quantity: reverted })
+              .eq("id", previous.supply_id);
+
+            if (revertError) throw revertError;
+          }
+        }
+
+        // Then apply the new link, mirroring useCreateExpense's bump.
+        if (input.supply_id && input.quantity) {
+          const { data: newSupply, error: newSupplyError } = await supabase
+            .from("supplies")
+            .select("stock_quantity")
+            .eq("id", input.supply_id)
+            .single();
+
+          if (newSupplyError) throw newSupplyError;
+
+          const { error: bumpError } = await supabase
+            .from("supplies")
+            .update({ stock_quantity: Number(newSupply.stock_quantity) + input.quantity })
+            .eq("id", input.supply_id);
+
+          if (bumpError) throw bumpError;
+        }
+      } catch (stockError) {
+        throw new StockAdjustError(expense.id, stockError);
+      }
+
+      return expense;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: expensesQueryKey(startDate, endDate) });
+      queryClient.invalidateQueries({ queryKey: ["orders-analytics"] });
+      queryClient.invalidateQueries({ queryKey: ["supplies"] });
+    },
+    onError: (error) => {
+      // Even though this mutation "failed", the row update underneath it
+      // did not — refresh so the edited values show up instead of looking
+      // like the edit was lost.
+      if (isStockAdjustFailure(error)) {
         queryClient.invalidateQueries({ queryKey: expensesQueryKey(startDate, endDate) });
         queryClient.invalidateQueries({ queryKey: ["orders-analytics"] });
       }
