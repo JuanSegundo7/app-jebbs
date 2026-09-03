@@ -120,10 +120,13 @@
   --surface-2: #171a22;
   --surface-3: #1f232d;
 
-  /* Materiales translúcidos (§12). El peso codifica jerarquía:
-     tintes CLAROS elevan contenido hacia el usuario;
-     tintes OSCUROS separan chrome estructural. */
-  --material-thin:    rgba(255, 255, 255, 0.048);  /* contenido elevado */
+  /* Materiales translúcidos (§12). Misma familia de tono en los tres —
+     igual que el tema claro (blanco al 72/78/86%) — el peso de jerarquía
+     lo da la opacidad, no un tinte distinto por rol. Antes "thin" usaba
+     blanco al 4.8%, tan sutil sobre el canvas casi negro que las cards
+     no se leían como el mismo material que header/sidebar: dependían
+     casi enteramente del hairline para notarse. */
+  --material-thin:    rgba(19, 22, 29, 0.42);      /* contenido elevado */
   --material-regular: rgba(19, 22, 29, 0.66);      /* chrome flotante   */
   --material-thick:   rgba(11, 13, 18, 0.82);      /* sidebar, modales  */
   --well:             rgba(0, 0, 0, 0.30);         /* pozo hundido      */
