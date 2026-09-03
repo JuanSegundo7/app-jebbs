@@ -124,7 +124,7 @@ export default function PricingPage() {
             <div className="flex items-center justify-between rounded-lg bg-secondary/30 p-3">
               <div>
                 <p className="font-medium">Costo de delivery por defecto</p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-caption text-muted-foreground">
                   Se usa como valor inicial al crear un pedido con envío
                 </p>
               </div>
@@ -178,7 +178,7 @@ export default function PricingPage() {
             <div className="flex items-center justify-between rounded-lg bg-secondary/30 p-3">
               <div>
                 <p className="font-medium">Comisión de PedidosYa</p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-caption text-muted-foreground">
                   Se aplica sobre el total al crear un pedido marcado como PedidosYa
                 </p>
               </div>
@@ -262,7 +262,7 @@ export default function PricingPage() {
                         <div className="flex items-center gap-3">
                           <span className="font-medium">{burger.name}</span>
                           {!burger.is_available && (
-                            <Badge variant="secondary" className="text-xs">
+                            <Badge variant="secondary" className="text-caption">
                               No disponible
                             </Badge>
                           )}
@@ -349,7 +349,7 @@ export default function PricingPage() {
                             <div className="flex items-center gap-3">
                               <span className="font-medium">{extra.name}</span>
                               {!extra.is_available && (
-                                <Badge variant="secondary" className="text-xs">
+                                <Badge variant="secondary" className="text-caption">
                                   No disponible
                                 </Badge>
                               )}

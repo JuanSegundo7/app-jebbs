@@ -159,19 +159,19 @@ export default function ExtrasPage() {
             }}
           >
             <TabsList className="rounded-full p-1">
-              <TabsTrigger value="all" className="rounded-full px-4 text-sm">
+              <TabsTrigger value="all" className="rounded-full px-4 text-subheadline">
                 Todos
               </TabsTrigger>
-              <TabsTrigger value="extra" className="rounded-full px-4 text-sm">
+              <TabsTrigger value="extra" className="rounded-full px-4 text-subheadline">
                 Extras
               </TabsTrigger>
-              <TabsTrigger value="drink" className="rounded-full px-4 text-sm">
+              <TabsTrigger value="drink" className="rounded-full px-4 text-subheadline">
                 Bebidas
               </TabsTrigger>
-              <TabsTrigger value="fries" className="rounded-full px-4 text-sm">
+              <TabsTrigger value="fries" className="rounded-full px-4 text-subheadline">
                 Papas
               </TabsTrigger>
-              <TabsTrigger value="sides" className="rounded-full px-4 text-sm">
+              <TabsTrigger value="sides" className="rounded-full px-4 text-subheadline">
                 Acompañamientos
               </TabsTrigger>
             </TabsList>
@@ -205,7 +205,7 @@ export default function ExtrasPage() {
                 <CardContent className="flex items-center justify-between p-4">
                   <div>
                     <p className="font-medium leading-none">{extra.name}</p>
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-caption text-muted-foreground">
                       {categoryLabels[extra.category]}
                     </span>
                   </div>
@@ -215,7 +215,7 @@ export default function ExtrasPage() {
                       {formatCurrency(extra.price)}
                     </span>
 
-                    <Badge variant="outline" className="text-xs">
+                    <Badge variant="outline" className="text-caption">
                       {extra.is_available ? "Activo" : "Inactivo"}
                     </Badge>
 
@@ -267,7 +267,7 @@ export default function ExtrasPage() {
           >
             ←
           </Button>
-          <span className="text-sm">
+          <span className="text-subheadline">
             {page} / {totalPages}
           </span>
           <Button

@@ -281,7 +281,7 @@ export default function MenuPage() {
         {/* Header */}
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-subheadline text-muted-foreground">
               {burgers?.length || 0} hamburguesas{" "}
               {burgers &&
                 `(${burgers.filter((b) => b.is_available).length} disponibles)`}
@@ -341,15 +341,15 @@ export default function MenuPage() {
                 <CardContent className="p-4">
                   {/* Header */}
                   <div className="mb-3">
-                    <h3 className="font-semibold text-lg">{burger.name}</h3>
-                    <p className="text-xl font-bold text-primary">
+                    <h3 className="text-headline">{burger.name}</h3>
+                    <p className="text-title3 font-bold text-primary">
                       {formatCurrency(burger.base_price)}
                     </p>
                   </div>
 
                   {/* Description */}
                   {burger.description && (
-                    <p className="mb-3 text-sm text-muted-foreground line-clamp-2">
+                    <p className="mb-3 text-subheadline text-muted-foreground line-clamp-2">
                       {burger.description}
                     </p>
                   )}
@@ -361,13 +361,13 @@ export default function MenuPage() {
                         <Badge
                           key={ing}
                           variant="outline"
-                          className="text-xs bg-card"
+                          className="text-caption bg-card"
                         >
                           {ing}
                         </Badge>
                       ))}
                       {burger.ingredients.length > 3 && (
-                        <Badge variant="outline" className="text-xs">
+                        <Badge variant="outline" className="text-caption">
                           +{burger.ingredients.length - 3}
                         </Badge>
                       )}
@@ -420,8 +420,8 @@ export default function MenuPage() {
         ) : (
           <div className="py-20 text-center">
             <ImageIcon className="mx-auto mb-4 h-16 w-16 text-muted-foreground" />
-            <h3 className="mb-2 text-lg font-semibold">No hay hamburguesas</h3>
-            <p className="mb-4 text-sm text-muted-foreground">
+            <h3 className="mb-2 text-title3">No hay hamburguesas</h3>
+            <p className="mb-4 text-subheadline text-muted-foreground">
               Comienza creando tu primera hamburguesa
             </p>
             <Button onClick={handleOpenCreate}>
@@ -481,10 +481,10 @@ export default function MenuPage() {
                   >
                     <div className="text-center">
                       <Upload className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-subheadline text-muted-foreground">
                         Click para subir imagen
                       </p>
-                      <p className="text-xs text-muted-foreground mt-1">
+                      <p className="text-caption text-muted-foreground mt-1">
                         PNG, JPG hasta 2MB
                       </p>
                     </div>
@@ -500,7 +500,7 @@ export default function MenuPage() {
                 {isUploading && (
                   <div className="mt-2">
                     <Progress value={uploadProgress} />
-                    <p className="text-xs text-center text-muted-foreground mt-1">
+                    <p className="text-caption text-center text-muted-foreground mt-1">
                       Subiendo... {uploadProgress}%
                     </p>
                   </div>
@@ -710,7 +710,7 @@ export default function MenuPage() {
             <AlertDialogDescription>
               ¿Estás seguro de eliminar "{deletingBurger?.name}"?
               <br />
-              <span className="text-sm text-muted-foreground mt-2 block">
+              <span className="text-subheadline text-muted-foreground mt-2 block">
                 Si esta hamburguesa tiene pedidos asociados, no se podrá
                 eliminar. En ese caso, puedes ocultarla usando el botón de
                 "Ocultar".
