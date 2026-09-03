@@ -270,7 +270,7 @@ export default function MenuPage() {
   /* ================= RENDER ================= */
 
   return (
-    <section className="flex h-screen flex-col">
+    <section className="flex flex-1 min-h-0 flex-col">
       <Header
         title="Menú"
         subtitle="Administra las hamburguesas del menú"

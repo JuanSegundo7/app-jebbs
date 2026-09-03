@@ -111,7 +111,7 @@ export default function PricingPage() {
   const isLoading = burgersLoading || extrasLoading;
 
   return (
-    <div className="flex h-screen flex-col">
+    <div className="flex flex-1 min-h-0 flex-col">
       <Header title="Precios" subtitle="Configuración central de precios" />
 
       <div className="flex-1 overflow-auto py-6 space-y-6">

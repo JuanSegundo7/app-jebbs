@@ -185,7 +185,7 @@ export default function CombosPage() {
   /* ---------- UI ---------- */
 
   return (
-    <div className="flex h-screen flex-col">
+    <div className="flex flex-1 min-h-0 flex-col">
       <Header
         title="Combos"
         subtitle="Creá y administrá combos reutilizando items existentes"

@@ -194,7 +194,7 @@ export default function FinanzasPage() {
 
 function FinanzasPageSkeleton() {
   return (
-    <section className="flex h-screen flex-col">
+    <section className="flex flex-1 min-h-0 flex-col">
       <div className="flex-1 overflow-auto py-4">
         <Skeleton className="h-10 w-64" />
         <Skeleton className="mt-4 h-24" />
@@ -597,7 +597,7 @@ function FinanzasPageContent() {
   }, [analytics?.ledger]);
 
   return (
-    <section className="flex h-screen flex-col">
+    <section className="flex flex-1 min-h-0 flex-col">
       <Header
         title="Finanzas"
         subtitle="Gastos, insumos y recetas"

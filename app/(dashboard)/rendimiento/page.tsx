@@ -174,7 +174,7 @@ export default function AnalyticsPage() {
     : [];
 
   return (
-    <section className="flex h-screen flex-col">
+    <section className="flex flex-1 min-h-0 flex-col">
       <Header title="Rendimiento" subtitle="Análisis de ventas" />
 
       <div className="flex-1 overflow-auto py-4">
