@@ -43,20 +43,20 @@ export function NetRevenueCard({
         <div className="space-y-2.5">
           <div className="flex items-center justify-between gap-3">
             <span className="text-callout text-muted-foreground">Ingresos brutos</span>
-            <span className="text-callout numeric vibrant">
+            <span className="text-callout numeric vibrant font-medium">
               {formatCurrency(grossRevenue)}
             </span>
           </div>
           <div className="flex items-center justify-between gap-3">
             <span className="text-callout text-muted-foreground">Gastos del período</span>
-            <span className="text-callout numeric vibrant text-[var(--status-canceled)]">
+            <span className="text-callout numeric vibrant font-medium text-[var(--status-canceled)]">
               −{formatCurrency(expensesTotal)}
             </span>
           </div>
           {commissionTotal > 0 && (
             <div className="flex items-center justify-between gap-3">
               <span className="text-callout text-muted-foreground">Comisión PedidosYa</span>
-              <span className="text-callout numeric vibrant text-[var(--status-canceled)]">
+              <span className="text-callout numeric vibrant font-medium text-[var(--status-canceled)]">
                 −{formatCurrency(commissionTotal)}
               </span>
             </div>

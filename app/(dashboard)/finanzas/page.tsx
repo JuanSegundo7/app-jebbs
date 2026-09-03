@@ -692,7 +692,7 @@ function FinanzasPageContent() {
                     <div className="flex items-center justify-between mb-3">
                       <p className="text-sm font-medium">Gastos puntuales cargados</p>
                       <div className="flex items-center gap-3">
-                        <span className="text-callout numeric vibrant">
+                        <span className="text-callout numeric vibrant font-medium">
                           {formatCurrency(oneOffExpensesTotal)}
                         </span>
                         <Button
@@ -737,7 +737,7 @@ function FinanzasPageContent() {
                             <span className="flex-1 text-sm text-muted-foreground truncate">
                               {expense.description ?? "—"}
                             </span>
-                            <span className="text-callout numeric vibrant">
+                            <span className="text-callout numeric vibrant font-medium">
                               {formatCurrency(expense.amount)}
                             </span>
                             <Button
@@ -875,7 +875,7 @@ function FinanzasPageContent() {
                               </div>
 
                               <div className="flex items-center gap-3 shrink-0">
-                                <span className="text-callout numeric vibrant">
+                                <span className="text-callout numeric vibrant font-medium">
                                   {template.amount != null
                                     ? `${formatCurrency(template.amount)}${frequencySuffix[template.frequency]}`
                                     : paydayPreviewText(template.start_date, template.frequency, todayArStr())}

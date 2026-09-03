@@ -88,7 +88,7 @@ export function StatTile({
               <p
                 className={cn(
                   isHero ? "text-display" : "text-amount",
-                  "numeric vibrant leading-tight",
+                  "numeric vibrant",
                 )}
                 style={valueColor ? { color: valueColor } : undefined}
               >
