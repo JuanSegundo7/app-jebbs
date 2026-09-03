@@ -21,28 +21,36 @@ export default function DashboardLayout({
         {/* NextStepProvider/NextStep wrap SidebarProvider from the OUTSIDE,
             not the other way around: nextstepjs renders its own
             position:relative wrapper div around whatever it's given, and
-            SidebarProvider needs its own direct children (SidebarLayout,
-            Toaster) to stay unwrapped so the sidebar's flex-sibling push
-            layout keeps working. Nesting it the other way traps the
-            sidebar+content pair inside that extra block-level div, which
-            silently turns the "push content" behavior into "overlay". */}
+            SidebarProvider needs its own direct child (SidebarLayout) to
+            stay unwrapped so the sidebar's flex-sibling push layout keeps
+            working. Nesting it the other way traps the sidebar+content
+            pair inside that extra block-level div, which silently turns
+            the "push content" behavior into "overlay". */}
         <NextStepProvider>
           <NextStep steps={tours} cardComponent={TourCard}>
             <SidebarProvider defaultOpen={false}>
               <SidebarLayout>{children}</SidebarLayout>
-              <Toaster
-                richColors
-                position="top-right"
-                theme="dark"
-                toastOptions={{
-                  classNames: {
-                    toast: "material-thick !text-foreground",
-                  },
-                }}
-              />
             </SidebarProvider>
           </NextStep>
         </NextStepProvider>
+        {/* Toaster afuera de SidebarProvider a propósito: sonner no está
+            aplicando su propio position:fixed en este árbol (bug de sonner
+            o de cómo se monta acá, no investigado a fondo), y mientras esa
+            sección quedaba adentro del flex de sidebar-wrapper, contaba
+            como un tercer hijo en fila y estiraba TODO el layout más allá
+            del viewport — scroll doble en cada página. Afuera del
+            SidebarProvider, aunque el position:fixed siga sin aplicar,
+            ya no puede volver a inflar ese contenedor. */}
+        <Toaster
+          richColors
+          position="top-right"
+          theme="dark"
+          toastOptions={{
+            classNames: {
+              toast: "material-thick !text-foreground",
+            },
+          }}
+        />
         <Analytics />
       </QueryProvider>
     </ThemeProvider>
