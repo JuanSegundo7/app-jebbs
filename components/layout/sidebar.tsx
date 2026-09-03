@@ -64,17 +64,19 @@ export function AppSidebar() {
           />
           <div
             className={cn(
+              // leading-tight deliberado: stack de 2 lineas (Jebbs / Burgers),
+              // el leading normal de headline/subheadline las separa de mas.
               "flex flex-col leading-tight overflow-hidden",
               "transition-all duration-300 ease-in-out",
               "max-w-xs opacity-100",
               "group-data-[collapsible=icon]:max-w-0 group-data-[collapsible=icon]:opacity-0",
             )}
           >
-            <span className="text-base font-bold tracking-[-0.02em] whitespace-nowrap">
+            <span className="text-headline font-bold whitespace-nowrap">
               Jebbs
             </span>
             <span
-              className="font-brand text-sm text-(--color-jebbs) -mt-1 whitespace-nowrap"
+              className="font-brand text-subheadline text-(--color-jebbs) -mt-1 whitespace-nowrap"
               style={{ textShadow: "0 0 12px color-mix(in srgb, var(--jebbs) 55%, transparent)" }}
             >
               Burgers
@@ -104,7 +106,7 @@ export function AppSidebar() {
                     >
                       <Link href={item.href}>
                         <item.icon className={cn("size-4 shrink-0", isActive && "text-primary")} />
-                        <span className="text-sm">{item.name}</span>
+                        <span className="text-subheadline">{item.name}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -124,7 +126,7 @@ export function AppSidebar() {
               className="rounded-lg transition-all duration-200 h-9 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent cursor-pointer"
             >
               <LogOut className="size-4 shrink-0" />
-              <span className="text-sm">Cerrar sesión</span>
+              <span className="text-subheadline">Cerrar sesión</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

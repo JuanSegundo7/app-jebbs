@@ -36,7 +36,7 @@ export function PeriodSelector({ period, className }: PeriodSelectorProps) {
         <Button
           variant={viewMode === "month" ? "default" : "ghost"}
           size="sm"
-          className="rounded-lg h-8 px-4 text-sm"
+          className="rounded-lg h-8 px-4"
           onClick={() => setViewMode("month")}
         >
           Mes
@@ -44,7 +44,7 @@ export function PeriodSelector({ period, className }: PeriodSelectorProps) {
         <Button
           variant={viewMode === "week" ? "default" : "ghost"}
           size="sm"
-          className="rounded-lg h-8 px-4 text-sm"
+          className="rounded-lg h-8 px-4"
           onClick={() => setViewMode("week")}
         >
           Semana
@@ -52,7 +52,7 @@ export function PeriodSelector({ period, className }: PeriodSelectorProps) {
         <Button
           variant={viewMode === "custom" ? "default" : "ghost"}
           size="sm"
-          className="rounded-lg h-8 px-4 text-sm"
+          className="rounded-lg h-8 px-4"
           onClick={() => setViewMode("custom")}
         >
           Custom
@@ -62,7 +62,7 @@ export function PeriodSelector({ period, className }: PeriodSelectorProps) {
       {viewMode === "custom" ? (
         <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
           <PopoverTrigger asChild>
-            <Button variant="outline" className="bg-card h-9 gap-2 text-sm font-medium">
+            <Button variant="outline" size="sm" className="bg-card gap-2 font-medium">
               <CalendarIcon className="h-4 w-4" />
               {customRange ? periodLabel : "Elegir rango de fechas"}
             </Button>
@@ -88,7 +88,7 @@ export function PeriodSelector({ period, className }: PeriodSelectorProps) {
           <Button variant="outline" size="icon" onClick={handlePrev} className="bg-card h-9 w-9">
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <span className="min-w-52 text-center text-sm font-medium capitalize tabular-nums">
+          <span className="min-w-52 text-center text-subheadline font-medium capitalize tabular-nums">
             {periodLabel}
           </span>
           <Button variant="outline" size="icon" onClick={handleNext} className="bg-card h-9 w-9">
