@@ -46,20 +46,14 @@ export function useSpring(name: SpringName): Transition {
  * Materialize (§12): una superficie condensándose desde el vidrio.
  * Anima blur + escala + opacidad juntos, no por separado.
  */
+// Sin `transition` embebida en animate/exit a propósito: si estuviera acá
+// adentro, el guard de reduced-motion de useSpring() no podría alcanzarla
+// (era un bug real — bajo prefers-reduced-motion el blur+scale igual corría
+// 550ms). El caller pasa `transition={useSpring("settle")}` en su lugar.
 export const materialize: Variants = {
   initial: { opacity: 0, scale: 0.96, filter: "blur(8px)" },
-  animate: {
-    opacity: 1,
-    scale: 1,
-    filter: "blur(0px)",
-    transition: springs.settle,
-  },
-  exit: {
-    opacity: 0,
-    scale: 0.98,
-    filter: "blur(4px)",
-    transition: { ...springs.move, duration: 0.22 },
-  },
+  animate: { opacity: 1, scale: 1, filter: "blur(0px)" },
+  exit: { opacity: 0, scale: 0.98, filter: "blur(4px)" },
 };
 
 /** Presence de una tarjeta en una lista (order-column): entra empujando,

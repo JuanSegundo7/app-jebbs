@@ -1,6 +1,7 @@
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";
+import { CardHeading } from "@/components/ui/card-heading";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TrendingUp } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, Cell, LabelList, XAxis, YAxis } from "recharts";
@@ -49,17 +50,9 @@ export function MarginByBurgerChart({ rows, isLoading }: MarginByBurgerChartProp
   return (
     <Card id="costos-margin-chart" className="ios-glass p-0 bg-card">
       <CardContent className="p-4">
-        <div className="flex items-center gap-2 mb-3">
-          <div
-            className="rounded-md p-1.5"
-            style={{
-              backgroundColor: "color-mix(in srgb, var(--color-chart-3) 15%, transparent)",
-            }}
-          >
-            <TrendingUp className="h-3.5 w-3.5" style={{ color: "var(--color-chart-3)" }} />
-          </div>
-          <p className="text-sm font-medium">Margen por hamburguesa</p>
-        </div>
+        <CardHeading icon={TrendingUp} iconColor="var(--color-chart-3)">
+          Margen por hamburguesa
+        </CardHeading>
 
         {chartData.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-4">

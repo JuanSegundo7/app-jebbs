@@ -2,6 +2,7 @@
 
 import { Header } from "@/components/layout/header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { StatTile } from "@/components/ui/stat-tile";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -181,60 +182,41 @@ export default function AnalyticsPage() {
         <PeriodSelector period={period} className="mb-6" />
 
         {/* Metrics cards */}
-        {analyticsLoading ? (
-          <div className="grid gap-3 grid-cols-2 lg:grid-cols-5">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <Skeleton key={i} className="h-24" />
-            ))}
-          </div>
-        ) : (
-          <div className="grid gap-3 grid-cols-2 lg:grid-cols-5">
-            {metrics.map((metric) => {
-              const isPositive = metric.invertChange
-                ? metric.change <= 0
-                : metric.change >= 0;
-              return (
-                <Card key={metric.title} className="ios-glass p-0 bg-card">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <div
-                        className="rounded-md p-1.5"
-                        style={{
-                          backgroundColor: `color-mix(in srgb, ${metric.color} 15%, transparent)`,
-                        }}
-                      >
-                        <metric.icon
-                          className="h-3.5 w-3.5"
-                          style={{ color: metric.color }}
-                        />
-                      </div>
-                      {viewMode !== "custom" && <div
-                        className={`flex items-center gap-0.5 text-xs ${
-                          isPositive
-                            ? "text-[var(--status-paid)]"
-                            : "text-[var(--status-canceled)]"
-                        }`}
-                      >
-                        {isPositive ? (
-                          <TrendingUp className="h-3 w-3" />
-                        ) : (
-                          <TrendingDown className="h-3 w-3" />
-                        )}
-                        <span>{Math.abs(metric.change).toFixed(1)}%</span>
-                      </div>}
+        <div className="grid gap-3 grid-cols-2 lg:grid-cols-5">
+          {metrics.map((metric) => {
+            const isPositive = metric.invertChange
+              ? metric.change <= 0
+              : metric.change >= 0;
+            return (
+              <StatTile
+                key={metric.title}
+                icon={metric.icon}
+                color={metric.color}
+                value={metric.format(metric.value)}
+                label={metric.title}
+                loading={analyticsLoading}
+                delta={
+                  viewMode !== "custom" && (
+                    <div
+                      className={`flex items-center gap-0.5 text-xs ${
+                        isPositive
+                          ? "text-[var(--status-paid)]"
+                          : "text-[var(--status-canceled)]"
+                      }`}
+                    >
+                      {isPositive ? (
+                        <TrendingUp className="h-3 w-3" />
+                      ) : (
+                        <TrendingDown className="h-3 w-3" />
+                      )}
+                      <span>{Math.abs(metric.change).toFixed(1)}%</span>
                     </div>
-                    <p className="text-xl font-bold leading-tight">
-                      {metric.format(metric.value)}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {metric.title}
-                    </p>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        )}
+                  )
+                }
+              />
+            );
+          })}
+        </div>
 
         {/* Payment method + source breakdown */}
         <div className="mt-4 grid gap-4 lg:grid-cols-2">

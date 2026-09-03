@@ -1,8 +1,7 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import { CircleDollarSign, TrendingUp, Package, AlertTriangle } from "lucide-react";
+import { StatTile } from "@/components/ui/stat-tile";
 import { useSupplies, useAllBurgersWithRecipes } from "@/lib/hooks/use-supplies";
 import {
   calculateInventoryValue,
@@ -20,16 +19,6 @@ export function CostosSummaryRow() {
   const { data: burgers, isLoading: burgersLoading } = useAllBurgersWithRecipes();
 
   const isLoading = suppliesLoading || burgersLoading;
-
-  if (isLoading) {
-    return (
-      <div id="costos-summary-row" className="grid gap-3 grid-cols-2 lg:grid-cols-4">
-        {[1, 2, 3, 4].map((i) => (
-          <Skeleton key={i} className="h-24" />
-        ))}
-      </div>
-    );
-  }
 
   const summary = summarizeRecipes(burgers ?? [], MARGIN_TARGET_DEFAULT);
   const inventoryValue = calculateInventoryValue(supplies ?? []);
@@ -92,25 +81,15 @@ export function CostosSummaryRow() {
   return (
     <div id="costos-summary-row" className="grid gap-3 grid-cols-2 lg:grid-cols-4">
       {tiles.map((tile) => (
-        <Card key={tile.key} className="ios-glass p-0 bg-card">
-          <CardContent className="p-4">
-            <div
-              className="rounded-md p-1.5 w-fit mb-2"
-              style={{
-                backgroundColor: `color-mix(in srgb, ${tile.chipColor} 15%, transparent)`,
-              }}
-            >
-              <tile.icon className="h-3.5 w-3.5" style={{ color: tile.chipColor }} />
-            </div>
-            <p
-              className="text-xl font-bold leading-tight tabular-nums"
-              style={tile.valueColor ? { color: tile.valueColor } : undefined}
-            >
-              {tile.value}
-            </p>
-            <p className="text-xs text-muted-foreground mt-0.5 truncate">{tile.label}</p>
-          </CardContent>
-        </Card>
+        <StatTile
+          key={tile.key}
+          icon={tile.icon}
+          color={tile.chipColor}
+          value={tile.value}
+          valueColor={tile.valueColor}
+          label={tile.label}
+          loading={isLoading}
+        />
       ))}
     </div>
   );

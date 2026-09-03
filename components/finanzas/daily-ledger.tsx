@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
+import { CardHeading } from "@/components/ui/card-heading";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -108,34 +109,28 @@ export function DailyLedger({
   return (
     <Card className="mt-6 ios-glass p-0 bg-card">
       <CardContent className="p-4">
-        <div className="flex items-center justify-between gap-2 mb-3">
-          <div className="flex items-center gap-2">
-            <div
-              className="rounded-md p-1.5"
-              style={{
-                backgroundColor: "color-mix(in srgb, var(--color-chart-2) 15%, transparent)",
-              }}
-            >
-              <BookOpen className="h-3.5 w-3.5" style={{ color: "var(--color-chart-2)" }} />
-            </div>
-            <p className="text-sm font-medium">Libro diario</p>
-          </div>
-
-          {dayGroups.length > 0 && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button size="sm" variant="outline" className="h-8 gap-1.5 text-xs">
-                  <Download className="h-3.5 w-3.5" />
-                  Exportar
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={handleExportPdf}>Exportar PDF</DropdownMenuItem>
-                <DropdownMenuItem onClick={handleExportExcel}>Exportar Excel</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
-        </div>
+        <CardHeading
+          icon={BookOpen}
+          iconColor="var(--color-chart-2)"
+          action={
+            dayGroups.length > 0 && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button size="sm" variant="outline" className="h-8 gap-1.5 text-xs">
+                    <Download className="h-3.5 w-3.5" />
+                    Exportar
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={handleExportPdf}>Exportar PDF</DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleExportExcel}>Exportar Excel</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )
+          }
+        >
+          Libro diario
+        </CardHeading>
 
         {dayGroups.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-4">

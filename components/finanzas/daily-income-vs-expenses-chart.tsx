@@ -1,6 +1,7 @@
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";
+import { CardHeading } from "@/components/ui/card-heading";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeftRight } from "lucide-react";
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
@@ -49,38 +50,32 @@ export function DailyIncomeVsExpensesChart({
   return (
     <Card className="ios-glass p-0 bg-card">
       <CardContent className="p-4">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <div
-              className="rounded-md p-1.5"
-              style={{
-                backgroundColor: "color-mix(in srgb, var(--status-paid) 15%, transparent)",
-              }}
-            >
-              <ArrowLeftRight className="h-3.5 w-3.5" style={{ color: "var(--status-paid)" }} />
+        <CardHeading
+          icon={ArrowLeftRight}
+          iconColor="var(--status-paid)"
+          action={
+            // Legend — colors are the income/expense polarity pair, not the
+            // categorical palette (matches NetRevenueCard/DailyLedger).
+            <div className="flex items-center gap-3">
+              <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <span
+                  className="h-2.5 w-2.5 rounded-full"
+                  style={{ background: "var(--status-paid)" }}
+                />
+                Ingresos
+              </span>
+              <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <span
+                  className="h-2.5 w-2.5 rounded-full"
+                  style={{ background: "var(--status-canceled)" }}
+                />
+                Gastos
+              </span>
             </div>
-            <p className="text-sm font-medium">Ingresos vs. gastos por día</p>
-          </div>
-
-          {/* Legend — colors are the income/expense polarity pair, not the
-              categorical palette (matches NetRevenueCard/DailyLedger). */}
-          <div className="flex items-center gap-3">
-            <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <span
-                className="h-2.5 w-2.5 rounded-full"
-                style={{ background: "var(--status-paid)" }}
-              />
-              Ingresos
-            </span>
-            <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <span
-                className="h-2.5 w-2.5 rounded-full"
-                style={{ background: "var(--status-canceled)" }}
-              />
-              Gastos
-            </span>
-          </div>
-        </div>
+          }
+        >
+          Ingresos vs. gastos por día
+        </CardHeading>
 
         {!hasMovement ? (
           <p className="text-sm text-muted-foreground text-center py-4">

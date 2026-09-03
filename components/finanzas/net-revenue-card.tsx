@@ -1,6 +1,7 @@
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";
+import { CardHeading } from "@/components/ui/card-heading";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Wallet } from "lucide-react";
 import { formatCurrency } from "@/lib/utils/format";
@@ -35,17 +36,9 @@ export function NetRevenueCard({
   return (
     <Card className="ios-glass p-0 bg-card">
       <CardContent className="p-4">
-        <div className="flex items-center gap-2 mb-3">
-          <div
-            className="rounded-md p-1.5"
-            style={{
-              backgroundColor: "color-mix(in srgb, var(--color-chart-2) 15%, transparent)",
-            }}
-          >
-            <Wallet className="h-3.5 w-3.5" style={{ color: "var(--color-chart-2)" }} />
-          </div>
-          <p className="text-sm font-medium">Ingreso neto</p>
-        </div>
+        <CardHeading icon={Wallet} iconColor="var(--color-chart-2)">
+          Ingreso neto
+        </CardHeading>
 
         <div className="space-y-2.5">
           <div className="flex items-center justify-between gap-3">

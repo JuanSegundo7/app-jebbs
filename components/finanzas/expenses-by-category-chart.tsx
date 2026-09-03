@@ -1,6 +1,7 @@
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";
+import { CardHeading } from "@/components/ui/card-heading";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tags } from "lucide-react";
 import { Bar, BarChart, Cell, LabelList, XAxis, YAxis } from "recharts";
@@ -61,17 +62,9 @@ export function ExpensesByCategoryChart({ data, isLoading }: ExpensesByCategoryC
   return (
     <Card className="ios-glass p-0 bg-card">
       <CardContent className="p-4">
-        <div className="flex items-center gap-2 mb-3">
-          <div
-            className="rounded-md p-1.5"
-            style={{
-              backgroundColor: "color-mix(in srgb, var(--color-chart-1) 15%, transparent)",
-            }}
-          >
-            <Tags className="h-3.5 w-3.5" style={{ color: "var(--color-chart-1)" }} />
-          </div>
-          <p className="text-sm font-medium">Gasto por categoría</p>
-        </div>
+        <CardHeading icon={Tags} iconColor="var(--color-chart-1)">
+          Gasto por categoría
+        </CardHeading>
 
         {chartData.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-4">
