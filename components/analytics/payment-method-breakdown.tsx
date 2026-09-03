@@ -23,7 +23,7 @@ function ChangeIndicator({ change }: { change: number }) {
   const isPositive = change >= 0;
   return (
     <div
-      className={`flex items-center gap-0.5 text-xs ${
+      className={`flex items-center gap-0.5 text-caption ${
         isPositive ? "text-[var(--status-paid)]" : "text-[var(--status-canceled)]"
       }`}
     >
@@ -59,7 +59,7 @@ export function PaymentMethodBreakdown({
           <CardHeading icon={Wallet} iconColor="var(--color-chart-2)">
             Ingresos por método de pago
           </CardHeading>
-          <p className="text-sm text-muted-foreground text-center py-6">
+          <p className="text-subheadline text-muted-foreground text-center py-6">
             Sin ingresos para el período seleccionado
           </p>
         </CardContent>
@@ -80,7 +80,7 @@ export function PaymentMethodBreakdown({
         <CardHeading
           icon={Wallet}
           iconColor="var(--color-chart-2)"
-          action={<span className="text-sm font-bold tabular-nums">{formatCurrency(total)}</span>}
+          action={<span className="text-subheadline font-bold tabular-nums">{formatCurrency(total)}</span>}
         >
           Ingresos por método de pago
         </CardHeading>
@@ -119,21 +119,21 @@ export function PaymentMethodBreakdown({
                       border: `1.5px solid ${row.color}`,
                     }}
                   />
-                  <span className="text-sm text-muted-foreground truncate">
+                  <span className="text-subheadline text-muted-foreground truncate">
                     {row.emoji} {row.label}
                   </span>
                   {orders !== undefined && (
-                    <span className="text-xs text-muted-foreground shrink-0">
+                    <span className="text-caption text-muted-foreground shrink-0">
                       ({orders})
                     </span>
                   )}
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   {showChange && <ChangeIndicator change={data.change} />}
-                  <span className="text-xs text-muted-foreground w-10 text-right tabular-nums">
+                  <span className="text-caption text-muted-foreground w-10 text-right tabular-nums">
                     {pctValue.toFixed(0)}%
                   </span>
-                  <span className="text-sm font-semibold tabular-nums w-24 text-right">
+                  <span className="text-subheadline font-semibold tabular-nums w-24 text-right">
                     {formatCurrency(amount)}
                   </span>
                 </div>

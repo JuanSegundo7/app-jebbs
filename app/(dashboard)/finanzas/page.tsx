@@ -607,16 +607,16 @@ function FinanzasPageContent() {
       <div className="flex-1 overflow-auto py-4">
         <Tabs value={tab} onValueChange={(v) => goToTab(v as FinanzasTab)}>
           <TabsList id="finanzas-tabs-list" className="rounded-full p-1">
-            <TabsTrigger value="resumen" className="rounded-full px-6 text-sm">
+            <TabsTrigger value="resumen" className="rounded-full px-6 text-subheadline">
               Resumen
             </TabsTrigger>
-            <TabsTrigger value="gastos" className="rounded-full px-6 text-sm">
+            <TabsTrigger value="gastos" className="rounded-full px-6 text-subheadline">
               Gastos
             </TabsTrigger>
-            <TabsTrigger value="insumos" id="costos-tab-supplies" className="rounded-full px-6 text-sm">
+            <TabsTrigger value="insumos" id="costos-tab-supplies" className="rounded-full px-6 text-subheadline">
               Insumos
             </TabsTrigger>
-            <TabsTrigger value="recetas" id="costos-tab-recipes" className="rounded-full px-6 text-sm">
+            <TabsTrigger value="recetas" id="costos-tab-recipes" className="rounded-full px-6 text-subheadline">
               Recetas
             </TabsTrigger>
           </TabsList>
@@ -677,10 +677,10 @@ function FinanzasPageContent() {
           <TabsContent value="gastos" className="mt-4">
             <Tabs value={gastosSubTab} onValueChange={(v) => setGastosSubTab(v as GastosSubTab)}>
               <TabsList className="rounded-full p-0.5 h-8">
-                <TabsTrigger value="period" className="rounded-full px-3 text-xs">
+                <TabsTrigger value="period" className="rounded-full px-3 text-caption">
                   Del período
                 </TabsTrigger>
-                <TabsTrigger value="recurring" className="rounded-full px-3 text-xs">
+                <TabsTrigger value="recurring" className="rounded-full px-3 text-caption">
                   Fijos mensuales
                 </TabsTrigger>
               </TabsList>
@@ -690,7 +690,7 @@ function FinanzasPageContent() {
                 <Card id="gastos-period-card">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-3">
-                      <p className="text-sm font-medium">Gastos puntuales cargados</p>
+                      <p className="text-subheadline font-medium">Gastos puntuales cargados</p>
                       <div className="flex items-center gap-3">
                         <span className="text-callout numeric vibrant font-medium">
                           {formatCurrency(oneOffExpensesTotal)}
@@ -698,7 +698,7 @@ function FinanzasPageContent() {
                         <Button
                           size="sm"
                           variant="outline"
-                          className="h-8 gap-1.5 text-xs"
+                          className="h-8 gap-1.5 text-caption"
                           onClick={() => setExpenseDialogOpen(true)}
                         >
                           <Plus className="h-3.5 w-3.5" />
@@ -714,7 +714,7 @@ function FinanzasPageContent() {
                         <Skeleton className="h-10" />
                       </div>
                     ) : !expenses || expenses.length === 0 ? (
-                      <p className="text-sm text-muted-foreground text-center py-4">
+                      <p className="text-subheadline text-muted-foreground text-center py-4">
                         Sin gastos en este período
                       </p>
                     ) : (
@@ -724,17 +724,17 @@ function FinanzasPageContent() {
                             key={expense.id}
                             className="flex items-center gap-3 rounded-xl material-well px-4 py-2.5 transition-colors hover:bg-[var(--material-thin)]"
                           >
-                            <span className="text-xs text-muted-foreground w-20 shrink-0">
+                            <span className="text-caption text-muted-foreground w-20 shrink-0">
                               {formatDisplayDate(expense.date)}
                             </span>
-                            <Badge variant="outline" className="text-xs shrink-0">
+                            <Badge variant="outline" className="text-caption shrink-0">
                               <span
                                 className="h-1.5 w-1.5 rounded-full shrink-0"
                                 style={{ backgroundColor: categoryChartColor[expense.category] }}
                               />
                               {categoryLabels[expense.category]}
                             </Badge>
-                            <span className="flex-1 text-sm text-muted-foreground truncate">
+                            <span className="flex-1 text-subheadline text-muted-foreground truncate">
                               {expense.description ?? "—"}
                             </span>
                             <span className="text-callout numeric vibrant font-medium">
@@ -770,7 +770,7 @@ function FinanzasPageContent() {
                             >
                               <ChevronLeft className="h-4 w-4" />
                             </Button>
-                            <span className="text-xs text-muted-foreground">
+                            <span className="text-caption text-muted-foreground">
                               {expensePage} / {expenseTotalPages}
                             </span>
                             <Button
@@ -795,12 +795,12 @@ function FinanzasPageContent() {
                 <Card id="gastos-recurring-card">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-3">
-                      <p className="text-sm font-medium">Gastos fijos mensuales</p>
+                      <p className="text-subheadline font-medium">Gastos fijos mensuales</p>
                       <Button
                         id="gastos-add-recurring-button"
                         size="sm"
                         variant="outline"
-                        className="h-8 gap-1.5 text-xs"
+                        className="h-8 gap-1.5 text-caption"
                         onClick={() => setRecurringDialogOpen(true)}
                       >
                         <Plus className="h-3.5 w-3.5" />
@@ -814,7 +814,7 @@ function FinanzasPageContent() {
                         <Skeleton className="h-16" />
                       </div>
                     ) : !recurringExpenses || recurringExpenses.length === 0 ? (
-                      <p className="text-sm text-muted-foreground text-center py-4">
+                      <p className="text-subheadline text-muted-foreground text-center py-4">
                         No hay gastos fijos configurados
                       </p>
                     ) : (
@@ -844,31 +844,31 @@ function FinanzasPageContent() {
                             >
                               <div className="min-w-0">
                                 <div className="flex items-center gap-2 flex-wrap">
-                                  <span className="text-sm font-medium truncate">
+                                  <span className="text-subheadline font-medium truncate">
                                     {template.description}
                                   </span>
-                                  <Badge variant="outline" className="text-xs shrink-0">
+                                  <Badge variant="outline" className="text-caption shrink-0">
                                     <span
                                       className="h-1.5 w-1.5 rounded-full shrink-0"
                                       style={{ backgroundColor: categoryChartColor[template.category] }}
                                     />
                                     {categoryLabels[template.category]}
                                   </Badge>
-                                  <Badge variant="outline" className="text-xs shrink-0">
+                                  <Badge variant="outline" className="text-caption shrink-0">
                                     {frequencyLabels[template.frequency]}
                                   </Badge>
                                   <Badge
                                     variant={isActive ? "default" : "secondary"}
-                                    className="text-xs shrink-0"
+                                    className="text-caption shrink-0"
                                   >
                                     {isActive ? "Activo" : `Cerrado el ${formatDisplayDate(template.end_date!)}`}
                                   </Badge>
                                 </div>
-                                <p className="text-xs text-muted-foreground mt-0.5">
+                                <p className="text-caption text-muted-foreground mt-0.5">
                                   Desde {formatDisplayDate(template.start_date)}
                                 </p>
                                 {progress && (
-                                  <p className="text-xs text-muted-foreground mt-0.5">
+                                  <p className="text-caption text-muted-foreground mt-0.5">
                                     {progress.loaded} de {progress.expected} pagos cargados este mes
                                   </p>
                                 )}
@@ -884,7 +884,7 @@ function FinanzasPageContent() {
                                   <Button
                                     size="sm"
                                     variant="outline"
-                                    className="h-8 gap-1.5 text-xs"
+                                    className="h-8 gap-1.5 text-caption"
                                     onClick={() => handleQuickLogPayment(template)}
                                   >
                                     <Plus className="h-3.5 w-3.5" />
@@ -895,7 +895,7 @@ function FinanzasPageContent() {
                                   <Button
                                     size="sm"
                                     variant="outline"
-                                    className="h-8 gap-1.5 text-xs"
+                                    className="h-8 gap-1.5 text-caption"
                                     onClick={() => openUpdateDialog(template)}
                                   >
                                     <RefreshCcw className="h-3.5 w-3.5" />
@@ -1054,7 +1054,7 @@ function FinanzasPageContent() {
                     </SelectContent>
                   </Select>
                   {!selectedExpenseSupply && (
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-caption text-muted-foreground">
                       Si vinculás un insumo, el gasto también suma su stock. El costo por unidad no
                       se toca acá — eso se edita desde Insumos.
                     </p>
@@ -1063,7 +1063,7 @@ function FinanzasPageContent() {
 
                 {selectedExpenseSupply && (
                   <div className="space-y-1.5 rounded-xl border p-3">
-                    <Label className="text-xs">Cantidad comprada</Label>
+                    <Label className="text-caption">Cantidad comprada</Label>
                     <SupplyQuantityInput
                       supply={selectedExpenseSupply}
                       value={expenseSupplyQuantity}
@@ -1072,12 +1072,12 @@ function FinanzasPageContent() {
                       onModeChange={setExpenseSupplyMode}
                     />
                     {resolvedExpenseSupplyQuantity !== null ? (
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-caption text-muted-foreground">
                         Se suma al stock actual ({selectedExpenseSupply.stock_quantity}{" "}
                         {selectedExpenseSupply.unit})
                       </p>
                     ) : (
-                      <p className="text-xs" style={{ color: "var(--status-canceled)" }}>
+                      <p className="text-caption" style={{ color: "var(--status-canceled)" }}>
                         Completá la cantidad para sumarla al stock — si la dejás así, el gasto se
                         guarda sin tocar el stock.
                       </p>
@@ -1196,7 +1196,7 @@ function FinanzasPageContent() {
                 />
               </div>
             ) : (
-              <p className="text-xs text-muted-foreground">
+              <p className="text-caption text-muted-foreground">
                 El monto se carga cada {recurringPeriodNoun[recurringFrequency]} en &quot;Del
                 período&quot;, ya que puede variar.
               </p>
@@ -1219,7 +1219,7 @@ function FinanzasPageContent() {
                   </SelectContent>
                 </Select>
                 {recurringPaydayPreview && (
-                  <p className="text-xs text-muted-foreground">{recurringPaydayPreview}</p>
+                  <p className="text-caption text-muted-foreground">{recurringPaydayPreview}</p>
                 )}
               </div>
             )}
@@ -1304,7 +1304,7 @@ function FinanzasPageContent() {
                 />
               </div>
             ) : (
-              <p className="text-xs text-muted-foreground">
+              <p className="text-caption text-muted-foreground">
                 El monto se carga cada {recurringPeriodNoun[updateFrequency]} en &quot;Del
                 período&quot;, ya que puede variar.
               </p>
@@ -1327,7 +1327,7 @@ function FinanzasPageContent() {
                   </SelectContent>
                 </Select>
                 {updatePaydayPreview && (
-                  <p className="text-xs text-muted-foreground">{updatePaydayPreview}</p>
+                  <p className="text-caption text-muted-foreground">{updatePaydayPreview}</p>
                 )}
               </div>
             )}
@@ -1353,7 +1353,7 @@ function FinanzasPageContent() {
                 </PopoverContent>
               </Popover>
               {updatingTemplate && (
-                <p className="text-xs text-muted-foreground">
+                <p className="text-caption text-muted-foreground">
                   El gasto anterior se cerrará el {formatDisplayDate(dayBeforeStr(updateStartDate))}.
                 </p>
               )}

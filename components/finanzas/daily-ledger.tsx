@@ -116,7 +116,7 @@ export function DailyLedger({
             dayGroups.length > 0 && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button size="sm" variant="outline" className="h-8 gap-1.5 text-xs">
+                  <Button size="sm" variant="outline" className="h-8 gap-1.5 text-caption">
                     <Download className="h-3.5 w-3.5" />
                     Exportar
                   </Button>
@@ -133,7 +133,7 @@ export function DailyLedger({
         </CardHeading>
 
         {dayGroups.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-4">
+          <p className="text-subheadline text-muted-foreground text-center py-4">
             Sin movimientos en este período
           </p>
         ) : (
@@ -159,7 +159,7 @@ export function DailyLedger({
                         <span className="flex items-center gap-1.5">
                           {entry.concept}
                           {entry.isProrated && (
-                            <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4">
+                            <Badge variant="outline" className="text-caption2 px-1.5 py-0 h-4">
                               prorrateo
                             </Badge>
                           )}
@@ -214,7 +214,7 @@ export function DailyLedger({
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
-                <span className="text-xs text-muted-foreground">
+                <span className="text-caption text-muted-foreground">
                   {currentPage} / {totalPages}
                 </span>
                 <Button

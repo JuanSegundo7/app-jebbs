@@ -67,7 +67,7 @@ export function ExpensesByCategoryChart({ data, isLoading }: ExpensesByCategoryC
         </CardHeading>
 
         {chartData.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-4">
+          <p className="text-subheadline text-muted-foreground text-center py-4">
             Sin gastos en este período
           </p>
         ) : (
@@ -95,7 +95,7 @@ export function ExpensesByCategoryChart({ data, isLoading }: ExpensesByCategoryC
                   if (!active || !payload?.length) return null;
                   const row = payload[0].payload as (typeof chartData)[number];
                   return (
-                    <div className="rounded-lg border bg-background px-3 py-2 shadow-md text-sm min-w-[140px]">
+                    <div className="rounded-lg border bg-background px-3 py-2 shadow-md text-subheadline min-w-[140px]">
                       <div className="flex items-center gap-2">
                         <span
                           className="h-2.5 w-2.5 rounded-full shrink-0"
@@ -117,7 +117,7 @@ export function ExpensesByCategoryChart({ data, isLoading }: ExpensesByCategoryC
                 <LabelList
                   dataKey="amount"
                   position="right"
-                  className="fill-foreground text-xs font-medium tabular-nums"
+                  className="fill-foreground text-caption font-medium tabular-nums"
                   formatter={(value: number) => formatCurrency(value)}
                 />
               </Bar>

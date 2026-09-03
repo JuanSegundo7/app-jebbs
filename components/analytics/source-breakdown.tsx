@@ -23,7 +23,7 @@ function ChangeIndicator({ change }: { change: number }) {
   const isPositive = change >= 0;
   return (
     <div
-      className={`flex items-center gap-0.5 text-xs ${
+      className={`flex items-center gap-0.5 text-caption ${
         isPositive ? "text-[var(--status-paid)]" : "text-[var(--status-canceled)]"
       }`}
     >
@@ -59,7 +59,7 @@ export function SourceBreakdownCard({
           <CardHeading icon={Store} iconColor="var(--color-chart-2)">
             Ingresos por origen
           </CardHeading>
-          <p className="text-sm text-muted-foreground text-center py-6">
+          <p className="text-subheadline text-muted-foreground text-center py-6">
             Sin ingresos para el período seleccionado
           </p>
         </CardContent>
@@ -80,7 +80,7 @@ export function SourceBreakdownCard({
         <CardHeading
           icon={Store}
           iconColor="var(--color-chart-2)"
-          action={<span className="text-sm font-bold tabular-nums">{formatCurrency(total)}</span>}
+          action={<span className="text-subheadline font-bold tabular-nums">{formatCurrency(total)}</span>}
         >
           Ingresos por origen
         </CardHeading>
@@ -118,21 +118,21 @@ export function SourceBreakdownCard({
                       border: `1.5px solid ${row.color}`,
                     }}
                   />
-                  <span className="text-sm text-muted-foreground truncate">
+                  <span className="text-subheadline text-muted-foreground truncate">
                     {row.emoji} {row.label}
                   </span>
                   {data.orders > 0 && (
-                    <span className="text-xs text-muted-foreground shrink-0">
+                    <span className="text-caption text-muted-foreground shrink-0">
                       ({data.orders})
                     </span>
                   )}
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   {showChange && <ChangeIndicator change={data.change} />}
-                  <span className="text-xs text-muted-foreground w-10 text-right tabular-nums">
+                  <span className="text-caption text-muted-foreground w-10 text-right tabular-nums">
                     {pctValue.toFixed(0)}%
                   </span>
-                  <span className="text-sm font-semibold tabular-nums w-24 text-right">
+                  <span className="text-subheadline font-semibold tabular-nums w-24 text-right">
                     {formatCurrency(amount)}
                   </span>
                 </div>
@@ -142,7 +142,7 @@ export function SourceBreakdownCard({
         </div>
 
         {breakdown.pedidosya.commission > 0 && (
-          <p className="mt-3 pt-3 border-t text-xs text-muted-foreground">
+          <p className="mt-3 pt-3 border-t text-caption text-muted-foreground">
             Comisión PedidosYa del período:{" "}
             <span className="font-medium text-foreground">
               {formatCurrency(breakdown.pedidosya.commission)}

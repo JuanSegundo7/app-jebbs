@@ -57,14 +57,14 @@ export function DailyIncomeVsExpensesChart({
             // Legend — colors are the income/expense polarity pair, not the
             // categorical palette (matches NetRevenueCard/DailyLedger).
             <div className="flex items-center gap-3">
-              <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1.5 text-caption text-muted-foreground">
                 <span
                   className="h-2.5 w-2.5 rounded-full"
                   style={{ background: "var(--status-paid)" }}
                 />
                 Ingresos
               </span>
-              <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1.5 text-caption text-muted-foreground">
                 <span
                   className="h-2.5 w-2.5 rounded-full"
                   style={{ background: "var(--status-canceled)" }}
@@ -78,7 +78,7 @@ export function DailyIncomeVsExpensesChart({
         </CardHeading>
 
         {!hasMovement ? (
-          <p className="text-sm text-muted-foreground text-center py-4">
+          <p className="text-subheadline text-muted-foreground text-center py-4">
             Sin movimientos en este período
           </p>
         ) : (
@@ -101,7 +101,7 @@ export function DailyIncomeVsExpensesChart({
                   if (!active || !payload?.length) return null;
                   const row = payload[0].payload as DailyIncomeVsExpenseRow;
                   return (
-                    <div className="rounded-lg border bg-background px-3 py-2 shadow-md text-sm min-w-[160px]">
+                    <div className="rounded-lg border bg-background px-3 py-2 shadow-md text-subheadline min-w-[160px]">
                       <p className="font-medium mb-2">{formatAxisDate(row.date)}</p>
                       <div className="flex items-center gap-2 mb-1">
                         <span
