@@ -687,12 +687,12 @@ function FinanzasPageContent() {
 
               {/* ─── Del período (period selector lives at page level now) ─── */}
               <TabsContent value="period" className="mt-3">
-                <Card id="gastos-period-card" className="ios-glass bg-card">
+                <Card id="gastos-period-card">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-3">
                       <p className="text-sm font-medium">Gastos puntuales cargados</p>
                       <div className="flex items-center gap-3">
-                        <span className="text-sm font-bold tabular-nums">
+                        <span className="text-callout numeric vibrant">
                           {formatCurrency(oneOffExpensesTotal)}
                         </span>
                         <Button
@@ -722,12 +722,12 @@ function FinanzasPageContent() {
                         {paginatedExpenses.map((expense) => (
                           <div
                             key={expense.id}
-                            className="flex items-center gap-3 rounded-xl bg-muted/40 px-4 py-2.5 transition-colors hover:bg-white/[0.035]"
+                            className="flex items-center gap-3 rounded-xl material-well px-4 py-2.5 transition-colors hover:bg-[var(--material-thin)]"
                           >
                             <span className="text-xs text-muted-foreground w-20 shrink-0">
                               {formatDisplayDate(expense.date)}
                             </span>
-                            <Badge variant="outline" className="text-xs bg-card shrink-0">
+                            <Badge variant="outline" className="text-xs shrink-0">
                               <span
                                 className="h-1.5 w-1.5 rounded-full shrink-0"
                                 style={{ backgroundColor: categoryChartColor[expense.category] }}
@@ -737,7 +737,7 @@ function FinanzasPageContent() {
                             <span className="flex-1 text-sm text-muted-foreground truncate">
                               {expense.description ?? "—"}
                             </span>
-                            <span className="text-sm font-semibold tabular-nums">
+                            <span className="text-callout numeric vibrant">
                               {formatCurrency(expense.amount)}
                             </span>
                             <Button
@@ -792,7 +792,7 @@ function FinanzasPageContent() {
 
               {/* ─── Fijos mensuales ─── */}
               <TabsContent value="recurring" className="mt-3">
-                <Card id="gastos-recurring-card" className="ios-glass bg-card">
+                <Card id="gastos-recurring-card">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-3">
                       <p className="text-sm font-medium">Gastos fijos mensuales</p>
@@ -840,21 +840,21 @@ function FinanzasPageContent() {
                           return (
                             <div
                               key={template.id}
-                              className="flex flex-col gap-2 rounded-xl bg-muted/40 px-4 py-3 sm:flex-row sm:items-center sm:justify-between transition-colors hover:bg-white/[0.035]"
+                              className="flex flex-col gap-2 rounded-xl material-well px-4 py-3 sm:flex-row sm:items-center sm:justify-between transition-colors hover:bg-[var(--material-thin)]"
                             >
                               <div className="min-w-0">
                                 <div className="flex items-center gap-2 flex-wrap">
                                   <span className="text-sm font-medium truncate">
                                     {template.description}
                                   </span>
-                                  <Badge variant="outline" className="text-xs bg-card shrink-0">
+                                  <Badge variant="outline" className="text-xs shrink-0">
                                     <span
                                       className="h-1.5 w-1.5 rounded-full shrink-0"
                                       style={{ backgroundColor: categoryChartColor[template.category] }}
                                     />
                                     {categoryLabels[template.category]}
                                   </Badge>
-                                  <Badge variant="outline" className="text-xs bg-card shrink-0">
+                                  <Badge variant="outline" className="text-xs shrink-0">
                                     {frequencyLabels[template.frequency]}
                                   </Badge>
                                   <Badge
@@ -875,7 +875,7 @@ function FinanzasPageContent() {
                               </div>
 
                               <div className="flex items-center gap-3 shrink-0">
-                                <span className="text-sm font-semibold tabular-nums">
+                                <span className="text-callout numeric vibrant">
                                   {template.amount != null
                                     ? `${formatCurrency(template.amount)}${frequencySuffix[template.frequency]}`
                                     : paydayPreviewText(template.start_date, template.frequency, todayArStr())}

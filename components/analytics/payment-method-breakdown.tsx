@@ -44,7 +44,7 @@ export function PaymentMethodBreakdown({
 }: PaymentMethodBreakdownProps) {
   if (isLoading) {
     return (
-      <Card className="ios-glass p-0 bg-card">
+      <Card className="p-0">
         <CardContent className="p-4">
           <Skeleton className="h-40" />
         </CardContent>
@@ -54,7 +54,7 @@ export function PaymentMethodBreakdown({
 
   if (!breakdown || breakdown.total === 0) {
     return (
-      <Card className="ios-glass p-0 bg-card">
+      <Card className="p-0">
         <CardContent className="p-4">
           <CardHeading icon={Wallet} iconColor="var(--color-chart-2)">
             Ingresos por método de pago
@@ -75,7 +75,7 @@ export function PaymentMethodBreakdown({
   };
 
   return (
-    <Card className="ios-glass p-0 bg-card">
+    <Card className="p-0">
       <CardContent className="p-4">
         <CardHeading
           icon={Wallet}

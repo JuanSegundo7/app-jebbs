@@ -37,7 +37,7 @@ const chartConfig: ChartConfig = {
 export function MarginByBurgerChart({ rows, isLoading }: MarginByBurgerChartProps) {
   if (isLoading) {
     return (
-      <Card id="costos-margin-chart" className="ios-glass p-0 bg-card">
+      <Card id="costos-margin-chart" className="p-0">
         <CardContent className="p-4">
           <Skeleton className="h-40" />
         </CardContent>
@@ -48,7 +48,7 @@ export function MarginByBurgerChart({ rows, isLoading }: MarginByBurgerChartProp
   const chartData = [...rows].sort((a, b) => b.marginPct - a.marginPct);
 
   return (
-    <Card id="costos-margin-chart" className="ios-glass p-0 bg-card">
+    <Card id="costos-margin-chart" className="p-0">
       <CardContent className="p-4">
         <CardHeading icon={TrendingUp} iconColor="var(--color-chart-3)">
           Margen por hamburguesa

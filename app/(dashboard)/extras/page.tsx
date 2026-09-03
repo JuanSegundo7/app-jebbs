@@ -215,7 +215,7 @@ export default function ExtrasPage() {
                       {formatCurrency(extra.price)}
                     </span>
 
-                    <Badge variant="outline" className="text-xs bg-card">
+                    <Badge variant="outline" className="text-xs">
                       {extra.is_available ? "Activo" : "Inactivo"}
                     </Badge>
 

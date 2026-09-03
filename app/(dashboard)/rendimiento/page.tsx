@@ -238,7 +238,7 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Product stats */}
-        <Card className="mt-4 ios-glass bg-card">
+        <Card className="mt-4">
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2">
               <UtensilsCrossed className="h-5 w-5 text-muted-foreground" />
@@ -278,7 +278,7 @@ export default function AnalyticsPage() {
 
         {/* Charts */}
         <div className="mt-6 grid gap-6 lg:grid-cols-2">
-          <Card className="ios-glass bg-card">
+          <Card>
             <CardHeader>
               <CardTitle>Pedidos por día</CardTitle>
             </CardHeader>
@@ -336,7 +336,7 @@ export default function AnalyticsPage() {
             </CardContent>
           </Card>
 
-          <Card className="ios-glass bg-card">
+          <Card>
             <CardHeader>
               <CardTitle>Ingresos por día</CardTitle>
             </CardHeader>
@@ -400,7 +400,7 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Top Burgers Podium */}
-        <Card className="mt-6 ios-glass bg-card overflow-hidden">
+        <Card className="mt-6 overflow-hidden">
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2">
@@ -576,7 +576,7 @@ export default function AnalyticsPage() {
         </Card>
 
         {/* Monthly comparison */}
-        <Card className="mt-6 ios-glass bg-card">
+        <Card className="mt-6">
           <CardHeader>
             <CardTitle>Comparativa últimos 3 meses</CardTitle>
           </CardHeader>

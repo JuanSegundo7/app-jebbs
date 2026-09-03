@@ -37,7 +37,7 @@ export function DailyIncomeVsExpensesChart({
 }: DailyIncomeVsExpensesChartProps) {
   if (isLoading) {
     return (
-      <Card className="ios-glass p-0 bg-card">
+      <Card className="p-0">
         <CardContent className="p-4">
           <Skeleton className="h-64" />
         </CardContent>
@@ -48,7 +48,7 @@ export function DailyIncomeVsExpensesChart({
   const hasMovement = dailyData.some((row) => row.income > 0 || row.expense > 0);
 
   return (
-    <Card className="ios-glass p-0 bg-card">
+    <Card className="p-0">
       <CardContent className="p-4">
         <CardHeading
           icon={ArrowLeftRight}

@@ -41,14 +41,9 @@ export function GastosSummaryRow({
     value: string;
     valueColor?: string;
     label: string;
+    emphasis?: "normal" | "hero";
+    className?: string;
   }[] = [
-    {
-      key: "expenses",
-      icon: Receipt,
-      chipColor: "var(--status-canceled)",
-      value: formatCurrency(expensesTotal),
-      label: "Gastos del período",
-    },
     {
       key: "net",
       icon: Wallet,
@@ -56,6 +51,15 @@ export function GastosSummaryRow({
       value: formatCurrency(netRevenue),
       valueColor: isNetPositive ? "var(--status-paid)" : "var(--status-canceled)",
       label: "Ingreso neto",
+      emphasis: "hero",
+      className: "col-span-2",
+    },
+    {
+      key: "expenses",
+      icon: Receipt,
+      chipColor: "var(--status-canceled)",
+      value: formatCurrency(expensesTotal),
+      label: "Gastos del período",
     },
     {
       key: "top-category",
@@ -78,7 +82,7 @@ export function GastosSummaryRow({
   ];
 
   return (
-    <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-3 grid-cols-2 lg:grid-cols-5">
       {tiles.map((tile) => (
         <StatTile
           key={tile.key}
@@ -88,6 +92,8 @@ export function GastosSummaryRow({
           valueColor={tile.valueColor}
           label={tile.label}
           loading={isLoading}
+          emphasis={tile.emphasis}
+          className={tile.className}
         />
       ))}
     </div>

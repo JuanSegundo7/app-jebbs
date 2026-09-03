@@ -367,7 +367,7 @@ export default function MenuPage() {
                         </Badge>
                       ))}
                       {burger.ingredients.length > 3 && (
-                        <Badge variant="outline" className="text-xs bg-card">
+                        <Badge variant="outline" className="text-xs">
                           +{burger.ingredients.length - 3}
                         </Badge>
                       )}

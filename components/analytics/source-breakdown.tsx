@@ -44,7 +44,7 @@ export function SourceBreakdownCard({
 }: SourceBreakdownCardProps) {
   if (isLoading) {
     return (
-      <Card className="ios-glass p-0 bg-card">
+      <Card className="p-0">
         <CardContent className="p-4">
           <Skeleton className="h-40" />
         </CardContent>
@@ -54,7 +54,7 @@ export function SourceBreakdownCard({
 
   if (!breakdown || breakdown.total === 0) {
     return (
-      <Card className="ios-glass p-0 bg-card">
+      <Card className="p-0">
         <CardContent className="p-4">
           <CardHeading icon={Store} iconColor="var(--color-chart-2)">
             Ingresos por origen
@@ -75,7 +75,7 @@ export function SourceBreakdownCard({
   };
 
   return (
-    <Card className="ios-glass p-0 bg-card">
+    <Card className="p-0">
       <CardContent className="p-4">
         <CardHeading
           icon={Store}

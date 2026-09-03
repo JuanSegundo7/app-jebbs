@@ -96,7 +96,7 @@ export function DailyLedger({
 
   if (isLoading) {
     return (
-      <Card className="mt-6 ios-glass bg-card">
+      <Card className="mt-6">
         <CardContent className="p-4">
           <Skeleton className="h-64" />
         </CardContent>
@@ -107,7 +107,7 @@ export function DailyLedger({
   const isPositive = closingBalance >= 0;
 
   return (
-    <Card className="mt-6 ios-glass p-0 bg-card">
+    <Card className="mt-6 p-0">
       <CardContent className="p-4">
         <CardHeading
           icon={BookOpen}
@@ -193,10 +193,10 @@ export function DailyLedger({
 
             {/* Closing balance — sourced from the `closingBalance` prop
                 (netRevenue), never re-summed from `entries` client-side. */}
-            <div className="flex items-center justify-between rounded-xl bg-muted/40 px-4 py-3 border-t">
-              <span className="text-sm font-medium">Saldo del período</span>
+            <div className="flex items-center justify-between rounded-xl material-well px-4 py-3 border-t">
+              <span className="text-callout font-medium">Saldo del período</span>
               <span
-                className="text-base font-bold tabular-nums"
+                className="text-amount numeric"
                 style={{ color: isPositive ? "var(--status-paid)" : "var(--status-canceled)" }}
               >
                 {formatCurrency(closingBalance)}

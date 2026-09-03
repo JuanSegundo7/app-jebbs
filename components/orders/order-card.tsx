@@ -291,7 +291,7 @@ export function OrderCard({
           <div className="w-full flex items-center justify-between">
             <div className="flex items-center gap-2">
               {order.payment_method === "cash" && (
-                <Badge variant="outline" className="text-xs gap-1 bg-card">
+                <Badge variant="outline" className="text-xs gap-1">
                   💵 Efectivo
                 </Badge>
               )}

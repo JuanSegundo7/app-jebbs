@@ -33,7 +33,7 @@ const MIN_HEIGHT = 140;
 export function ExpensesByCategoryChart({ data, isLoading }: ExpensesByCategoryChartProps) {
   if (isLoading) {
     return (
-      <Card className="ios-glass p-0 bg-card">
+      <Card className="p-0">
         <CardContent className="p-4">
           <Skeleton className="h-64" />
         </CardContent>
@@ -60,7 +60,7 @@ export function ExpensesByCategoryChart({ data, isLoading }: ExpensesByCategoryC
   );
 
   return (
-    <Card className="ios-glass p-0 bg-card">
+    <Card className="p-0">
       <CardContent className="p-4">
         <CardHeading icon={Tags} iconColor="var(--color-chart-1)">
           Gasto por categoría

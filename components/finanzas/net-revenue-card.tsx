@@ -23,7 +23,7 @@ export function NetRevenueCard({
 }: NetRevenueCardProps) {
   if (isLoading) {
     return (
-      <Card className="ios-glass p-0 bg-card">
+      <Card className="p-0">
         <CardContent className="p-4">
           <Skeleton className="h-24" />
         </CardContent>
@@ -34,7 +34,7 @@ export function NetRevenueCard({
   const isPositive = netRevenue >= 0;
 
   return (
-    <Card className="ios-glass p-0 bg-card">
+    <Card className="p-0">
       <CardContent className="p-4">
         <CardHeading icon={Wallet} iconColor="var(--color-chart-2)">
           Ingreso neto
@@ -42,29 +42,29 @@ export function NetRevenueCard({
 
         <div className="space-y-2.5">
           <div className="flex items-center justify-between gap-3">
-            <span className="text-sm text-muted-foreground">Ingresos brutos</span>
-            <span className="text-sm font-semibold tabular-nums">
+            <span className="text-callout text-muted-foreground">Ingresos brutos</span>
+            <span className="text-callout numeric vibrant">
               {formatCurrency(grossRevenue)}
             </span>
           </div>
           <div className="flex items-center justify-between gap-3">
-            <span className="text-sm text-muted-foreground">Gastos del período</span>
-            <span className="text-sm font-semibold tabular-nums text-[var(--status-canceled)]">
+            <span className="text-callout text-muted-foreground">Gastos del período</span>
+            <span className="text-callout numeric vibrant text-[var(--status-canceled)]">
               −{formatCurrency(expensesTotal)}
             </span>
           </div>
           {commissionTotal > 0 && (
             <div className="flex items-center justify-between gap-3">
-              <span className="text-sm text-muted-foreground">Comisión PedidosYa</span>
-              <span className="text-sm font-semibold tabular-nums text-[var(--status-canceled)]">
+              <span className="text-callout text-muted-foreground">Comisión PedidosYa</span>
+              <span className="text-callout numeric vibrant text-[var(--status-canceled)]">
                 −{formatCurrency(commissionTotal)}
               </span>
             </div>
           )}
           <div className="flex items-center justify-between gap-3 border-t pt-2.5">
-            <span className="text-sm font-medium">Neto</span>
+            <span className="text-callout font-medium">Neto</span>
             <span
-              className="text-base font-bold tabular-nums"
+              className="text-amount numeric"
               style={{
                 color: isPositive ? "var(--status-paid)" : "var(--status-canceled)",
               }}

@@ -268,7 +268,7 @@ export function SuppliesTab() {
 
   return (
     <>
-      <Card id="costos-supplies-card" className="ios-glass bg-card">
+      <Card id="costos-supplies-card">
         <CardContent className="p-4">
           <div className="flex items-center justify-between mb-3">
             <p className="text-sm font-medium">Catálogo de insumos</p>
