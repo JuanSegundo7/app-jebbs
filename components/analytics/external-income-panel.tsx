@@ -89,7 +89,7 @@ export function ExternalIncomePanel({ startDate, endDate }: ExternalIncomePanelP
       <Card>
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2 text-base">
+            <CardTitle className="flex items-center gap-2">
               <ExternalLink className="h-4 w-4 text-muted-foreground" />
               Ingresos externos
             </CardTitle>
