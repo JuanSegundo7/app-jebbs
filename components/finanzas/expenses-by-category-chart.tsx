@@ -110,7 +110,7 @@ export function ExpensesByCategoryChart({ data, isLoading }: ExpensesByCategoryC
                   );
                 }}
               />
-              <Bar dataKey="amount" radius={[0, 4, 4, 0]} barSize={22}>
+              <Bar dataKey="amount" radius={[0, 4, 4, 0]} barSize={22} isAnimationActive={false}>
                 {chartData.map((row) => (
                   <Cell key={row.category} fill={categoryChartColor[row.category]} />
                 ))}

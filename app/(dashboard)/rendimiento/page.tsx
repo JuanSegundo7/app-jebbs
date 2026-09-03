@@ -329,6 +329,7 @@ export default function AnalyticsPage() {
                       fill="var(--color-chart-1)"
                       fillOpacity={0.18}
                       strokeWidth={2}
+                      isAnimationActive={false}
                     />
                   </AreaChart>
                 </ChartContainer>
@@ -391,6 +392,7 @@ export default function AnalyticsPage() {
                       fill="var(--color-chart-2)"
                       fillOpacity={0.18}
                       strokeWidth={2}
+                      isAnimationActive={false}
                     />
                   </AreaChart>
                 </ChartContainer>
@@ -615,12 +617,14 @@ export default function AnalyticsPage() {
                     dataKey="orders"
                     fill="var(--color-chart-1)"
                     radius={[4, 4, 0, 0]}
+                    isAnimationActive={false}
                   />
                   <Bar
                     yAxisId="right"
                     dataKey="revenue"
                     fill="var(--color-chart-2)"
                     radius={[4, 4, 0, 0]}
+                    isAnimationActive={false}
                   />
                 </BarChart>
               </ChartContainer>

@@ -133,6 +133,7 @@ export function DailyIncomeVsExpensesChart({
                 fill="var(--status-paid)"
                 fillOpacity={0.18}
                 strokeWidth={2}
+                isAnimationActive={false}
               />
               <Area
                 dataKey="expense"
@@ -140,6 +141,7 @@ export function DailyIncomeVsExpensesChart({
                 fill="var(--status-canceled)"
                 fillOpacity={0.18}
                 strokeWidth={2}
+                isAnimationActive={false}
               />
             </AreaChart>
           </ChartContainer>

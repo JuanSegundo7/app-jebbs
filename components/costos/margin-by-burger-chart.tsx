@@ -113,7 +113,7 @@ export function MarginByBurgerChart({ rows, isLoading }: MarginByBurgerChartProp
                   );
                 }}
               />
-              <Bar dataKey="marginPct" radius={[0, 4, 4, 0]} barSize={22}>
+              <Bar dataKey="marginPct" radius={[0, 4, 4, 0]} barSize={22} isAnimationActive={false}>
                 {chartData.map((row) => (
                   <Cell
                     key={row.id}
