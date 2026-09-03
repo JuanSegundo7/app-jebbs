@@ -4,11 +4,26 @@ import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
+import type { Variants } from "framer-motion";
+
 import { Card, CardContent } from "@/components/ui/card";
 import { IconChip } from "@/components/ui/icon-chip";
 import { Skeleton } from "@/components/ui/skeleton";
-import { materialize, useSpring } from "@/lib/motion";
+import { useSpring } from "@/lib/motion";
 import { cn } from "@/lib/utils";
+
+// NO usa `materialize` (blur+escala) a propósito: ese variant es para
+// vidrio que condensa en momentos raros (§12). Este tile recarga cada vez
+// que cambiás de período en /finanzas — con react-query armando una
+// queryKey nueva por fecha, eso es "isLoading" en cada click de
+// Anterior/Siguiente, no una vez. Animar blur() en ~4 tiles a la vez, ahí,
+// se sentía como lag real (medido: el usuario lo reportó tras este cambio).
+// Solo opacity — barato, sin forzar compositing nuevo por tile.
+const tileFade: Variants = {
+  initial: { opacity: 0 },
+  animate: { opacity: 1 },
+  exit: { opacity: 0 },
+};
 
 interface StatTileProps {
   icon: LucideIcon;
@@ -47,7 +62,7 @@ export function StatTile({
           {loading ? (
             <motion.div
               key="skeleton"
-              variants={materialize}
+              variants={tileFade}
               initial="initial"
               animate="animate"
               exit="exit"
@@ -60,7 +75,7 @@ export function StatTile({
           ) : (
             <motion.div
               key="content"
-              variants={materialize}
+              variants={tileFade}
               initial="initial"
               animate="animate"
               exit="exit"
