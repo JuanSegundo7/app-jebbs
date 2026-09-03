@@ -722,7 +722,7 @@ function FinanzasPageContent() {
                         {paginatedExpenses.map((expense) => (
                           <div
                             key={expense.id}
-                            className="flex items-center gap-3 rounded-xl bg-muted/40 px-4 py-2.5"
+                            className="flex items-center gap-3 rounded-xl bg-muted/40 px-4 py-2.5 transition-colors hover:bg-white/[0.035]"
                           >
                             <span className="text-xs text-muted-foreground w-20 shrink-0">
                               {formatDisplayDate(expense.date)}
@@ -840,7 +840,7 @@ function FinanzasPageContent() {
                           return (
                             <div
                               key={template.id}
-                              className="flex flex-col gap-2 rounded-xl bg-muted/40 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+                              className="flex flex-col gap-2 rounded-xl bg-muted/40 px-4 py-3 sm:flex-row sm:items-center sm:justify-between transition-colors hover:bg-white/[0.035]"
                             >
                               <div className="min-w-0">
                                 <div className="flex items-center gap-2 flex-wrap">
@@ -1115,7 +1115,7 @@ function FinanzasPageContent() {
 
       {/* ─── Delete one-off expense confirm ─── */}
       <AlertDialog open={!!deletingExpense} onOpenChange={(open) => !open && setDeletingExpense(null)}>
-        <AlertDialogContent className="ios-glass rounded-2xl">
+        <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Eliminar gasto</AlertDialogTitle>
             <AlertDialogDescription>
@@ -1389,7 +1389,7 @@ function FinanzasPageContent() {
         open={!!deletingRecurring}
         onOpenChange={(open) => !open && setDeletingRecurring(null)}
       >
-        <AlertDialogContent className="ios-glass rounded-2xl">
+        <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Eliminar gasto fijo</AlertDialogTitle>
             <AlertDialogDescription>

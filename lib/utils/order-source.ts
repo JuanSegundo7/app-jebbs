@@ -13,6 +13,6 @@ export const orderSourceConfig: Record<
   },
   pedidosya: {
     label: "🛵 PedidosYa",
-    className: "bg-red-500 text-white",
+    className: "bg-[var(--status-canceled-tint)] text-[var(--status-canceled)]",
   },
 };

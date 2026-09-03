@@ -285,19 +285,19 @@ export default function OrdersHistoryPage() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Pedido</TableHead>
-                        <TableHead>Cliente</TableHead>
-                        <TableHead>Estado</TableHead>
-                        <TableHead>Total</TableHead>
-                        <TableHead>Fecha/Hora</TableHead>
-                        <TableHead className="text-right">Acciones</TableHead>
+                        <TableHead className="text-overline">Pedido</TableHead>
+                        <TableHead className="text-overline">Cliente</TableHead>
+                        <TableHead className="text-overline">Estado</TableHead>
+                        <TableHead className="text-overline">Total</TableHead>
+                        <TableHead className="text-overline">Fecha/Hora</TableHead>
+                        <TableHead className="text-overline text-right">Acciones</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {paginatedOrders.map((order) => {
                         const config = orderStatusConfig[order.status];
                         return (
-                          <TableRow key={order.id}>
+                          <TableRow key={order.id} className="hover:bg-white/[0.035]">
                             <TableCell className="font-mono font-medium">
                               <div className="flex items-center gap-2">
                                 <span>#{order.order_number}</span>
@@ -319,7 +319,7 @@ export default function OrdersHistoryPage() {
                                 {config.label}
                               </Badge>
                             </TableCell>
-                            <TableCell className="font-medium">
+                            <TableCell className="font-medium numeric">
                               {formatCurrency(order.total_amount)}
                             </TableCell>
                             <TableCell className="text-muted-foreground">

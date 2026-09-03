@@ -477,6 +477,48 @@
   letter-spacing: 0.006em;
 }
 
+/* El estado como luz, no como franja (Encanto §1). Requiere que el
+   consumidor setee --status-color / --status-tint (inline style, un
+   valor por tarjeta) antes de aplicar esta clase. */
+@utility status-edge {
+  position: relative;
+  overflow: hidden;
+  &::before {
+    content: "";
+    position: absolute;
+    inset-block: 0;
+    left: 0;
+    width: 3px;
+    background: var(--status-color);
+    box-shadow: 0 0 16px -2px var(--status-color);
+  }
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(130% 90% at 0% 0%, var(--status-tint), transparent 62%);
+  }
+}
+
+/* Mismo vocabulario de "luz en el canto" que status-edge, pero fijo al
+   acento de marca — para el item de nav activo (Slice 4). Una idea, tres
+   lugares (tarjetas de pedido, columna drop-target, riel de nav): eso es
+   lo que hace que se lea como sistema. */
+@utility nav-rail-active {
+  position: relative;
+  &::before {
+    content: "";
+    position: absolute;
+    inset-block: 4px;
+    left: -1px;
+    width: 2px;
+    border-radius: 2px;
+    background: var(--accent-brand);
+    box-shadow: 0 0 10px -1px var(--accent-brand);
+  }
+}
+
 /* Fallbacks de accesibilidad (§14) — sin capa, para ganar siempre
    por especificidad de aparición contra las utilities de arriba. */
 

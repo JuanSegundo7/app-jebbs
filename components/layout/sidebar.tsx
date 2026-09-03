@@ -28,17 +28,6 @@ import {
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
-import { Pacifico, Baloo_2 } from "next/font/google";
-
-const baloo = Baloo_2({
-  subsets: ["latin"],
-  weight: ["600", "700"],
-});
-
-const pacifico = Pacifico({
-  subsets: ["latin"],
-  weight: "400",
-});
 
 const navigation = [
   { name: "Pedidos", href: "/", icon: LayoutDashboard },
@@ -81,10 +70,13 @@ export function AppSidebar() {
               "group-data-[collapsible=icon]:max-w-0 group-data-[collapsible=icon]:opacity-0",
             )}
           >
-            <span className={cn(baloo.className, "text-base font-bold tracking-wide whitespace-nowrap")}>
+            <span className="text-base font-bold tracking-[-0.02em] whitespace-nowrap">
               Jebbs
             </span>
-            <span className={cn(pacifico.className, "text-sm text-(--color-jebbs) -mt-1 whitespace-nowrap")}>
+            <span
+              className="font-brand text-sm text-(--color-jebbs) -mt-1 whitespace-nowrap"
+              style={{ textShadow: "0 0 12px color-mix(in srgb, var(--jebbs) 55%, transparent)" }}
+            >
               Burgers
             </span>
           </div>
@@ -106,7 +98,7 @@ export function AppSidebar() {
                       className={cn(
                         "rounded-lg transition-all duration-200 h-9",
                         isActive
-                          ? "bg-primary/10 text-primary font-medium"
+                          ? "nav-rail-active bg-primary/10 text-primary font-medium"
                           : "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
                       )}
                     >

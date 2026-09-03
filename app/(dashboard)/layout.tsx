@@ -30,7 +30,16 @@ export default function DashboardLayout({
           <NextStep steps={tours} cardComponent={TourCard}>
             <SidebarProvider defaultOpen={false}>
               <SidebarLayout>{children}</SidebarLayout>
-              <Toaster richColors position="top-right" />
+              <Toaster
+                richColors
+                position="top-right"
+                theme="dark"
+                toastOptions={{
+                  classNames: {
+                    toast: "material-thick !text-foreground",
+                  },
+                }}
+              />
             </SidebarProvider>
           </NextStep>
         </NextStepProvider>
