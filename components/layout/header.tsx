@@ -29,7 +29,7 @@ export function Header({
       <div className="flex items-center gap-3">
         <SidebarTrigger className="md:hidden" />
         <div>
-          <h1 className="text-title text-foreground">{title}</h1>
+          <h1 className="text-title2 text-foreground">{title}</h1>
           {subtitle && (
             <p className="hidden text-footnote text-muted-foreground sm:block">{subtitle}</p>
           )}
