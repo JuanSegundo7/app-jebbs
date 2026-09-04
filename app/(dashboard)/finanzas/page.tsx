@@ -945,7 +945,7 @@ function FinanzasPageContent() {
           if (!open) resetExpenseForm();
         }}
       >
-        <DialogContent className="sm:max-w-xl ios-glass rounded-2xl">
+        <DialogContent className="sm:max-w-xl rounded-2xl">
           <DialogHeader>
             <DialogTitle>{editingExpense ? "Editar gasto" : "Nuevo gasto"}</DialogTitle>
           </DialogHeader>
@@ -1140,7 +1140,7 @@ function FinanzasPageContent() {
           if (!open) resetRecurringForm();
         }}
       >
-        <DialogContent className="sm:max-w-xl ios-glass rounded-2xl">
+        <DialogContent className="sm:max-w-xl rounded-2xl">
           <DialogHeader>
             <DialogTitle>Nuevo gasto fijo</DialogTitle>
             <DialogDescription>
@@ -1280,7 +1280,7 @@ function FinanzasPageContent() {
           if (!open) setUpdatingTemplate(null);
         }}
       >
-        <DialogContent className="sm:max-w-xl ios-glass rounded-2xl">
+        <DialogContent className="sm:max-w-xl rounded-2xl">
           <DialogHeader>
             <DialogTitle>Actualizar</DialogTitle>
             <DialogDescription>

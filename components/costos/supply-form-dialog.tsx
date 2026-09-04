@@ -294,7 +294,7 @@ export function SupplyFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-xl ios-glass rounded-2xl">
+      <DialogContent className="sm:max-w-xl rounded-2xl">
         <DialogHeader>
           <DialogTitle>{editingSupply ? "Editar insumo" : "Nuevo insumo"}</DialogTitle>
           <DialogDescription>

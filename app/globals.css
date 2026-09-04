@@ -459,7 +459,15 @@
 
 /* .ios-glass CONSERVA su nombre (58 sitios mejoran gratis) pero cambia
    de SIGNIFICADO: superficie elevada, translúcida, iluminada, SIN blur.
-   Es el material barato — seguro de repetir cientos de veces. */
+   Es el material barato — seguro de repetir cientos de veces.
+   NUNCA combinar con .modal-surface en el mismo elemento: se emite
+   despues en esta hoja de estilos y le gana en background-color/border/
+   border-top-color, dejando el modal a la mitad de su opacidad real
+   (bug real, encontrado en 9 dialogos — el backdrop-filter y el
+   box-shadow de modal-surface sobreviven porque ios-glass no los
+   declara, asi que no se nota a simple vista). DialogContent/
+   AlertDialogContent/SheetContent ya traen modal-surface por su
+   cuenta -- no hace falta agregarle nada acá. */
 @utility ios-glass {
   background-color: var(--card);
   border: 1px solid var(--hairline);
