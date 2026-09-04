@@ -25,14 +25,14 @@ export function TourCard({
       <div className="mb-2 flex items-start justify-between gap-3">
         <div className="flex items-center gap-2">
           {step.icon && <span aria-hidden="true">{step.icon}</span>}
-          <h2 className="text-sm font-semibold">{step.title}</h2>
+          <h2 className="text-subheadline font-semibold">{step.title}</h2>
         </div>
-        <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
+        <span className="shrink-0 text-caption text-muted-foreground tabular-nums">
           {currentStep + 1} / {totalSteps}
         </span>
       </div>
 
-      <div className="mb-4 text-sm text-muted-foreground leading-relaxed">{step.content}</div>
+      <div className="mb-4 text-subheadline text-muted-foreground leading-relaxed">{step.content}</div>
 
       <div className="flex items-center justify-between gap-2">
         {skipTour ? (
