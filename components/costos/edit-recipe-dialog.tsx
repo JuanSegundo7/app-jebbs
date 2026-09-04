@@ -289,30 +289,30 @@ export function EditRecipeDialog({
             className="mb-4 grid grid-cols-3 gap-3 rounded-xl border bg-muted/20 p-3"
           >
             <div className="border-r pr-3">
-              <p className="text-xs text-muted-foreground">Costo unitario</p>
-              <p className="text-lg font-bold tabular-nums">{formatCurrency(totalCost)}</p>
+              <p className="text-caption text-muted-foreground">Costo unitario</p>
+              <p className="text-title3 font-bold tabular-nums">{formatCurrency(totalCost)}</p>
             </div>
             <div className="border-r pr-3">
-              <p className="text-xs text-muted-foreground">Margen</p>
-              <p className="text-lg font-bold tabular-nums" style={{ color: marginColor }}>
+              <p className="text-caption text-muted-foreground">Margen</p>
+              <p className="text-title3 font-bold tabular-nums" style={{ color: marginColor }}>
                 {formatCurrency(margin.amount)}{" "}
-                <span className="text-xs font-medium">({margin.percentage.toFixed(1)}%)</span>
+                <span className="text-caption font-medium">({margin.percentage.toFixed(1)}%)</span>
               </p>
             </div>
             <div>
-              <p className="text-xs text-muted-foreground">Alcanza para</p>
+              <p className="text-caption text-muted-foreground">Alcanza para</p>
               {makeable.count === null ? (
-                <p className="text-lg font-bold text-muted-foreground">—</p>
+                <p className="text-title3 font-bold text-muted-foreground">—</p>
               ) : (
                 <>
                   <p
-                    className="text-lg font-bold tabular-nums"
+                    className="text-title3 font-bold tabular-nums"
                     style={makeable.count === 0 ? { color: "var(--status-canceled)" } : undefined}
                   >
                     {makeable.count} u.
                   </p>
                   {makeable.limitingSupplyId && (
-                    <p className="text-xs text-muted-foreground truncate">
+                    <p className="text-caption text-muted-foreground truncate">
                       limita: {limitingSupplyName ?? "—"}
                     </p>
                   )}
@@ -329,7 +329,7 @@ export function EditRecipeDialog({
               for. md is comfortably within reach of any laptop. */}
           <div className="grid grid-cols-1 gap-4 md:grid-cols-[3fr_2fr]">
             <div className="min-w-0 space-y-3">
-              <p className="text-xs font-medium text-muted-foreground">
+              <p className="text-caption font-medium text-muted-foreground">
                 Ingredientes de la receta
               </p>
 
@@ -340,7 +340,7 @@ export function EditRecipeDialog({
                   <Skeleton className="h-14" />
                 </div>
               ) : !recipe || recipe.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-4">
+                <p className="text-subheadline text-muted-foreground text-center py-4">
                   {target.kind === "burger"
                     ? "Esta hamburguesa no tiene receta cargada"
                     : "Este ítem no tiene receta cargada"}
@@ -363,21 +363,21 @@ export function EditRecipeDialog({
                         <div className="flex items-center gap-3">
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-1.5">
-                              <p className="text-sm font-medium truncate">{row.name}</p>
+                              <p className="text-subheadline font-medium truncate">{row.name}</p>
                               {line.supply.is_active === false && (
-                                <Badge variant="outline" className="text-xs">
+                                <Badge variant="outline" className="text-caption">
                                   Inactivo
                                 </Badge>
                               )}
                             </div>
-                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <div className="flex items-center gap-1 text-caption text-muted-foreground">
                               {isEditing ? (
                                 <Input
                                   autoFocus
                                   type="number"
                                   min="0"
                                   step="0.001"
-                                  className="h-6 w-20 text-xs tabular-nums"
+                                  className="h-6 w-20 text-caption tabular-nums"
                                   value={quantityDrafts[line.id] ?? String(line.quantity)}
                                   onChange={(e) =>
                                     setQuantityDrafts((d) => ({ ...d, [line.id]: e.target.value }))
@@ -408,11 +408,11 @@ export function EditRecipeDialog({
                               </span>
                             </div>
                           </div>
-                          <span className="text-sm font-semibold tabular-nums">
+                          <span className="text-subheadline font-semibold tabular-nums">
                             {formatCurrency(row.lineCost)}
                           </span>
                           <span
-                            className="w-16 shrink-0 text-right text-xs tabular-nums"
+                            className="w-16 shrink-0 text-right text-caption tabular-nums"
                             style={isLimiting ? { color: "var(--status-canceled)" } : undefined}
                           >
                             {lineMakeable ?? "—"} u.
@@ -439,7 +439,7 @@ export function EditRecipeDialog({
                                 handleLineScalingChange(line, v as RecipeScaling | "fixed")
                               }
                             >
-                              <SelectTrigger className="h-6 w-auto gap-1 border-none bg-transparent px-1 text-[11px] text-muted-foreground shadow-none hover:bg-muted">
+                              <SelectTrigger className="h-6 w-auto gap-1 border-none bg-transparent px-1 text-caption2 text-muted-foreground shadow-none hover:bg-muted">
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
@@ -451,7 +451,7 @@ export function EditRecipeDialog({
                               </SelectContent>
                             </Select>
                             {line.scales_with && resolvedLine && (
-                              <span className="text-[11px] text-muted-foreground">
+                              <span className="text-caption2 text-muted-foreground">
                                 = {resolvedLine.quantity} {line.supply.unit} (×
                                 {resolvedLine.scalingFactor}{" "}
                                 {line.scales_with === "meat" ? "medallones" : "porciones"})
@@ -471,7 +471,7 @@ export function EditRecipeDialog({
                               }}
                             />
                           </div>
-                          <span className="w-10 shrink-0 text-right text-xs text-muted-foreground tabular-nums">
+                          <span className="w-10 shrink-0 text-right text-caption text-muted-foreground tabular-nums">
                             {(row.share * 100).toFixed(0)}%
                           </span>
                         </div>
@@ -484,7 +484,7 @@ export function EditRecipeDialog({
               {/* ─── Agregar insumo manualmente ─── */}
               <div className="flex items-end gap-2 border-t pt-3">
                 <div className="flex-1 space-y-1.5">
-                  <Label className="text-xs">Insumo</Label>
+                  <Label className="text-caption">Insumo</Label>
                   <Select value={supplyId} onValueChange={setSupplyId}>
                     <SelectTrigger>
                       <SelectValue placeholder="Elegir insumo" />
@@ -499,7 +499,7 @@ export function EditRecipeDialog({
                   </Select>
                 </div>
                 <div className="w-24 space-y-1.5">
-                  <Label className="text-xs">
+                  <Label className="text-caption">
                     {target.kind === "burger"
                       ? addLineScalesWith === "meat"
                         ? "Cant. por medallón"
@@ -519,7 +519,7 @@ export function EditRecipeDialog({
                 </div>
                 {target.kind === "burger" && (
                   <div className="w-36 space-y-1.5">
-                    <Label className="text-xs">Escala</Label>
+                    <Label className="text-caption">Escala</Label>
                     <Select
                       value={addLineScalesWith}
                       onValueChange={(v) => setAddLineScalesWith(v as RecipeScaling | "fixed")}
@@ -552,7 +552,7 @@ export function EditRecipeDialog({
                   id="costos-recipe-dialog-suggestions"
                   className="space-y-2 rounded-xl bg-muted/30 p-3"
                 >
-                  <p className="text-xs font-medium text-muted-foreground">
+                  <p className="text-caption font-medium text-muted-foreground">
                     Sugerencias desde el menú
                   </p>
                   <IngredientSuggestions
@@ -575,9 +575,9 @@ export function EditRecipeDialog({
                 id="costos-recipe-dialog-suggested-price"
                 className="space-y-2 rounded-xl border p-3"
               >
-                <p className="text-xs font-medium text-muted-foreground">Precio sugerido</p>
+                <p className="text-caption font-medium text-muted-foreground">Precio sugerido</p>
                 <div className="space-y-1">
-                  <Label className="text-xs">Margen objetivo (%)</Label>
+                  <Label className="text-caption">Margen objetivo (%)</Label>
                   <Input
                     type="number"
                     min="0"
@@ -592,14 +592,14 @@ export function EditRecipeDialog({
                   const parsedTarget = parseFloat(targetMargin.replace(",", "."));
                   if (totalCost <= 0) {
                     return (
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-subheadline text-muted-foreground">
                         Cargá la receta para calcular un precio sugerido.
                       </p>
                     );
                   }
                   if (isNaN(parsedTarget) || parsedTarget >= 100) {
                     return (
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-subheadline text-muted-foreground">
                         El margen objetivo tiene que ser menor a 100%.
                       </p>
                     );
@@ -609,15 +609,15 @@ export function EditRecipeDialog({
                   const delta = product.salePrice - suggested;
                   return (
                     <div>
-                      <p className="text-base font-bold tabular-nums">
+                      <p className="text-callout font-bold tabular-nums">
                         {formatCurrency(suggested)}
                       </p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-caption text-muted-foreground">
                         Precio actual {formatCurrency(product.salePrice)} · margen actual{" "}
                         {margin.percentage.toFixed(1)}%
                       </p>
                       <p
-                        className="text-xs font-medium"
+                        className="text-caption font-medium"
                         style={{
                           color: delta >= 0 ? "var(--status-paid)" : "var(--status-canceled)",
                         }}
@@ -629,8 +629,8 @@ export function EditRecipeDialog({
                     </div>
                   );
                 })()}
-                <p className="text-xs text-muted-foreground">Sólo es una sugerencia.</p>
-                <Link href={product.priceEditHref} className="block text-xs text-primary hover:underline">
+                <p className="text-caption text-muted-foreground">Sólo es una sugerencia.</p>
+                <Link href={product.priceEditHref} className="block text-caption text-primary hover:underline">
                   Editar el precio en {product.priceEditHref} →
                 </Link>
               </div>
@@ -639,7 +639,7 @@ export function EditRecipeDialog({
         </div>
 
         <DialogFooter className="sm:justify-between items-center">
-          <p className="text-xs text-muted-foreground">Los cambios se guardan automáticamente</p>
+          <p className="text-caption text-muted-foreground">Los cambios se guardan automáticamente</p>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cerrar
           </Button>
