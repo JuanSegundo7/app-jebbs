@@ -55,7 +55,7 @@ export function MarginByBurgerChart({ rows, isLoading }: MarginByBurgerChartProp
         </CardHeading>
 
         {chartData.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-4">
+          <p className="text-subheadline text-muted-foreground text-center py-4">
             Cargá recetas para ver el margen por hamburguesa
           </p>
         ) : (
@@ -93,7 +93,7 @@ export function MarginByBurgerChart({ rows, isLoading }: MarginByBurgerChartProp
                       ? "var(--status-paid)"
                       : "var(--status-canceled)";
                   return (
-                    <div className="rounded-lg border bg-background px-3 py-2 shadow-md text-sm min-w-[180px]">
+                    <div className="rounded-lg border bg-background px-3 py-2 shadow-md text-subheadline min-w-[180px]">
                       <p className="font-medium mb-2">{row.name}</p>
                       <div className="flex items-center justify-between gap-3">
                         <span className="text-muted-foreground">Costo</span>
@@ -127,7 +127,7 @@ export function MarginByBurgerChart({ rows, isLoading }: MarginByBurgerChartProp
                 <LabelList
                   dataKey="marginPct"
                   position="right"
-                  className="fill-foreground text-xs font-medium tabular-nums"
+                  className="fill-foreground text-caption font-medium tabular-nums"
                   formatter={(value: number) => `${value.toFixed(1)}%`}
                 />
               </Bar>

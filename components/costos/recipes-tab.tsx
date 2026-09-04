@@ -165,7 +165,7 @@ export function RecipesTab() {
 
   return (
     <>
-      <p className="text-xs text-muted-foreground mb-3">
+      <p className="text-caption text-muted-foreground mb-3">
         Esto es la receta de costeo (insumo + cantidad + costo). Es distinto de los ingredientes que
         se ven en <span className="font-medium">/menu</span>, que son sólo etiquetas para sacar cosas
         en el wizard de pedidos y no tienen cantidades ni costo.
@@ -190,8 +190,8 @@ export function RecipesTab() {
       />
 
       <div className="mt-6 mb-3">
-        <h3 className="text-sm font-medium">Extras, bebidas y acompañamientos</h3>
-        <p className="text-xs text-muted-foreground mt-1">
+        <h3 className="text-subheadline font-medium">Extras, bebidas y acompañamientos</h3>
+        <p className="text-caption text-muted-foreground mt-1">
           Misma idea que arriba pero para lo que no es hamburguesa: extras, bebidas, papas y
           acompañamientos también tienen su propia receta de costeo.
         </p>

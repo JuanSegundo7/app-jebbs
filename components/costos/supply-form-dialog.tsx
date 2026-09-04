@@ -318,7 +318,7 @@ export function SupplyFormDialog({
                   value={form.name}
                   onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
                 />
-                {formErrors.name && <p className="text-xs text-destructive">{formErrors.name}</p>}
+                {formErrors.name && <p className="text-caption text-destructive">{formErrors.name}</p>}
               </div>
 
               <div className="space-y-1.5">
@@ -329,9 +329,9 @@ export function SupplyFormDialog({
                   existingUnits={existingUnits}
                 />
                 {formErrors.unit ? (
-                  <p className="text-xs text-destructive">{formErrors.unit}</p>
+                  <p className="text-caption text-destructive">{formErrors.unit}</p>
                 ) : (
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-caption text-muted-foreground">
                     Es la medida que vas a usar al armar recetas y al contar stock.
                   </p>
                 )}
@@ -340,7 +340,7 @@ export function SupplyFormDialog({
 
             {/* ─── 2. Cómo lo comprás ─── */}
             <div className="space-y-2.5 rounded-xl border p-3">
-              <p className="text-xs font-medium text-muted-foreground">Cómo lo comprás</p>
+              <p className="text-caption font-medium text-muted-foreground">Cómo lo comprás</p>
 
               <ToggleGroup
                 type="single"
@@ -349,20 +349,20 @@ export function SupplyFormDialog({
                 onValueChange={(value) => value && setMode(value as SupplyPurchaseMode)}
                 className="w-full"
               >
-                <ToggleGroupItem value="unit" className="text-xs">
+                <ToggleGroupItem value="unit" className="text-caption">
                   Por unidad
                 </ToggleGroupItem>
-                <ToggleGroupItem value="package" className="text-xs">
+                <ToggleGroupItem value="package" className="text-caption">
                   Por paquete
                 </ToggleGroupItem>
-                <ToggleGroupItem value="weight" className="text-xs">
+                <ToggleGroupItem value="weight" className="text-caption">
                   Por peso
                 </ToggleGroupItem>
               </ToggleGroup>
 
               {form.purchaseMode === "unit" && (
                 <div className="space-y-1">
-                  <Label className="text-xs">Costo por {unitLabel}</Label>
+                  <Label className="text-caption">Costo por {unitLabel}</Label>
                   <InputGroup>
                     <InputGroupAddon>
                       <InputGroupText>$</InputGroupText>
@@ -381,7 +381,7 @@ export function SupplyFormDialog({
               {form.purchaseMode === "package" && (
                 <div className="grid grid-cols-2 gap-2">
                   <div className="space-y-1">
-                    <Label className="text-xs">Precio del paquete</Label>
+                    <Label className="text-caption">Precio del paquete</Label>
                     <InputGroup>
                       <InputGroupAddon>
                         <InputGroupText>$</InputGroupText>
@@ -396,7 +396,7 @@ export function SupplyFormDialog({
                     </InputGroup>
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-xs">¿Cuántos {unitLabel} trae?</Label>
+                    <Label className="text-caption">¿Cuántos {unitLabel} trae?</Label>
                     <InputGroup>
                       <InputGroupInput
                         type="text"
@@ -413,7 +413,7 @@ export function SupplyFormDialog({
               {form.purchaseMode === "weight" && (
                 <div className="grid grid-cols-2 gap-2">
                   <div className="space-y-1">
-                    <Label className="text-xs">Precio del kilo</Label>
+                    <Label className="text-caption">Precio del kilo</Label>
                     <InputGroup>
                       <InputGroupAddon>
                         <InputGroupText>$</InputGroupText>
@@ -428,7 +428,7 @@ export function SupplyFormDialog({
                     </InputGroup>
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-xs">¿Cuánto pesa un {unitLabel}?</Label>
+                    <Label className="text-caption">¿Cuánto pesa un {unitLabel}?</Label>
                     <InputGroup>
                       <InputGroupInput
                         type="text"
@@ -451,34 +451,34 @@ export function SupplyFormDialog({
               <div className="rounded-lg bg-muted/40 px-3 py-2">
                 {resolvedCost !== null ? (
                   <>
-                    <p className="text-sm font-semibold tabular-nums">
+                    <p className="text-subheadline font-semibold tabular-nums">
                       Costo por {unitLabel}: {formatCurrency(resolvedCost)}
                     </p>
                     {form.purchaseMode === "package" && (
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-caption text-muted-foreground">
                         ${form.packagePrice} / {form.packageUnits} {unitLabel}
                       </p>
                     )}
                     {form.purchaseMode === "weight" && (
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-caption text-muted-foreground">
                         ${form.pricePerKilo}/kg × {form.unitWeightGrams}g
                       </p>
                     )}
                   </>
                 ) : (
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-caption text-muted-foreground">
                     Completá los datos para ver el costo por {unitLabel}.
                   </p>
                 )}
               </div>
 
-              {formErrors.cost && <p className="text-xs text-destructive">{formErrors.cost}</p>}
+              {formErrors.cost && <p className="text-caption text-destructive">{formErrors.cost}</p>}
             </div>
 
             {/* ─── 3. Stock y estado ─── */}
             <div className="grid grid-cols-2 gap-4 items-start">
               <div className="space-y-1">
-                <Label className="text-xs">¿Cuántos {unitLabel} tenés ahora?</Label>
+                <Label className="text-caption">¿Cuántos {unitLabel} tenés ahora?</Label>
                 <SupplyQuantityInput
                   supply={stockQuantityShape}
                   value={form.stockQuantity}
@@ -487,7 +487,7 @@ export function SupplyFormDialog({
                   onModeChange={setStockQuantityMode}
                   allowNegative
                 />
-                <p className="text-xs text-muted-foreground">
+                <p className="text-caption text-muted-foreground">
                   Podés dejarlo en 0 y cargarlo después con el botón de sumar stock. Si te quedó en
                   negativo, dejalo en negativo — es una corrección, no un error.
                 </p>
@@ -501,7 +501,7 @@ export function SupplyFormDialog({
                 />
                 <div className="space-y-0.5">
                   <Label htmlFor="supply-active">Activo</Label>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-caption text-muted-foreground">
                     Los insumos inactivos no aparecen al armar recetas nuevas.
                   </p>
                 </div>

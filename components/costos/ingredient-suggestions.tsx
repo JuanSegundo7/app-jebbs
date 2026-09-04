@@ -175,7 +175,7 @@ export function IngredientSuggestions({
 
   return (
     <div className="space-y-3 rounded-xl border p-3">
-      <p className="text-xs font-medium text-muted-foreground">Desde el menú</p>
+      <p className="text-caption font-medium text-muted-foreground">Desde el menú</p>
       <div className="space-y-2">
         {suggestions.map((s) => {
           const draft = drafts[s.ingredient];
@@ -195,14 +195,14 @@ export function IngredientSuggestions({
               />
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-1.5">
-                  <span className="text-sm font-medium truncate">{s.ingredient}</span>
+                  <span className="text-subheadline font-medium truncate">{s.ingredient}</span>
                   {s.matchKind === "approximate" && (
-                    <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4">
+                    <Badge variant="outline" className="text-caption2 px-1.5 py-0 h-4">
                       aproximado
                     </Badge>
                   )}
                   {s.matchKind === "ambiguous" && !draft.supplyId && (
-                    <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4">
+                    <Badge variant="outline" className="text-caption2 px-1.5 py-0 h-4">
                       elegí uno
                     </Badge>
                   )}
@@ -216,20 +216,20 @@ export function IngredientSuggestions({
                         onChange={(unit) => updateDraft(s.ingredient, { newUnit: unit })}
                         existingUnits={existingUnits}
                         placeholder="Unidad"
-                        className="h-7 w-28 text-xs"
+                        className="h-7 w-28 text-caption"
                       />
                       <Input
                         type="number"
                         min="0"
                         step="0.01"
                         placeholder="Costo/unidad"
-                        className="h-7 w-24 text-xs"
+                        className="h-7 w-24 text-caption"
                         value={draft.newCost}
                         onChange={(e) => updateDraft(s.ingredient, { newCost: e.target.value })}
                       />
                       <Button
                         size="sm"
-                        className="h-7 text-xs"
+                        className="h-7 text-caption"
                         onClick={() => handleCreateSupply(s.ingredient)}
                         disabled={createSupply.isPending}
                       >
@@ -240,7 +240,7 @@ export function IngredientSuggestions({
                     <Button
                       size="sm"
                       variant="outline"
-                      className="mt-1 h-6 gap-1 text-[11px]"
+                      className="mt-1 h-6 gap-1 text-caption2"
                       onClick={() => updateDraft(s.ingredient, { creatingSupply: true })}
                     >
                       <Plus className="h-3 w-3" />
@@ -252,7 +252,7 @@ export function IngredientSuggestions({
                     value={draft.supplyId}
                     onValueChange={(v) => updateDraft(s.ingredient, { supplyId: v })}
                   >
-                    <SelectTrigger className="mt-1 h-7 w-full text-xs">
+                    <SelectTrigger className="mt-1 h-7 w-full text-caption">
                       <SelectValue placeholder="Elegir insumo" />
                     </SelectTrigger>
                     <SelectContent>
@@ -272,7 +272,7 @@ export function IngredientSuggestions({
                   min="0"
                   step="0.001"
                   placeholder="Cant."
-                  className="h-8 w-20 shrink-0 text-right text-xs tabular-nums"
+                  className="h-8 w-20 shrink-0 text-right text-caption tabular-nums"
                   value={draft.quantity}
                   onChange={(e) => updateDraft(s.ingredient, { quantity: e.target.value })}
                 />
@@ -284,7 +284,7 @@ export function IngredientSuggestions({
 
       <Button
         size="sm"
-        className="h-8 w-full text-xs"
+        className="h-8 w-full text-caption"
         onClick={handleAddChecked}
         disabled={readyToAdd.length === 0 || setRecipeLine.isPending}
       >

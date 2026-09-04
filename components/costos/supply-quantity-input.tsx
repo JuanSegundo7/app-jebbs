@@ -105,7 +105,7 @@ export function SupplyQuantityInput({
             type="button"
             variant={mode === "native" ? "default" : "ghost"}
             size="sm"
-            className="h-6 rounded-md px-2 text-xs"
+            className="h-6 rounded-md px-2 text-caption"
             onClick={() => setMode("native")}
           >
             En {supply.unit}
@@ -115,7 +115,7 @@ export function SupplyQuantityInput({
               type="button"
               variant={mode === "kilos" ? "default" : "ghost"}
               size="sm"
-              className="h-6 rounded-md px-2 text-xs"
+              className="h-6 rounded-md px-2 text-caption"
               onClick={() => setMode("kilos")}
             >
               En kilos
@@ -126,7 +126,7 @@ export function SupplyQuantityInput({
               type="button"
               variant={mode === "package" ? "default" : "ghost"}
               size="sm"
-              className="h-6 rounded-md px-2 text-xs"
+              className="h-6 rounded-md px-2 text-caption"
               onClick={() => setMode("package")}
             >
               En paquetes
@@ -149,13 +149,13 @@ export function SupplyQuantityInput({
             if (e.key === "Enter") onEnter?.();
           }}
         />
-        <span className="shrink-0 text-xs text-muted-foreground">
+        <span className="shrink-0 text-caption text-muted-foreground">
           {mode === "kilos" ? "kg" : mode === "package" ? "paquetes" : supply.unit}
         </span>
       </div>
 
       {mode === "kilos" && (
-        <p className="mt-1.5 text-xs">
+        <p className="mt-1.5 text-caption">
           {convertedUnits === null ? (
             <span className="text-muted-foreground">
               = ? {supply.unit} · cada uno pesa {supply.unit_weight_grams}g
@@ -173,7 +173,7 @@ export function SupplyQuantityInput({
       )}
 
       {mode === "package" && (
-        <p className="mt-1.5 text-xs">
+        <p className="mt-1.5 text-caption">
           {convertedUnits === null ? (
             <span className="text-muted-foreground">
               = ? {supply.unit} · cada paquete trae {supply.purchase_units} {supply.unit}

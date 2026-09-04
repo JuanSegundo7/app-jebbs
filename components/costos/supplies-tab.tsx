@@ -107,7 +107,7 @@ function RestockPopover({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-64 p-3" align="end">
-        <p className="text-xs font-medium mb-2">Sumar al stock de {supply.name}</p>
+        <p className="text-caption font-medium mb-2">Sumar al stock de {supply.name}</p>
 
         <SupplyQuantityInput
           supply={supply}
@@ -120,12 +120,12 @@ function RestockPopover({
           onEnter={handleConfirm}
         />
 
-        <p className="mt-1.5 text-xs text-muted-foreground">
+        <p className="mt-1.5 text-caption text-muted-foreground">
           Stock actual: {supply.stock_quantity} {supply.unit}
         </p>
         <Button
           size="sm"
-          className="mt-2 h-7 w-full text-xs"
+          className="mt-2 h-7 w-full text-caption"
           onClick={handleConfirm}
           disabled={isPending || !resolvedAmount}
         >
@@ -271,12 +271,12 @@ export function SuppliesTab() {
       <Card id="costos-supplies-card">
         <CardContent className="p-4">
           <div className="flex items-center justify-between mb-3">
-            <p className="text-sm font-medium">Catálogo de insumos</p>
+            <p className="text-subheadline font-medium">Catálogo de insumos</p>
             <Button
               id="costos-add-supply-button"
               size="sm"
               variant="outline"
-              className="h-8 gap-1.5 text-xs"
+              className="h-8 gap-1.5 text-caption"
               onClick={openCreate}
             >
               <Plus className="h-3.5 w-3.5" />
@@ -289,7 +289,7 @@ export function SuppliesTab() {
               <Button
                 variant={statusFilter === "all" ? "default" : "ghost"}
                 size="sm"
-                className="rounded-lg h-7 px-3 text-xs"
+                className="rounded-lg h-7 px-3 text-caption"
                 onClick={() => setFilter({ status: "all" })}
               >
                 Todos
@@ -297,7 +297,7 @@ export function SuppliesTab() {
               <Button
                 variant={statusFilter === "active" ? "default" : "ghost"}
                 size="sm"
-                className="rounded-lg h-7 px-3 text-xs"
+                className="rounded-lg h-7 px-3 text-caption"
                 onClick={() => setFilter({ status: "active" })}
               >
                 Activos
@@ -305,7 +305,7 @@ export function SuppliesTab() {
               <Button
                 variant={statusFilter === "out" ? "default" : "ghost"}
                 size="sm"
-                className="rounded-lg h-7 px-3 text-xs"
+                className="rounded-lg h-7 px-3 text-caption"
                 onClick={() => setFilter({ status: "out" })}
               >
                 Sin stock
@@ -316,7 +316,7 @@ export function SuppliesTab() {
               <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
               <Input
                 placeholder="Buscar insumo..."
-                className="h-8 pl-8 text-sm"
+                className="h-8 pl-8 text-subheadline"
                 value={search}
                 onChange={(e) => setFilter({ search: e.target.value })}
               />
@@ -330,9 +330,9 @@ export function SuppliesTab() {
               <Skeleton className="h-12" />
             </div>
           ) : !supplies || supplies.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-4">Sin insumos cargados</p>
+            <p className="text-subheadline text-muted-foreground text-center py-4">Sin insumos cargados</p>
           ) : filteredSupplies.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-4">
+            <p className="text-subheadline text-muted-foreground text-center py-4">
               Sin resultados para el filtro aplicado
             </p>
           ) : (
@@ -346,16 +346,16 @@ export function SuppliesTab() {
                   )}
                 >
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium truncate">{supply.name}</p>
-                    <span className="text-xs text-muted-foreground">
+                    <p className="text-subheadline font-medium truncate">{supply.name}</p>
+                    <span className="text-caption text-muted-foreground">
                       {supply.unit} · {usage.get(supply.id) ?? 0} recetas
                     </span>
                   </div>
                   <div className="w-28 text-right shrink-0">
-                    <p className="text-sm font-semibold tabular-nums">
+                    <p className="text-subheadline font-semibold tabular-nums">
                       {formatCurrency(supply.cost_per_unit)}
                     </p>
-                    <p className="text-xs text-muted-foreground tabular-nums">
+                    <p className="text-caption text-muted-foreground tabular-nums">
                       {formatCurrency(supply.stock_quantity * supply.cost_per_unit)} inv.
                     </p>
                   </div>
@@ -376,7 +376,7 @@ export function SuppliesTab() {
                           if (e.key === "Enter") e.currentTarget.blur();
                         }}
                       />
-                      <span className="w-12 text-xs text-muted-foreground">{supply.unit}</span>
+                      <span className="w-12 text-caption text-muted-foreground">{supply.unit}</span>
                     </div>
                     <RestockPopover
                       supply={supply}
@@ -439,8 +439,8 @@ export function SuppliesTab() {
               ))}
 
               <div className="flex items-center justify-between border-t pt-2 mt-1 px-1">
-                <span className="text-xs text-muted-foreground">Valor total del inventario</span>
-                <span className="text-sm font-semibold tabular-nums">
+                <span className="text-caption text-muted-foreground">Valor total del inventario</span>
+                <span className="text-subheadline font-semibold tabular-nums">
                   {formatCurrency(inventoryTotal)}
                 </span>
               </div>
@@ -456,7 +456,7 @@ export function SuppliesTab() {
                   >
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-caption text-muted-foreground">
                     {page} / {totalPages}
                   </span>
                   <Button

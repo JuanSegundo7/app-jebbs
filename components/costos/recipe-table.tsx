@@ -150,7 +150,7 @@ export function RecipeTable({
           <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder={searchPlaceholder}
-            className="h-8 pl-8 text-sm"
+            className="h-8 pl-8 text-subheadline"
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
           />
@@ -163,9 +163,9 @@ export function RecipeTable({
             <Skeleton className="h-10" />
           </div>
         ) : rows.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-4">{emptyLabel}</p>
+          <p className="text-subheadline text-muted-foreground text-center py-4">{emptyLabel}</p>
         ) : sortedRows.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-4">
+          <p className="text-subheadline text-muted-foreground text-center py-4">
             Sin resultados para tu búsqueda
           </p>
         ) : (
@@ -222,7 +222,7 @@ export function RecipeTable({
                     <div className="flex items-center gap-1.5">
                       <span>{row.name}</span>
                       {row.badge && (
-                        <Badge variant="outline" className="text-xs">
+                        <Badge variant="outline" className="text-caption">
                           {row.badge}
                         </Badge>
                       )}
@@ -248,7 +248,7 @@ export function RecipeTable({
                         >
                           {row.margin.percentage.toFixed(1)}%
                         </p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-caption text-muted-foreground">
                           {formatCurrency(row.margin.amount)}
                         </p>
                       </div>
@@ -269,7 +269,7 @@ export function RecipeTable({
                         >
                           {row.makeable.count} u.
                         </p>
-                        <p className="text-xs text-muted-foreground truncate">
+                        <p className="text-caption text-muted-foreground truncate">
                           limita: {row.limitingSupplyName ?? "—"}
                         </p>
                       </div>
@@ -279,7 +279,7 @@ export function RecipeTable({
                     <Button
                       size="sm"
                       variant="outline"
-                      className="h-8 text-xs"
+                      className="h-8 text-caption"
                       onClick={(e) => {
                         e.stopPropagation();
                         onRowClick(row.id);
