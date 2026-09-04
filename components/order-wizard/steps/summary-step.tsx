@@ -170,9 +170,9 @@ export function SummaryStep({
       {/* Customer Info */}
       <Card className="bg-card">
         <CardContent className="p-3">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm space-y-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-subheadline space-y-2">
             <div className="font-medium flex items-center gap-2">
-              <h3 className="flex items-center gap-2 text-sm font-medium">
+              <h3 className="flex items-center gap-2 text-subheadline font-medium">
                 <User className="h-4 w-4 text-muted-foreground" />
                 Cliente
               </h3>
@@ -189,7 +189,7 @@ export function SummaryStep({
                       : `${selectedAddress?.label}: ${selectedAddress?.address}`}
                   </p>
                   {(newAddressData?.notes || selectedAddress?.notes) && (
-                    <p className="text-xs text-muted-foreground italic">
+                    <p className="text-caption text-muted-foreground italic">
                       Nota:{" "}
                       {isNewCustomer
                         ? newAddressData?.notes
@@ -202,7 +202,7 @@ export function SummaryStep({
 
             {customerPhone && (
               <div className="flex items-center gap-2">
-                <h3 className="flex items-center gap-2 text-sm font-medium">
+                <h3 className="flex items-center gap-2 text-subheadline font-medium">
                   <Phone className="h-4 w-4 text-muted-foreground" />
                   Teléfono
                 </h3>
@@ -216,7 +216,7 @@ export function SummaryStep({
       {/* Delivery */}
       <Card className="bg-card">
         <CardContent className="p-4 space-y-4">
-          <h3 className="text-sm font-medium">Entrega</h3>
+          <h3 className="text-subheadline font-medium">Entrega</h3>
 
           {source !== "pedidosya" ? (
             <>
@@ -262,7 +262,7 @@ export function SummaryStep({
                             <Info className="h-4 w-4 text-muted-foreground" />
                           </TooltipTrigger>
                           <TooltipContent>
-                            <p className="text-xs">
+                            <p className="text-caption">
                               Selecciona una dirección en el paso 1 para habilitar
                               envío
                             </p>
@@ -276,7 +276,7 @@ export function SummaryStep({
                 {!hasAddress && (
                   <div className="flex items-start gap-2 rounded-md bg-orange-50 dark:bg-orange-950 border border-orange-200 dark:border-orange-800 p-3">
                     <AlertCircle className="h-4 w-4 text-orange-600 dark:text-orange-400 mt-0.5" />
-                    <div className="text-xs text-orange-900 dark:text-orange-100">
+                    <div className="text-caption text-orange-900 dark:text-orange-100">
                       <p className="font-medium mb-1">Envío no disponible</p>
                       <p className="text-orange-700 dark:text-orange-300">
                         {isNewCustomer
@@ -301,7 +301,7 @@ export function SummaryStep({
               )}
             </>
           ) : (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-subheadline text-muted-foreground">
               🛵 PedidosYa gestiona su propio envío — este pedido se
               retira/gestiona por su cuenta.
             </p>
@@ -324,7 +324,7 @@ export function SummaryStep({
                 placeholder="HH:MM"
                 className="bg-card"
               />
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-caption text-muted-foreground mt-1">
                 {deliveryType === "delivery"
                   ? "Hora en que se entregará el pedido"
                   : "Hora en que el cliente retirará el pedido"}
@@ -338,7 +338,7 @@ export function SummaryStep({
       {source === "pedidosya" && (
         <Card className="bg-card">
           <CardContent className="p-4 space-y-3">
-            <h3 className="text-sm font-medium">Ajuste de precio PedidosYa</h3>
+            <h3 className="text-subheadline font-medium">Ajuste de precio PedidosYa</h3>
             <div className="space-y-2">
               <Label>Diferencia sobre el precio de menú</Label>
               <Input
@@ -354,7 +354,7 @@ export function SummaryStep({
                 placeholder="Ej: 1500"
               />
               {priceAdjustment > 0 && (
-                <p className="text-xs text-muted-foreground">
+                <p className="text-caption text-muted-foreground">
                   Se suma al total y a la base de la comisión de PedidosYa.
                 </p>
               )}
@@ -366,7 +366,7 @@ export function SummaryStep({
       {/* Discount */}
       <Card className="bg-card">
         <CardContent className="p-4 space-y-4">
-          <h3 className="text-sm font-medium">Descuento</h3>
+          <h3 className="text-subheadline font-medium">Descuento</h3>
           <div className="space-y-3">
             <Label>Tipo de descuento</Label>
             <RadioGroup
@@ -423,11 +423,11 @@ export function SummaryStep({
                   }
                 />
                 {discountAmount > 0 && (
-                  <div className="flex items-center justify-between text-sm rounded-md bg-[var(--status-paid-tint)] border border-[var(--status-paid)]/30 p-2">
+                  <div className="flex items-center justify-between text-subheadline rounded-md bg-[var(--status-paid-tint)] border border-[var(--status-paid)]/30 p-2">
                     <span className="text-[var(--status-paid)]">
                       Descuento aplicado
                       {isFullDiscount && (
-                        <span className="ml-1 text-xs text-[var(--status-paid)]/80">
+                        <span className="ml-1 text-caption text-[var(--status-paid)]/80">
                           (incluye envío)
                         </span>
                       )}
@@ -447,7 +447,7 @@ export function SummaryStep({
       {/* Payment Method */}
       <Card className="bg-card">
         <CardContent className="p-4 space-y-3">
-          <h3 className="text-sm font-medium">Método de pago</h3>
+          <h3 className="text-subheadline font-medium">Método de pago</h3>
           <RadioGroup
             value={paymentMethod}
             onValueChange={(value: "cash" | "transfer") =>
@@ -473,7 +473,7 @@ export function SummaryStep({
       {/* Order Summary */}
       <Card className="bg-card">
         <CardContent className="p-4">
-          <h3 className="mb-3 text-sm font-medium">Pedido</h3>
+          <h3 className="mb-3 text-subheadline font-medium">Pedido</h3>
 
           <div className="space-y-3">
             {/* Burgers */}
@@ -506,18 +506,18 @@ export function SummaryStep({
                     <div className="flex-1">
                       <p className="font-medium">
                         {item.quantity}x {item.burger.name}{" "}
-                        <span className="text-xs text-muted-foreground">({sizeLabel})</span>
+                        <span className="text-caption text-muted-foreground">({sizeLabel})</span>
                       </p>
-                      <p className="text-xs text-muted-foreground mt-1">
+                      <p className="text-caption text-muted-foreground mt-1">
                         Base: {formatCurrency(basePrice)}
                       </p>
                       <div className="mt-2 space-y-1">
                         {item.removedIngredients.length > 0 && (
-                          <p className="text-xs text-muted-foreground">
+                          <p className="text-caption text-muted-foreground">
                             • Sin: {item.removedIngredients.join(", ")}
                           </p>
                         )}
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-caption text-muted-foreground">
                           •{" "}
                           {item.friesQuantity === 0
                             ? "Sin papas"
@@ -532,7 +532,7 @@ export function SummaryStep({
                           )}
                         </p>
                         {diffMeat > 0 && meatExtra && (
-                          <p className="text-xs text-muted-foreground">
+                          <p className="text-caption text-muted-foreground">
                             • + {diffMeat}x Medallón extra{" "}
                             <span className="text-primary font-medium">
                               +{formatCurrency(diffMeat * meatExtra.price * item.quantity)}
@@ -540,7 +540,7 @@ export function SummaryStep({
                           </p>
                         )}
                         {item.selectedExtras.map((ext) => (
-                          <p key={ext.extra.id} className="text-xs text-muted-foreground">
+                          <p key={ext.extra.id} className="text-caption text-muted-foreground">
                             • + {ext.quantity}x {ext.extra.name}{" "}
                             <span className="text-primary font-medium">
                               +{formatCurrency(ext.extra.price * ext.quantity)}
@@ -591,7 +591,7 @@ export function SummaryStep({
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     <p className="font-medium">{c.quantity}x {c.combo.name}</p>
-                    <p className="text-xs text-muted-foreground mt-1">
+                    <p className="text-caption text-muted-foreground mt-1">
                       Base: {formatCurrency(comboBasePrice)}
                     </p>
                   </div>
@@ -618,17 +618,17 @@ export function SummaryStep({
 
                         return (
                           <div key={burgerIndex} className="ml-4 space-y-1">
-                            <p className="text-sm font-medium text-muted-foreground">
+                            <p className="text-subheadline font-medium text-muted-foreground">
                               • {b.quantity}x {b.burger.name}{" "}
-                              <span className="text-xs">({comboSizeLabel})</span>
+                              <span className="text-caption">({comboSizeLabel})</span>
                             </p>
                             <div className="ml-4 space-y-0.5">
                               {b.removedIngredients.length > 0 && (
-                                <p className="text-xs text-muted-foreground">
+                                <p className="text-caption text-muted-foreground">
                                   • Sin: {b.removedIngredients.join(", ")}
                                 </p>
                               )}
-                              <p className="text-xs text-muted-foreground">
+                              <p className="text-caption text-muted-foreground">
                                 •{" "}
                                 {b.friesQuantity === 0 ? "Sin papas"
                                   : `${b.friesQuantity} ${b.friesQuantity === 1 ? "porción" : "porciones"} de papas`}
@@ -641,7 +641,7 @@ export function SummaryStep({
                                 )}
                               </p>
                               {meatDiff > 0 && meatExtra && (
-                                <p className="text-xs text-muted-foreground">
+                                <p className="text-caption text-muted-foreground">
                                   • + {meatDiff}x Medallón extra{" "}
                                   <span className="text-primary font-medium">
                                     +{formatCurrency(meatDiff * meatExtra.price * b.quantity)}
@@ -649,7 +649,7 @@ export function SummaryStep({
                                 </p>
                               )}
                               {b.selectedExtras.map((ext) => (
-                                <p key={ext.extra.id} className="text-xs text-muted-foreground">
+                                <p key={ext.extra.id} className="text-caption text-muted-foreground">
                                   • + {ext.quantity}x {ext.extra.name}{" "}
                                   <span className="text-primary font-medium">
                                     +{formatCurrency(ext.extra.price * ext.quantity)}
@@ -663,7 +663,7 @@ export function SummaryStep({
 
                       {slot.selectedExtras?.map((extra) => (
                         <div key={extra.id} className="ml-4">
-                          <p className="text-sm font-medium text-muted-foreground">
+                          <p className="text-subheadline font-medium text-muted-foreground">
                             •{" "}
                             {slot.slotType === "drink"
                               ? "Bebida: "
@@ -696,13 +696,13 @@ export function SummaryStep({
                     <p className="font-medium">
                       {item.quantity}x {item.extra.name}
                     </p>
-                    <p className="text-xs text-muted-foreground mt-1">
+                    <p className="text-caption text-muted-foreground mt-1">
                       {formatCurrency(item.extra.price)} c/u
                     </p>
                     {(item.selectedExtras ?? []).length > 0 && (
                       <div className="mt-2 space-y-1">
                         {(item.selectedExtras ?? []).map((ext) => (
-                          <p key={ext.extra.id} className="text-xs text-muted-foreground">
+                          <p key={ext.extra.id} className="text-caption text-muted-foreground">
                             • + {ext.quantity}x {ext.extra.name}{" "}
                             <span className="text-primary font-medium">
                               +{formatCurrency(ext.extra.price * ext.quantity)}
@@ -722,14 +722,14 @@ export function SummaryStep({
 
           {/* Totals */}
           <Separator className="my-3" />
-          <div className="space-y-1 text-sm">
+          <div className="space-y-1 text-subheadline">
             {discountAmount > 0 && (
               <div className="flex justify-between text-green-600 dark:text-green-400">
                 <span>
                   Descuento{" "}
                   {discountType === "percentage" && `(${discountValue}%)`}
                   {isFullDiscount && (
-                    <span className="ml-1 text-xs opacity-75">(incl. envío)</span>
+                    <span className="ml-1 text-caption opacity-75">(incl. envío)</span>
                   )}
                 </span>
                 <span>-{formatCurrency(isFullDiscount ? orderTotal : discountAmount)}</span>
@@ -753,7 +753,7 @@ export function SummaryStep({
                 <span>+{formatCurrency(priceAdjustment)}</span>
               </div>
             )}
-            <div className="flex justify-between text-sm text-muted-foreground">
+            <div className="flex justify-between text-subheadline text-muted-foreground">
               <span>Método de pago</span>
               <span>{paymentMethod === "cash" ? "Efectivo" : "Transferencia"}</span>
             </div>
@@ -761,9 +761,9 @@ export function SummaryStep({
 
           <Separator className="my-2" />
 
-          <div className="flex justify-between text-lg font-bold">
-            <span>Total</span>
-            <span>{formatCurrency(orderTotal)}</span>
+          <div className="flex justify-between items-center">
+            <span className="text-headline font-bold">Total</span>
+            <span className="text-amount">{formatCurrency(orderTotal)}</span>
           </div>
         </CardContent>
       </Card>
