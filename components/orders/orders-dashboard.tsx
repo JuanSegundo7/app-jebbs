@@ -46,7 +46,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useOrderForEdit } from "@/lib/hooks/orders/use-order-for-edit";
-import { useQueryClient } from "@tanstack/react-query";
 import type { OrderStatus } from "@/lib/types";
 import { toast } from "sonner";
 import type { OrderStockResult } from "@/lib/hooks/orders/use-order-stock";
@@ -61,7 +60,6 @@ const statusGlowVar: Record<string, string> = {
 };
 
 export function OrdersDashboard() {
-  const queryClient = useQueryClient();
   const { data: orders, isLoading, refetch, isRefetching } = useOrders();
   const { data: todayCount } = useTodayOrdersCount();
   const updateStatus = useUpdateOrderStatus();
@@ -161,18 +159,14 @@ export function OrdersDashboard() {
     const orderId = active.id as string;
     const newStatus = over.id as OrderStatus;
 
-    queryClient.setQueryData<Order[]>(["orders"], (old) => {
-      if (!old) return old;
-      return old.map((order) =>
-        order.id === orderId
-          ? {
-              ...order,
-              status: newStatus,
-              updated_at: new Date().toISOString(),
-            }
-          : order,
-      );
-    });
+    // Columnas y cards estan registradas como droppables en dnd-kit; si la
+    // deteccion de colision alguna vez resuelve `over` a una card en vez de
+    // a una columna, over.id seria un UUID, no un OrderStatus. Guard barato
+    // para que ese "as" no escriba basura en orders.status.
+    if (newStatus !== "new" && newStatus !== "ready") {
+      setActiveOrder(null);
+      return;
+    }
 
     setActiveOrder(null);
     // No stock toast here: the drag-and-drop columns only target "new"/
