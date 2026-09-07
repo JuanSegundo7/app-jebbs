@@ -1,7 +1,9 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { toast } from "sonner";
+import { useSpring } from "@/lib/motion";
 import {
   Sheet,
   SheetContent,
@@ -46,6 +48,10 @@ export function OrderWizardDrawer({
   orderToEdit,
 }: OrderWizardDrawerProps) {
   const [step, setStep] = useState<WizardStep>("customer");
+  // +1 = avanzando, -1 = retrocediendo — decide de que lado entra/sale el
+  // paso (§7: el camino de vuelta tiene que espejar al de ida, no ser el
+  // mismo slide en la misma direccion sin importar hacia donde se navega).
+  const [direction, setDirection] = useState(1);
   const [customerPage, setCustomerPage] = useState(1);
 
   const isSubmittingRef = useRef(false);
@@ -227,6 +233,7 @@ export function OrderWizardDrawer({
 
   // ================= NAVIGATION =================
   const goNext = () => {
+    setDirection(1);
     if (step === "customer") setStep("combos");
     else if (step === "combos") setStep("burgers");
     else if (step === "burgers") setStep("sides");
@@ -234,11 +241,23 @@ export function OrderWizardDrawer({
   };
 
   const goBack = () => {
+    setDirection(-1);
     if (step === "combos") setStep("customer");
     else if (step === "burgers") setStep("combos");
     else if (step === "sides") setStep("burgers");
     else if (step === "summary") setStep("sides");
   };
+
+  // Slide direccional del body del paso — bajo MotionConfig
+  // reducedMotion="user" (app/(dashboard)/layout.tsx) el desplazamiento en
+  // x se cae solo y queda un cross-fade, que es exactamente el equivalente
+  // de reduced motion que pide §14. No hace falta ramificar a mano acá.
+  const stepVariants = {
+    enter: (dir: number) => ({ x: dir > 0 ? 24 : -24, opacity: 0 }),
+    center: { x: 0, opacity: 1 },
+    exit: (dir: number) => ({ x: dir > 0 ? -24 : 24, opacity: 0 }),
+  };
+  const stepTransition = useSpring("move");
 
   // ================= RENDER =================
   return (
@@ -286,7 +305,17 @@ export function OrderWizardDrawer({
 
           {/* CONTENT */}
           <div className="flex-1 overflow-y-auto">
-            <div className="p-6">
+            <AnimatePresence mode="wait" custom={direction} initial={false}>
+              <motion.div
+                key={step}
+                custom={direction}
+                variants={stepVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={stepTransition}
+                className="p-6"
+              >
               {step === "customer" && (
                 <CustomerStep
                   source={wizard.settings.source}
@@ -430,7 +459,8 @@ export function OrderWizardDrawer({
                   onDeliveryTimeChange={wizard.settings.setDeliveryTime}
                 />
               )}
-            </div>
+              </motion.div>
+            </AnimatePresence>
           </div>
 
           {/* TOTAL BAR */}
