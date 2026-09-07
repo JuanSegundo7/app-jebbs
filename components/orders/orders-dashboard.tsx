@@ -165,6 +165,7 @@ export function OrdersDashboard() {
 
     const orderId = active.id as string;
     const newStatus = over.id as OrderStatus;
+    const previousStatus = activeOrder?.status;
 
     // Columnas y cards estan registradas como droppables en dnd-kit; si la
     // deteccion de colision alguna vez resuelve `over` a una card en vez de
@@ -180,7 +181,29 @@ export function OrdersDashboard() {
     // "ready", so this call can never resolve to a "completed" status
     // transition — there's nothing meaningful for handleStockToast to react
     // to. Left out rather than wired in for consistency's sake.
-    updateStatus.mutate({ orderId, status: newStatus });
+    updateStatus.mutate(
+      { orderId, status: newStatus },
+      {
+        // Undo solo en el sentido "hacia atras" (listo->nuevo). nuevo->listo
+        // es el flujo normal de alta frecuencia y se queda silencioso, mismo
+        // criterio que ya establece el comentario de handleStockToast sobre
+        // no meter ruido en la accion mas repetida de la app. listo->nuevo
+        // es rara y casi siempre un arrastre accidental -- ahi si vale un
+        // toast con Deshacer.
+        onSuccess: () => {
+          if (previousStatus === "ready" && newStatus === "new") {
+            toast("Pedido movido a Nuevos", {
+              duration: 8000,
+              action: {
+                label: "Deshacer",
+                onClick: () =>
+                  updateStatus.mutate({ orderId, status: previousStatus }),
+              },
+            });
+          }
+        },
+      },
+    );
   };
 
   const handleCompleteOrder = (order: Order) => {

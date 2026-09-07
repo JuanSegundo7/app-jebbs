@@ -424,15 +424,15 @@ export function SuppliesTab() {
                       <Edit className="h-3.5 w-3.5" />
                     </Button>
                     <Button
-                      size="icon"
+                      size="icon-sm"
                       variant="ghost"
-                      className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                      className="text-muted-foreground hover:text-destructive"
                       onClick={() => {
                         setDeletingSupply(supply);
                         setDeleteBlockedByFk(false);
                       }}
                     >
-                      <Trash2 className="h-3.5 w-3.5" />
+                      <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>

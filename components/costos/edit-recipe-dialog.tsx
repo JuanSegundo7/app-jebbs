@@ -191,10 +191,27 @@ export function EditRecipeDialog({
     }
   }
 
-  async function handleRemoveLine(id: string) {
+  // Undo-toast, no AlertDialog: es una accion de alta frecuencia mientras
+  // se ajusta una receta (agregar/sacar lineas para probar), y confirmar
+  // cada borrado con un dialogo seria exactamente el error que marca §16.2
+  // -- entrenar a clickear sin leer. supply_id/quantity/scales_with son
+  // los mismos campos que saveLine ya acepta para agregar una linea nueva,
+  // asi que restaurar es el mismo call, no un camino aparte.
+  async function handleRemoveLine(line: RecipeLineWithDetails) {
+    const snapshot = {
+      supply_id: line.supply_id,
+      quantity: line.quantity,
+      scales_with: line.scales_with,
+    };
     try {
-      await deleteLine(id);
-      toast.success("Línea de receta eliminada");
+      await deleteLine(line.id);
+      toast.success("Línea de receta eliminada", {
+        duration: 8000,
+        action: {
+          label: "Deshacer",
+          onClick: () => saveLine(snapshot),
+        },
+      });
     } catch {
       toast.error("Error al eliminar la línea de receta");
     }
@@ -418,12 +435,12 @@ export function EditRecipeDialog({
                             {lineMakeable ?? "—"} u.
                           </span>
                           <Button
-                            size="icon"
+                            size="icon-sm"
                             variant="ghost"
-                            className="h-7 w-7 text-muted-foreground hover:text-destructive"
-                            onClick={() => handleRemoveLine(line.id)}
+                            className="text-muted-foreground hover:text-destructive"
+                            onClick={() => handleRemoveLine(line)}
                           >
-                            <X className="h-3.5 w-3.5" />
+                            <X className="h-4 w-4" />
                           </Button>
                         </div>
 
