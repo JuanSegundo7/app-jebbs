@@ -39,6 +39,14 @@ export default function DashboardLayout({
             </NextStep>
           </NextStepProvider>
         </MotionProvider>
+        {/* Taxonomia de toast (regla de la casa):
+            - toast.error   = lo pedido NO paso.
+            - toast.warning = paso, pero un efecto secundario fallo -- puede
+              requerir accion (ej: se guardo el gasto pero no se ajusto el
+              stock).
+            - toast.info    = paso; contexto que no se pidio.
+            No usar error para una falla parcial, ni warning para una falla
+            total -- son distinguibles a proposito. */}
         {/* Toaster afuera de SidebarProvider a propósito: sonner no está
             aplicando su propio position:fixed en este árbol (bug de sonner
             o de cómo se monta acá, no investigado a fondo), y mientras esa

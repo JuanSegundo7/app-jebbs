@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useNextStep } from "nextstepjs";
+import { toast } from "sonner";
 import { Header } from "@/components/layout/header";
 import { HelpButton } from "@/components/onboarding/help-button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -168,13 +169,13 @@ export default function MenuPage() {
 
     // Validar tipo de archivo
     if (!file.type.startsWith("image/")) {
-      alert("Por favor selecciona una imagen válida");
+      toast.error("Por favor selecciona una imagen válida");
       return;
     }
 
     // Validar tamaño (max 2MB)
     if (file.size > 2 * 1024 * 1024) {
-      alert("La imagen no puede superar los 2MB");
+      toast.error("La imagen no puede superar los 2MB");
       return;
     }
 
@@ -246,7 +247,7 @@ export default function MenuPage() {
       setDialogOpen(false);
     } catch (error) {
       console.error("Error saving burger:", error);
-      alert("Error al guardar hamburguesa");
+      toast.error("Error al guardar hamburguesa");
     }
   };
 

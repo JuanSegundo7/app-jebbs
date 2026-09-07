@@ -360,7 +360,7 @@ function FinanzasPageContent() {
       resetExpenseForm();
     } catch (error) {
       if (isStockUpdateFailure(error)) {
-        toast.error("El gasto se registró, pero no se pudo actualizar el stock. Corregilo desde Insumos.");
+        toast.warning("El gasto se registró, pero no se pudo actualizar el stock. Corregilo desde Insumos.");
         setExpenseDialogOpen(false);
         resetExpenseForm();
       } else {
@@ -392,7 +392,7 @@ function FinanzasPageContent() {
       resetExpenseForm();
     } catch (error) {
       if (isStockAdjustFailure(error)) {
-        toast.error("El gasto se actualizó, pero no se pudo ajustar el stock. Corregilo desde Insumos.");
+        toast.warning("El gasto se actualizó, pero no se pudo ajustar el stock. Corregilo desde Insumos.");
         setExpenseDialogOpen(false);
         resetExpenseForm();
       } else {
@@ -408,7 +408,7 @@ function FinanzasPageContent() {
       toast.success("Gasto eliminado");
     } catch (error) {
       if (isStockRevertFailure(error)) {
-        toast.error("El gasto se eliminó, pero no se pudo actualizar el stock. Corregilo desde Insumos.");
+        toast.warning("El gasto se eliminó, pero no se pudo actualizar el stock. Corregilo desde Insumos.");
       } else {
         toast.error("Error al eliminar el gasto");
       }

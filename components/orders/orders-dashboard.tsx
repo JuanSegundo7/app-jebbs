@@ -106,7 +106,7 @@ export function OrdersDashboard() {
     stockError: unknown;
   }) => {
     if (result.stockError) {
-      toast.error(
+      toast.warning(
         "Pedido completado, pero falló el descuento de stock. Revisá el stock manualmente.",
       );
     } else if (result.stockResult?.itemsWithoutRecipe) {

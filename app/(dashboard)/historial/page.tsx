@@ -149,7 +149,7 @@ export default function OrdersHistoryPage() {
         // the error branch can actually fire here.
         onSuccess: (result) => {
           if (result.stockError) {
-            toast.error(
+            toast.warning(
               "Pedido cancelado, pero falló la reversión de stock. Revisá el stock manualmente.",
             );
           }
@@ -167,7 +167,7 @@ export default function OrdersHistoryPage() {
       {
         onSuccess: (result) => {
           if (result.stockError) {
-            toast.error(
+            toast.warning(
               nextStatus === "completed"
                 ? "Pedido reactivado, pero falló el descuento de stock. Revisá el stock manualmente."
                 : "Pedido reactivado, pero falló la reversión de stock. Revisá el stock manualmente.",
