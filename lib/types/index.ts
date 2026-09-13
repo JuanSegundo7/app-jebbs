@@ -7,7 +7,7 @@ export type ExtraCategory = "extra" | "drink" | "fries" | "sides";
 export type DeliveryType = "pickup" | "delivery";
 export type PaymentMethod = "cash" | "transfer";
 export type DiscountType = "amount" | "percentage" | "none";
-export type OrderSource = "local" | "pedidosya";
+export type OrderSource = "local" | "pedidosya" | "web";
 
 // ============================================
 // CUSTOMER

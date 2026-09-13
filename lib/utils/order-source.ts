@@ -15,4 +15,8 @@ export const orderSourceConfig: Record<
     label: "🛵 PedidosYa",
     className: "bg-[var(--status-canceled-tint)] text-[var(--status-canceled)]",
   },
+  web: {
+    label: "🌐 Web",
+    className: "bg-[var(--color-chart-3)]/15 text-[var(--color-chart-3)]",
+  },
 };

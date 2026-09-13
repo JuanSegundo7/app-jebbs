@@ -16,6 +16,7 @@ interface SourceBreakdownCardProps {
 const ROWS = [
   { key: "local" as const, label: "Local", emoji: "🏠", color: "var(--color-chart-2)" },
   { key: "pedidosya" as const, label: "PedidosYa", emoji: "🛵", color: "var(--color-chart-1)" },
+  { key: "web" as const, label: "Web", emoji: "🌐", color: "var(--color-chart-4)" },
   { key: "unknown" as const, label: "Otros", emoji: "📦", color: "var(--color-chart-3)" },
 ];
 
@@ -71,6 +72,7 @@ export function SourceBreakdownCard({
   const rowsData = {
     local: breakdown.local,
     pedidosya: breakdown.pedidosya,
+    web: breakdown.web,
     unknown: breakdown.unknown,
   };
 
@@ -102,7 +104,7 @@ export function SourceBreakdownCard({
         </div>
 
         <div className="space-y-2.5">
-          {(["local", "pedidosya", "unknown"] as const).map((key) => {
+          {(["local", "pedidosya", "web", "unknown"] as const).map((key) => {
             const row = ROWS.find((r) => r.key === key)!;
             const data = rowsData[key];
             const amount = data.amount;

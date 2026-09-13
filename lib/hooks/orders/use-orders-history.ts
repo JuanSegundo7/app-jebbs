@@ -78,18 +78,20 @@ export interface PaymentBreakdown {
 export type SourceBuckets = {
   local: { amount: number; orders: number };
   pedidosya: { amount: number; orders: number; commission: number };
+  web: { amount: number; orders: number };
   unknown: { amount: number; orders: number };
 };
 
 export interface SourceBreakdown {
   local: { amount: number; orders: number; change: number };
   pedidosya: { amount: number; orders: number; commission: number; change: number };
+  web: { amount: number; orders: number; change: number };
   // The non-PedidosYa share of external_income (events, catering, etc. —
   // anything not matched by the PedidosYa description backfill in
   // scripts/012-external-income-source.sql), plus any order whose `source`
   // is still unrecognized — same "absorb what has no dimension value" role
-  // `other` plays in PaymentBreakdown, so local + pedidosya + unknown ===
-  // total exactly.
+  // `other` plays in PaymentBreakdown, so local + pedidosya + web + unknown
+  // === total exactly.
   unknown: { amount: number; orders: number; change: number };
   total: number;
 }
@@ -141,8 +143,8 @@ function bucketByPaymentMethod(
   return buckets;
 }
 
-// Classifies completed orders into local/pedidosya/unknown buckets by
-// `source`. Anything other than a strict "local"/"pedidosya" match
+// Classifies completed orders into local/pedidosya/web/unknown buckets by
+// `source`. Anything other than a strict "local"/"pedidosya"/"web" match
 // (including null/undefined from rows predating the column) falls into
 // "unknown" — same convention as bucketByPaymentMethod above, never
 // silently attributed to "local".
@@ -155,6 +157,7 @@ function bucketBySource(
   const buckets: SourceBuckets = {
     local: { amount: 0, orders: 0 },
     pedidosya: { amount: 0, orders: 0, commission: 0 },
+    web: { amount: 0, orders: 0 },
     unknown: { amount: 0, orders: 0 },
   };
   for (const o of orders || []) {
@@ -166,6 +169,9 @@ function bucketBySource(
       buckets.pedidosya.amount += amount;
       buckets.pedidosya.orders += 1;
       buckets.pedidosya.commission += Number(o.commission_amount ?? 0);
+    } else if (o.source === "web") {
+      buckets.web.amount += amount;
+      buckets.web.orders += 1;
     } else {
       buckets.unknown.amount += amount;
       buckets.unknown.orders += 1;
@@ -433,12 +439,12 @@ export function useOrdersAnalytics(
         total: currentBuckets.cash.amount + currentBuckets.transfer.amount + currentOtherAmount,
       };
 
-      // Source breakdown (local / pedidosya / unknown). PedidosYa-flagged
+      // Source breakdown (local / pedidosya / web / unknown). PedidosYa-flagged
       // external_income (backfilled by scripts/012-external-income-source.sql,
       // or set going forward — though the panel has no source selector yet)
       // folds into the pedidosya bucket; only the rest falls back to the
       // "other absorbs what's left" trick unknown shares with paymentBreakdown
-      // above — so the three buckets still sum to totalRevenue exactly.
+      // above — so the four buckets still sum to totalRevenue exactly.
       const currentSourceBuckets = bucketBySource(current);
       const prevSourceBuckets = bucketBySource(prev);
       const currentExternalSplit = splitExternalBySource(externalIncome);
@@ -465,6 +471,11 @@ export function useOrdersAnalytics(
           commission: currentSourceBuckets.pedidosya.commission,
           change: pct(currentPedidosyaAmount, prevPedidosyaAmount),
         },
+        web: {
+          amount: currentSourceBuckets.web.amount,
+          orders: currentSourceBuckets.web.orders,
+          change: pct(currentSourceBuckets.web.amount, prevSourceBuckets.web.amount),
+        },
         unknown: {
           amount: currentUnknownSourceAmount,
           orders: currentSourceBuckets.unknown.orders,
@@ -473,6 +484,7 @@ export function useOrdersAnalytics(
         total:
           currentSourceBuckets.local.amount +
           currentPedidosyaAmount +
+          currentSourceBuckets.web.amount +
           currentUnknownSourceAmount,
       };
 

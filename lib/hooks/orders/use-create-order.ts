@@ -2,6 +2,7 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
+import type { OrderSource } from "@/lib/types";
 
 export interface OrderItemInput {
   burger_id: string | null;
@@ -28,7 +29,7 @@ export interface CreateOrderInput {
   delivery_type: "delivery" | "pickup";
   delivery_fee: number;
   payment_method: "cash" | "transfer";
-  source?: "local" | "pedidosya" | null;
+  source?: OrderSource | null;
   commission_rate?: number | null;
   discount_type?: "amount" | "percentage" | "none" | null;
   discount_value?: number;
