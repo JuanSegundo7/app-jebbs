@@ -99,6 +99,11 @@ export function useUpdateOrder() {
           price_adjustment: payload.price_adjustment ?? 0,
           total_amount: finalTotal,
           notes: payload.notes,
+          // Editar el pedido completo (este path) siempre implica que
+          // alguien del local miró y confirmó el costo de envío -- nunca
+          // queda "a confirmar" después de pasar por acá, sin importar el
+          // valor que tuviera antes.
+          delivery_fee_pending: false,
           updated_at: new Date().toISOString(),
         })
         .eq("id", orderId)

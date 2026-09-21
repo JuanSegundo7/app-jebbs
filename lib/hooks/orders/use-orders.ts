@@ -437,10 +437,12 @@ export function useQuickPatchOrder() {
       orderId,
       total_amount,
       payment_method,
+      delivery_fee,
     }: {
       orderId: string;
       total_amount: number;
       payment_method: "cash" | "transfer";
+      delivery_fee?: number;
     }) => {
       const { error } = await supabase
         .from("orders")
@@ -448,16 +450,33 @@ export function useQuickPatchOrder() {
           total_amount,
           payment_method,
           updated_at: new Date().toISOString(),
+          // Recibir un delivery_fee acá significa que el staff resolvió el
+          // costo de envío de un pedido "a confirmar" -- nunca queda
+          // pending después de esto. Ver order-card.tsx: este es el único
+          // lugar donde un pedido puede tocarse de nuevo una vez que su
+          // status avanzó más allá de new/ready.
+          ...(delivery_fee !== undefined
+            ? { delivery_fee, delivery_fee_pending: false }
+            : {}),
         })
         .eq("id", orderId);
       if (error) throw error;
     },
-    onMutate: async ({ orderId, total_amount, payment_method }) => {
+    onMutate: async ({ orderId, total_amount, payment_method, delivery_fee }) => {
       await queryClient.cancelQueries({ queryKey: ["orders"] });
       const previousOrders = queryClient.getQueryData<Order[]>(["orders"]);
       queryClient.setQueryData<Order[]>(["orders"], (old) =>
         old?.map((o) =>
-          o.id === orderId ? { ...o, total_amount, payment_method } : o,
+          o.id === orderId
+            ? {
+                ...o,
+                total_amount,
+                payment_method,
+                ...(delivery_fee !== undefined
+                  ? { delivery_fee, delivery_fee_pending: false }
+                  : {}),
+              }
+            : o,
         ),
       );
       return { previousOrders };
