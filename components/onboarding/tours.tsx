@@ -359,4 +359,69 @@ export const tours: Tour[] = [
       },
     ],
   },
+  {
+    // Targets the WhatsApp message editor specifically — the delivery
+    // template editor reuses the same TemplateEditor component (ids prefixed
+    // "configuracion-delivery-*" instead of "configuracion-whatsapp-*") and
+    // isn't covered by its own steps to keep the tour short.
+    tour: "configuracion",
+    steps: [
+      {
+        selector: "#configuracion-whatsapp-chips",
+        side: "bottom",
+        title: "Variables del mensaje",
+        content: (
+          <>
+            Hacé click en cualquier chip para insertarlo donde tengas el cursor. Cada uno se
+            reemplaza por un dato real del pedido — cliente, total, dirección — al copiar un
+            pedido.
+          </>
+        ),
+        showControls: true,
+        showSkip: true,
+      },
+      {
+        selector: "#configuracion-whatsapp-textarea",
+        side: "right",
+        title: "El texto del mensaje",
+        content: (
+          <>
+            Editá libremente — es el mensaje completo. Una línea que solo tiene variables vacías
+            (por ejemplo, sin notas o sin hora de entrega) desaparece sola; el resto de la línea
+            queda como la escribiste.
+          </>
+        ),
+        showControls: true,
+        showSkip: true,
+      },
+      {
+        selector: "#configuracion-whatsapp-preview",
+        side: "left",
+        title: "Vista previa",
+        content: (
+          <>
+            Se actualiza con cada letra que escribís, usando un pedido de ejemplo que ya trae
+            combo, papas sin querer, descuento y envío — así ves de una todas las secciones
+            posibles, no solo las que tocaste en el último pedido real.
+          </>
+        ),
+        showControls: true,
+        showSkip: true,
+      },
+      {
+        selector: "#configuracion-whatsapp-actions",
+        side: "top",
+        title: "Guardar",
+        content: (
+          <>
+            Los botones de Guardar y Cancelar aparecen acá apenas cambiás algo. &quot;Restaurar
+            plantilla original&quot; carga de nuevo el mensaje de fábrica — pero también necesita
+            que apretés Guardar para hacerse efectivo.
+          </>
+        ),
+        showControls: true,
+        showSkip: true,
+      },
+    ],
+  },
 ];
