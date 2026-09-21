@@ -8,11 +8,17 @@
   color-scheme: light;
 
   /* Escalera opaca. Uso directo en regiones sin vidrio, y fallback
-     cuando backdrop-filter no está disponible o no conviene (§14). */
-  --surface-0: #f2f2f7;
-  --surface-1: #ffffff;
-  --surface-2: #f5f5f7;
-  --surface-3: #e9e9ee;
+     cuando backdrop-filter no está disponible o no conviene (§14).
+     Bajados unos puntos de luminancia desde blanco/gris puro (reportado
+     real: "el modo claro es demasiado brillante, molesto") -- foreground
+     (#1c1c1e) sobre surface-1 pasaba de ~16.5:1 a ~15.2:1, todavía muy por
+     encima del mínimo de accesibilidad (4.5:1 WCAG AA), pero sin el glare
+     de blanco puro en superficies grandes. Mismo orden relativo de
+     elevación de antes (surface-1 > surface-2 > surface-0 > surface-3). */
+  --surface-0: #eef0f3;
+  --surface-1: #f7f8fa;
+  --surface-2: #f2f3f5;
+  --surface-3: #e5e6ea;
 
   /* Materiales translúcidos (§12). */
   --material-thin: rgba(255, 255, 255, 0.72);
@@ -611,9 +617,43 @@
   }
 }
 
+/* Vista previa de zonas de envío (components/configuracion/delivery-zone-map-preview.tsx).
+   El SVG inyectado (public/delivery-zone-map.svg) trae su propio <style>
+   embebido con .zone y .zone.dim -- ese ya alcanza para el hover. Lo que
+   falta acá es .zone-off: un data-zone="z1".."z4" que no matchea el
+   map_zone_key de ninguna zona activa hoy (zona desactivada, o key
+   reasignada a otra zona) -- gris desaturado, sin affordance de hover, en
+   vez de desaparecer o seguir mostrando un precio caído. Selector con más
+   especificidad que `.zone path`/`.zone.dim` (estilo inline del propio
+   SVG) para ganar la cascada sin depender del orden de inserción en el DOM
+   una vez inyectado vía dangerouslySetInnerHTML. Todo prefijado por
+   `.delivery-zone-map` para que no se filtre a otro SVG con clases "zone"
+   en el resto del dashboard. */
+.delivery-zone-map .zone.zone-off path {
+  fill: var(--muted-foreground-dim);
+  fill-opacity: 0.16;
+  stroke: var(--muted-foreground-dim);
+  stroke-opacity: 0.35;
+}
+.delivery-zone-map .zone.zone-off {
+  pointer-events: none;
+}
+
 /* Fallbacks de accesibilidad (§14) — sin capa, para ganar siempre
    por especificidad de aparición contra las utilities de arriba. */
 
+/* !important en CADA declaración de acá, no solo en backdrop-filter: las
+   utilities que emite @utility (material-thin/regular/thick, modal-surface,
+   scrim, ios-blur, ios-glass -- todas definidas más arriba en este mismo
+   archivo) viven en la capa de utilities de Tailwind v4, que por diseño le
+   gana a CSS plano de la misma especificidad sin importar el orden en el
+   archivo fuente. Antes background-color acá NO tenía !important -- perdía
+   la cascada contra la utility real, así que con "reducir transparencia"
+   activado en el SO quedaba lo peor de los dos mundos: sin blur (eso sí
+   ganaba, por su !important) pero con la opacidad NORMAL en vez de la
+   reforzada, mucho más transparente de lo pensado (bug real, reportado con
+   DevTools: Computed mostraba backdrop-filter: none pero background-color:
+   rgba(0,0,0,0.55), el valor sin reforzar). */
 @media (prefers-reduced-transparency: reduce) {
   .material-thin,
   .material-regular,
@@ -625,29 +665,29 @@
     -webkit-backdrop-filter: none !important;
   }
   .material-thin {
-    background-color: var(--surface-1);
+    background-color: var(--surface-1) !important;
   }
   .material-regular {
-    background-color: var(--surface-2);
+    background-color: var(--surface-2) !important;
   }
   .material-thick,
   .modal-surface {
-    background-color: var(--surface-3);
+    background-color: var(--surface-3) !important;
   }
   .scrim,
   .ios-blur {
-    background-color: rgba(0, 0, 0, 0.72);
+    background-color: rgba(0, 0, 0, 0.72) !important;
   }
   .ios-sidebar [data-slot="sidebar-inner"] {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
-    background-color: var(--surface-3);
+    background-color: var(--surface-3) !important;
   }
   /* .ios-glass no tiene blur que sacar, pero su fondo (--card =
      --material-thin, alpha 0.42 en oscuro) se queda translucido igual --
      ~58 sitios lo usan. */
   .ios-glass {
-    background-color: var(--surface-1);
+    background-color: var(--surface-1) !important;
   }
 }
 

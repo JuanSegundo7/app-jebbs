@@ -95,7 +95,10 @@ export function EditCustomerModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg bg-card p-0 overflow-hidden gap-0">
+      {/* Sin bg-card: mismo bug que order-details-modal.tsx -- pisaba el
+          background-color de modal-surface (globals.css) con el material más
+          fino de --card, dejando el fondo del modal demasiado translúcido. */}
+      <DialogContent className="max-w-lg p-0 overflow-hidden gap-0">
         {/* Header */}
         <DialogHeader className="px-6 pt-6 pb-4 border-b">
           <div className="flex items-center gap-3">
