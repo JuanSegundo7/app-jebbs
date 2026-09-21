@@ -3,9 +3,16 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
-const BUCKET_NAME = "burger-images"; // Nombre del bucket en Supabase
-
-export function useImageUpload() {
+// `bucket`/`pathPrefix` default to the burger-images upload's original
+// values so the only existing consumer (app/(dashboard)/menu/page.tsx,
+// which calls useImageUpload() with no arguments) keeps working unchanged.
+// A future work unit calls useImageUpload("branding", "logo/") for the
+// brand logo upload, reusing this same uploadImage/deleteImage logic
+// instead of duplicating it.
+export function useImageUpload(
+  bucket: string = "burger-images",
+  pathPrefix: string = "burgers/",
+) {
   const supabase = createClient();
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -18,11 +25,11 @@ export function useImageUpload() {
       // Generar nombre único para el archivo
       const fileExt = file.name.split(".").pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-      const filePath = `burgers/${fileName}`;
+      const filePath = `${pathPrefix}${fileName}`;
 
       // Upload a Supabase Storage
       const { data, error } = await supabase.storage
-        .from(BUCKET_NAME)
+        .from(bucket)
         .upload(filePath, file, {
           cacheControl: "3600",
           upsert: false,
@@ -33,7 +40,7 @@ export function useImageUpload() {
       // Obtener URL pública
       const {
         data: { publicUrl },
-      } = supabase.storage.from(BUCKET_NAME).getPublicUrl(filePath);
+      } = supabase.storage.from(bucket).getPublicUrl(filePath);
 
       setUploadProgress(100);
       return publicUrl;
@@ -49,14 +56,12 @@ export function useImageUpload() {
   const deleteImage = async (imageUrl: string): Promise<void> => {
     try {
       // Extraer el path del URL
-      const urlParts = imageUrl.split(`${BUCKET_NAME}/`);
+      const urlParts = imageUrl.split(`${bucket}/`);
       if (urlParts.length < 2) return;
 
       const filePath = urlParts[1];
 
-      const { error } = await supabase.storage
-        .from(BUCKET_NAME)
-        .remove([filePath]);
+      const { error } = await supabase.storage.from(bucket).remove([filePath]);
 
       if (error) throw error;
     } catch (error) {

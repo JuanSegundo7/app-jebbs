@@ -1,49 +1,36 @@
 import { DeliveryType, DiscountType, OrderSource, PaymentMethod } from "@/lib/types";
-import { useState } from "react";
+import type { AppSettings } from "@/lib/types";
+import { useRef, useState } from "react";
 
-function getDefaultDeliveryTime(): string {
+function getDefaultDeliveryTime(minutes: number): string {
   const now = new Date();
-  now.setMinutes(now.getMinutes() + 30);
+  now.setMinutes(now.getMinutes() + minutes);
   const hours = now.getHours().toString().padStart(2, "0");
-  const minutes = now.getMinutes().toString().padStart(2, "0");
-  return `${hours}:${minutes}`;
+  const mins = now.getMinutes().toString().padStart(2, "0");
+  return `${hours}:${mins}`;
 }
 
-const DEFAULT_DELIVERY_FEE_KEY = "jebbs_default_delivery_fee";
-
-function getDefaultDeliveryFee(): number {
-  if (typeof window === "undefined") return 2000;
-  const stored = localStorage.getItem(DEFAULT_DELIVERY_FEE_KEY);
-  if (!stored) return 2000;
-  // Guard against a corrupted "NaN" string persisted before the /precios fix
-  // (comma-decimal input wasn't normalized before Number()) — fall back to
-  // the 2000 default instead of starting a new order with a NaN delivery fee.
-  const parsed = Number(stored);
-  return Number.isFinite(parsed) ? parsed : 2000;
-}
-
-// Same key precios/page.tsx writes to when the % is edited, and the same
+// Same row (`app_settings`, via `appSettings`/the ref) that precios/page.tsx
+// used to write to when the % was edited (now /configuracion), and the same
 // key use-create-order.ts / use-update-order.ts used to read live before
 // this fix. Resolving it here — once, into wizard state — is what makes
 // the commission actually freeze: a NEW order picks up today's default on
 // mount, and an EDITED order overwrites it via loadSettings with whatever
 // rate was frozen onto that order at creation (see order-data-loader.ts),
 // never with today's live value.
-const PEDIDOSYA_COMMISSION_PCT_KEY = "jebbs_pedidosya_commission_pct";
 
-function getDefaultCommissionRate(): number {
-  if (typeof window === "undefined") return 0;
-  const stored = localStorage.getItem(PEDIDOSYA_COMMISSION_PCT_KEY);
-  if (!stored) return 0;
-  const parsed = Number(stored);
-  return Number.isFinite(parsed) ? Math.min(100, Math.max(0, parsed)) : 0;
-}
+export function useOrderSettings(appSettings: AppSettings) {
+  // Always points at the latest `appSettings` without triggering a
+  // re-render — see the comment on `reset()` below for why this matters.
+  const appSettingsRef = useRef(appSettings);
+  appSettingsRef.current = appSettings;
 
-export function useOrderSettings() {
   const [deliveryType, setDeliveryType] = useState<"delivery" | "pickup">(
     "pickup",
   );
-  const [deliveryFee, setDeliveryFee] = useState(getDefaultDeliveryFee);
+  const [deliveryFee, setDeliveryFee] = useState(
+    () => appSettings.default_delivery_fee,
+  );
   const [paymentMethod, setPaymentMethod] = useState<"cash" | "transfer">(
     "cash",
   );
@@ -56,7 +43,7 @@ export function useOrderSettings() {
   // never get silently defaulted to "local" (see loadSettings below).
   const [source, setSource] = useState<OrderSource | null>("local");
   const [commissionRate, setCommissionRate] = useState(
-    getDefaultCommissionRate,
+    () => appSettings.pedidosya_commission_pct,
   );
   const [notes, setNotes] = useState("");
   const [discountType, setDiscountType] = useState<
@@ -66,19 +53,29 @@ export function useOrderSettings() {
   // Flat manual amount, PedidosYa-only — see order-price-calculator.ts and
   // scripts/016-order-price-adjustment.sql for why this isn't a discount.
   const [priceAdjustment, setPriceAdjustment] = useState(0);
-  const [deliveryTime, setDeliveryTime] = useState(getDefaultDeliveryTime);
+  const [deliveryTime, setDeliveryTime] = useState(() =>
+    getDefaultDeliveryTime(appSettings.default_delivery_minutes),
+  );
 
   const reset = () => {
+    // Read from the ref, NOT the `appSettings` parameter closed over at the
+    // initial render — `reset()` runs when order-wizard-drawer.tsx opens the
+    // drawer in create mode, which happens long after the initial render (the
+    // drawer stays mounted, only `open` toggles), so by then the
+    // `["app-settings"]` query has almost certainly resolved. Reading the
+    // closed-over parameter here could freeze the hardcoded defaults forever
+    // if the wizard was first opened before that query settled.
+    const current = appSettingsRef.current;
     setDeliveryType("delivery");
-    setDeliveryFee(getDefaultDeliveryFee());
+    setDeliveryFee(current.default_delivery_fee);
     setPaymentMethod("transfer");
     setSource("local");
-    setCommissionRate(getDefaultCommissionRate());
+    setCommissionRate(current.pedidosya_commission_pct);
     setDiscountType("none");
     setDiscountValue(0);
     setPriceAdjustment(0);
     setNotes("");
-    setDeliveryTime(getDefaultDeliveryTime()); // recalcula al momento del reset
+    setDeliveryTime(getDefaultDeliveryTime(current.default_delivery_minutes)); // recalcula al momento del reset
   };
 
   const loadSettings = (settings: {

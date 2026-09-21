@@ -3,6 +3,7 @@ import { useCustomerSelection } from "./use-customer-selection";
 import { useBurgerSelection } from "./use-burger-selection";
 import { useComboSelection } from "./use-combo-selection";
 import { useOrderSettings } from "./use-order-settings";
+import { useSettings } from "@/lib/hooks/use-app-settings";
 import { OrderPriceCalculator } from "../services/order-price-calculator";
 import { OrderDataTransformer } from "../services/order-data-transformer";
 import { usePrintOrder } from "@/lib/hooks/use-print-order";
@@ -44,7 +45,8 @@ export function useOrderWizard({
   const customer = useCustomerSelection();
   const burgers = useBurgerSelection(meatExtra);
   const combos = useComboSelection();
-  const settings = useOrderSettings();
+  const appSettings = useSettings();
+  const settings = useOrderSettings(appSettings);
   const sides = useSidesSelection();
 
   const createOrder = useCreateOrder();

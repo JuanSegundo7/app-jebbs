@@ -240,6 +240,7 @@ export function useOrdersHistory(dateRange: { from: Date; to: Date }) {
             unit_price,
             subtotal,
             customizations,
+            extra_id,
             order_item_extras (
               id,
               extra_name,

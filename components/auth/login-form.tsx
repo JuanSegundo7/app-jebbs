@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Loader2, ShoppingBag, BarChart3, Users, Zap, Eye, EyeOff } from "lucide-react"
 import Image from "next/image"
+import { useSettings } from "@/lib/hooks/use-app-settings"
 
 const FEATURES = [
   { icon: ShoppingBag, text: "Gestión de pedidos en tiempo real" },
@@ -18,6 +19,7 @@ const FEATURES = [
 
 export function LoginForm() {
   const router = useRouter()
+  const settings = useSettings()
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
@@ -54,13 +56,13 @@ export function LoginForm() {
 
         <div className="flex items-center gap-3 relative z-10">
           <Image
-            src="/jebbs.jpg"
-            alt="Jebbs"
+            src={settings.logo_url ?? "/jebbs.jpg"}
+            alt={settings.business_name}
             width={36}
             height={36}
             className="rounded-xl object-cover"
           />
-          <span className="text-white text-headline">Jebbs Burgers</span>
+          <span className="text-white text-headline">{settings.business_name}</span>
         </div>
 
         <div className="relative z-10 space-y-8">
@@ -88,7 +90,7 @@ export function LoginForm() {
         </div>
 
         <p className="text-zinc-600 text-caption relative z-10">
-          © {new Date().getFullYear()} Jebbs Burgers
+          © {new Date().getFullYear()} {settings.business_name}
         </p>
       </div>
 
@@ -96,8 +98,14 @@ export function LoginForm() {
       <div className="w-full lg:w-1/2 flex items-center justify-center bg-zinc-900 p-8">
         <div className="w-full max-w-sm space-y-8">
           <div className="flex items-center gap-2 lg:hidden">
-            <Image src="/jebbs.jpg" alt="Jebbs" width={32} height={32} className="rounded-lg object-cover" />
-            <span className="text-white font-semibold">Jebbs Burgers</span>
+            <Image
+              src={settings.logo_url ?? "/jebbs.jpg"}
+              alt={settings.business_name}
+              width={32}
+              height={32}
+              className="rounded-lg object-cover"
+            />
+            <span className="text-white font-semibold">{settings.business_name}</span>
           </div>
 
           <div className="space-y-1">

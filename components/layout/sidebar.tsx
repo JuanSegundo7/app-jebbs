@@ -13,6 +13,7 @@ import {
   User,
   LogOut,
   Wallet,
+  Settings,
 } from "lucide-react";
 import {
   Sidebar,
@@ -28,6 +29,7 @@ import {
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
+import { useSettings } from "@/lib/hooks/use-app-settings";
 
 const navigation = [
   { name: "Pedidos", href: "/", icon: LayoutDashboard },
@@ -39,11 +41,13 @@ const navigation = [
   { name: "Combos", href: "/combos", icon: Component },
   { name: "Extras", href: "/extras", icon: Plus },
   { name: "Precios", href: "/precios", icon: DollarSign },
+  { name: "Configuración", href: "/configuracion", icon: Settings },
 ];
 
 export function AppSidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const settings = useSettings();
 
   async function handleLogout() {
     const supabase = createClient()
@@ -67,7 +71,7 @@ export function AppSidebar() {
             centro en modo icono) a cambio de cero saltos.
           */}
           <Image
-            src="/jebbs.jpg"
+            src={settings.logo_url ?? "/jebbs.jpg"}
             alt="Logo"
             width={36}
             height={36}
@@ -89,21 +93,15 @@ export function AppSidebar() {
           <div className="grid grid-cols-[1fr] transition-[grid-template-columns] duration-300 ease-in-out group-data-[collapsible=icon]:grid-cols-[0fr]">
             <div
               className={cn(
-                // leading-tight deliberado: stack de 2 lineas (Jebbs / Burgers),
-                // el leading normal de headline/subheadline las separa de mas.
+                // flex-col + leading-tight se mantienen por si el nombre
+                // custom del negocio hace wrap en algun ancho intermedio.
                 "flex flex-col leading-tight overflow-hidden min-w-0",
                 "transition-opacity duration-300 ease-in-out opacity-100",
                 "group-data-[collapsible=icon]:opacity-0",
               )}
             >
-              <span className="text-headline font-bold whitespace-nowrap">
-                Jebbs
-              </span>
-              <span
-                className="font-brand text-subheadline text-(--color-jebbs) -mt-1 whitespace-nowrap"
-                style={{ textShadow: "0 0 12px color-mix(in srgb, var(--jebbs) 55%, transparent)" }}
-              >
-                Burgers
+              <span className="text-headline font-bold whitespace-nowrap truncate">
+                {settings.business_name}
               </span>
             </div>
           </div>

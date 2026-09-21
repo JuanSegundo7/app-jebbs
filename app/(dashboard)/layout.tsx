@@ -1,6 +1,7 @@
 import type React from "react";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
+import { ThemeColorProvider } from "@/components/providers/theme-color-provider";
 import { MotionProvider } from "@/components/providers/motion-provider";
 
 import { Analytics } from "@vercel/analytics/next";
@@ -19,6 +20,12 @@ export default function DashboardLayout({
   return (
     <ThemeProvider>
       <QueryProvider>
+        {/* ThemeColorProvider necesita un QueryClientProvider ancestro
+            (useSettings() hace una query) -- por eso vive DENTRO de
+            QueryProvider, no afuera junto a ThemeProvider. No depende de
+            useTheme(): lee la clase "dark" directo del <html>, ver el
+            comentario en theme-color-provider.tsx. */}
+        <ThemeColorProvider>
         {/* MotionProvider envuelve solo el arbol que puede tener motion.*
             (sidebar, kanban) -- Toaster/Analytics quedan afuera a proposito,
             mismo criterio que ya separa a Toaster de SidebarProvider abajo. */}
@@ -39,6 +46,7 @@ export default function DashboardLayout({
             </NextStep>
           </NextStepProvider>
         </MotionProvider>
+        </ThemeColorProvider>
         {/* Taxonomia de toast (regla de la casa):
             - toast.error   = lo pedido NO paso.
             - toast.warning = paso, pero un efecto secundario fallo -- puede

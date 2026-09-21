@@ -86,6 +86,9 @@ export interface Order {
   commission_amount: number; // 🆕 Agregado de DB
   commission_rate: number | null; // 🆕 Agregado de DB — % congelado al crear el pedido
   price_adjustment: number; // 🆕 Agregado de DB — ajuste manual, solo PedidosYa
+  delivery_zone_id: string | null; // 🆕 Agregado de DB
+  delivery_zone_name: string | null; // 🆕 Agregado de DB
+  delivery_fee_pending: boolean; // 🆕 Agregado de DB
   notes: string | null;
   created_at: string;
   updated_at: string;
@@ -290,4 +293,48 @@ export interface OrderItemDraft {
   meatPriceAdjustment: number;
   removedIngredients: string[];
   selectedExtras: { extra: Extra; quantity: number }[];
+}
+
+// ============================================
+// APP SETTINGS
+// ============================================
+
+// Singleton row — see scripts/018-app-settings.sql. Defaults mirrored in
+// lib/settings/defaults.ts.
+export interface AppSettings {
+  business_name: string;
+  pickup_address: string;
+  whatsapp_template: string;
+  delivery_template: string;
+  default_delivery_fee: number;
+  pedidosya_commission_pct: number;
+  default_delivery_minutes: number;
+  primary_color_light: string;
+  primary_color_dark: string;
+  logo_url: string | null;
+}
+
+// ============================================
+// DELIVERY ZONES
+// ============================================
+
+// See scripts/019-delivery-zones.sql. Zones are soft-deleted only
+// (is_active = false) — there is no delete mutation anywhere in this app,
+// since orders.delivery_zone_id has no ON DELETE cascade.
+export interface DeliveryZone {
+  id: string;
+  name: string;
+  description: string | null;
+  fee: number;
+  is_active: boolean;
+  sort_order: number;
+  map_zone_key: string | null;
+  // Hand-drawn shape on the same illustrated map (viewBox 0 0 1654 966), an
+  // array of [x, y] point pairs. Nullable, independent of map_zone_key — see
+  // scripts/020-delivery-zone-polygons.sql. A zone should never have both
+  // set: saving a map_polygon must null out map_zone_key in the same
+  // mutation ("graduating" off the 4 legacy fixed slots).
+  map_polygon: [number, number][] | null;
+  created_at: string;
+  updated_at: string;
 }

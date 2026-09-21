@@ -62,8 +62,7 @@ import {
 } from "@/components/ui/popover";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { formatOrderForWhatsapp } from "@/lib/utils/formatOrderWhatsapp";
-import { formatOrderForDelivery } from "@/lib/utils/formatOrderDelivery";
+import { useOrderMessages } from "@/lib/hooks/use-order-messages";
 import { toast } from "sonner";
 
 type DateFilter = "today" | "week" | "custom";
@@ -84,6 +83,7 @@ export default function OrdersHistoryPage() {
   const printOrder = usePrintOrder();
   const cancelOrder = useCancelOrder();
   const reactivateOrder = useReactivateOrder();
+  const { copyWhatsapp, copyDelivery } = useOrderMessages();
 
   const dateRange = useMemo(() => {
     const now = new Date();
@@ -364,11 +364,7 @@ export default function OrdersHistoryPage() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={async () => {
-                                  const text = formatOrderForWhatsapp(order);
-                                  await navigator.clipboard.writeText(text);
-                                  toast.success("Pedido copiado para WhatsApp");
-                                }}
+                                onClick={() => copyWhatsapp(order)}
                                 className="cursor-pointer"
                               >
                                 <Copy className="h-4 w-4" />
@@ -376,11 +372,7 @@ export default function OrdersHistoryPage() {
                               <Button
                                 variant="ghost"
                                 size="icon-sm"
-                                onClick={async () => {
-                                  const text = formatOrderForDelivery(order);
-                                  await navigator.clipboard.writeText(text);
-                                  toast.success("Pedido copiado para delivery");
-                                }}
+                                onClick={() => copyDelivery(order)}
                                 className="cursor-pointer rounded-xl"
                                 title="Copiar para delivery"
                               >

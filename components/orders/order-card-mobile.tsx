@@ -24,8 +24,7 @@ import { formatCurrency, getRelativeTime } from "@/lib/utils/format";
 import { useTogglePaymentStatus, useQuickPatchOrder } from "@/lib/hooks/orders/use-orders";
 import { cn } from "@/lib/utils";
 import { orderSourceConfig } from "@/lib/utils/order-source";
-import { formatOrderForWhatsapp } from "@/lib/utils/formatOrderWhatsapp";
-import { formatOrderForDelivery } from "@/lib/utils/formatOrderDelivery";
+import { useOrderMessages } from "@/lib/hooks/use-order-messages";
 import { toast } from "sonner";
 import { statusConfig, statusEdgeStyle } from "@/lib/utils/order-status-style";
 
@@ -44,6 +43,7 @@ export function OrderCardMobile({
 }: OrderCardMobileProps) {
   const togglePayment = useTogglePaymentStatus();
   const quickPatch = useQuickPatchOrder();
+  const { copyWhatsapp, copyDelivery } = useOrderMessages();
   const status = order.status;
   const config = statusConfig[status];
 
@@ -89,18 +89,14 @@ export function OrderCardMobile({
     togglePayment.mutate({ orderId: order.id, isPaid: !order.is_paid });
   };
 
-  const handleCopy = async (e: React.MouseEvent) => {
+  const handleCopy = (e: React.MouseEvent) => {
     e.stopPropagation();
-    const text = formatOrderForWhatsapp(order);
-    await navigator.clipboard.writeText(text);
-    toast.success("Pedido copiado para WhatsApp");
+    copyWhatsapp(order);
   };
 
-  const handleCopyDelivery = async (e: React.MouseEvent) => {
+  const handleCopyDelivery = (e: React.MouseEvent) => {
     e.stopPropagation();
-    const text = formatOrderForDelivery(order);
-    await navigator.clipboard.writeText(text);
-    toast.success("Pedido copiado para delivery");
+    copyDelivery(order);
   };
 
   return (
