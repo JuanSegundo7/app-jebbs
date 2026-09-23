@@ -241,6 +241,11 @@ function loadCombos(
                 removedIngredients: burgerData.removedIngredients || [],
                 selectedExtras,
                 meatPriceAdjustment: 0,
+                // Solo se bloquea si la burger guardada ES la fija del combo;
+                // pedidos viejos con otra burger quedan editables.
+                locked:
+                  !!originalSlot?.rules?.fixed_burger_id &&
+                  originalSlot.rules.fixed_burger_id === burgerData.burgerId,
               };
             })
             .filter(Boolean);

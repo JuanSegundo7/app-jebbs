@@ -62,8 +62,18 @@ export function useAllCombos() {
             (r) => r.rule_type === "max_quantity",
           );
 
+          // Alias: el admin históricamente guardó esta regla como
+          // "allowed_default_meat_quantity" y los lectores buscaban
+          // "allowed_meat_count", así que el filtro nunca se aplicaba.
+          // Aceptamos ambos para que los combos ya guardados filtren sin re-guardarse.
           const allowedMeatRule = slot.combo_slots_rules.find(
-            (r) => r.rule_type === "allowed_meat_count",
+            (r) =>
+              r.rule_type === "allowed_meat_count" ||
+              r.rule_type === "allowed_default_meat_quantity",
+          );
+
+          const fixedBurgerRule = slot.combo_slots_rules.find(
+            (r) => r.rule_type === "fixed_burger_id",
           );
 
           const noFriesRule = slot.combo_slots_rules.find(
@@ -80,7 +90,16 @@ export function useAllCombos() {
             created_at: slot.created_at,
 
             rules: {
-              min_quantity: minRule ? Number(minRule.rule_value) : 0,
+              // Sin regla explícita, un slot de HAMBURGUESA required exige su
+              // cantidad completa. Solo hamburguesas: en producción `required`
+              // es true en todos los combo_slots (default de la DB, el admin
+              // nunca lo persistía), incluidas bebidas y acompañamientos que el
+              // admin trata como opcionales (los manda con required:false).
+              min_quantity: minRule
+                ? Number(minRule.rule_value)
+                : slot.required && slot.slot_type === "burger"
+                  ? Number(slot.quantity)
+                  : 0,
               max_quantity: maxRule
                 ? Number(maxRule.rule_value)
                 : slot.quantity,
@@ -88,6 +107,7 @@ export function useAllCombos() {
                 ? JSON.parse(allowedMeatRule.rule_value)
                 : undefined,
               no_fries: noFriesRule?.rule_value === "true" ? true : undefined,
+              fixed_burger_id: fixedBurgerRule?.rule_value || undefined,
             },
           };
         }),
@@ -202,6 +222,7 @@ export function useCreateComboWithSlots() {
             combo_id: combo.id,
             slot_type: slot.slot_type,
             quantity: slot.quantity,
+            required: slot.required,
             default_meat_quantity: slot.default_meat_quantity ?? null,
           })
           .select()
@@ -272,6 +293,7 @@ export function useUpdateComboWithSlots() {
             combo_id: id,
             slot_type: slot.slot_type,
             quantity: slot.quantity,
+            required: slot.required,
             default_meat_quantity: slot.default_meat_quantity ?? null,
           })
           .select()

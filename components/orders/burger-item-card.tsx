@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Minus, Plus, Trash2, X } from "lucide-react";
+import { Lock, Minus, Plus, Trash2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/lib/utils/format";
 
@@ -15,6 +15,7 @@ export type SelectedBurger = {
   meatCount: number;
   friesQuantity: number;
   isVeggie?: boolean;
+  locked?: boolean; // burger fija del combo: sin quitar ni cambiar cantidad
   removedIngredients: string[];
   selectedExtras: {
     extra: { id: string; name: string; price: number };
@@ -130,12 +131,22 @@ export function SelectedBurgerCard({
         {/* HEADER */}
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <p className="font-medium">{item.burger.name}</p>
+            <p className="flex items-center gap-1.5 font-medium">
+              {item.burger.name}
+              {item.locked && (
+                <Lock
+                  className="h-3 w-3 text-muted-foreground"
+                  aria-label="Incluida en el combo"
+                />
+              )}
+            </p>
             <p className="text-subheadline text-muted-foreground">
               {formatCurrency(item.burger.base_price)}
             </p>
           </div>
 
+          {/* Burger fija del combo: la cantidad y el quitar no se tocan */}
+          {!item.locked && (
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
@@ -168,6 +179,7 @@ export function SelectedBurgerCard({
               <Trash2 className="h-3 w-3" />
             </Button>
           </div>
+          )}
         </div>
 
         {/* TOGGLE */}

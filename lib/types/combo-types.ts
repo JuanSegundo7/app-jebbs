@@ -45,13 +45,19 @@ export interface ComboSnapshot {
 // EXTENDED TYPES - Para uso en el frontend
 // ============================================
 
+// Reglas de un slot ya parseadas desde combo_slots_rules (clave/valor).
+// Única definición: la comparten el combo de la DB y el slot seleccionado en el wizard.
+export interface ComboSlotRules {
+  min_quantity: number;
+  max_quantity: number;
+  allowed_meat_count?: number[];
+  no_fries?: boolean;
+  // Hamburguesa obligatoria: el slot queda fijo en esta burger (id)
+  fixed_burger_id?: string;
+}
+
 export interface ComboSlotWithRules extends ComboSlot {
-  rules: {
-    min_quantity: number;
-    max_quantity: number;
-    allowed_meat_count?: number[];
-    no_fries?: boolean;
-  };
+  rules: ComboSlotRules;
 }
 
 export interface ComboWithSlots extends Combo {
@@ -84,6 +90,7 @@ export interface SelectedBurger {
     quantity: number;
   }>;
   meatPriceAdjustment: number;
+  locked?: boolean; // true = burger fija del combo: no se quita ni cambia su cantidad
 }
 
 /**
@@ -96,11 +103,7 @@ export interface SelectedComboSlot {
   defaultMeatCount?: number;
   maxQuantity: number;
   minQuantity: number;
-  rules: {
-    min_quantity: number;
-    max_quantity: number;
-    allowed_meat_count?: number[];
-  };
+  rules: ComboSlotRules;
   burgers: SelectedBurger[];
   selectedExtras: Extra[];
 }
@@ -120,6 +123,7 @@ interface CreateComboSlotPayload {
   slot_type: string;
   quantity: number;
   default_meat_quantity?: number | null;
+  required?: boolean;
   rules?: Array<{
     rule_type: string | null;
     rule_value: string | null;

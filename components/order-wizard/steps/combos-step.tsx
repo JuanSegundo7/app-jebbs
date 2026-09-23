@@ -11,7 +11,7 @@ import { ComboSnapshot, ComboWithSlots } from "@/lib/types/combo-types";
 
 interface CombosStepProps {
   availableCombos: ComboWithSlots[];
-  onAddCombo: (combo: ComboWithSlots) => void;
+  onAddCombo: (combo: ComboWithSlots, burgers: Burger[]) => void;
   onRemoveCombo: (comboId: string) => void;
 
   selectedCombos: Array<{
@@ -24,6 +24,7 @@ interface CombosStepProps {
       maxQuantity: number;
       minQuantity: number;
       defaultMeatCount?: number;
+      rules?: { fixed_burger_id?: string };
       burgers: Array<{
         id: string;
         burger: Burger;
@@ -31,6 +32,7 @@ interface CombosStepProps {
         meatCount: number;
         friesQuantity: number;
         isVeggie?: boolean;
+        locked?: boolean;
         removedIngredients: string[];
         selectedExtras: { extra: Extra; quantity: number }[];
       }>;
@@ -112,6 +114,15 @@ export function CombosStep({
         <div className="grid grid-cols-2 gap-3">
           {availableCombos
             .filter((c) => c.is_available)
+            // Un combo con burger fija borrada/no disponible no se puede ofrecer
+            .filter((c) =>
+              c.slots.every(
+                (s) =>
+                  s.slot_type !== "burger" ||
+                  !s.rules?.fixed_burger_id ||
+                  availableBurgers.some((b) => b.id === s.rules.fixed_burger_id),
+              ),
+            )
             .map((combo) => {
               const qty = comboCount[combo.id] ?? 0;
               return (
@@ -123,7 +134,7 @@ export function CombosStep({
                       ? "ring-2 ring-primary border-primary"
                       : "hover:shadow-sm",
                   )}
-                  onClick={() => onAddCombo(combo)}
+                  onClick={() => onAddCombo(combo, availableBurgers)}
                 >
                   <CardContent className="p-3">
                     {/* ✅ Badge igual que en burgers */}
@@ -161,12 +172,18 @@ export function CombosStep({
           {comboInstance.slots.map((slot) => {
             if (slot.slotType === "burger") {
               const remaining = getRemainingQuantity(comboInstance.id, slot.slotId);
+              // Solo por `locked`, no por la regla: un pedido viejo que se edita
+              // con otra burger no tiene nada bloqueado y tiene que poder
+              // volver a elegir (canAddBurgerToSlot ya limita a la burger fija).
+              const hasFixedBurger = slot.burgers.some((b) => b.locked);
 
               return (
                 <Card key={slot.slotId}>
                   <CardContent className="space-y-3 p-4">
                     <h5 className="text-subheadline font-medium">
-                      Hamburguesas ({remaining} disponibles)
+                      {hasFixedBurger
+                        ? "Hamburguesa incluida en el combo"
+                        : `Hamburguesas (${remaining} disponibles)`}
                     </h5>
 
                     <div className="space-y-2">
@@ -214,7 +231,7 @@ export function CombosStep({
                       ))}
                     </div>
 
-                    {remaining > 0 && (
+                    {!hasFixedBurger && remaining > 0 && (
                       <div className="grid grid-cols-2 gap-2">
                         {availableBurgers?.map((burger) => {
                           if (!canAddBurgerToSlot(comboInstance.id, slot.slotId, burger))

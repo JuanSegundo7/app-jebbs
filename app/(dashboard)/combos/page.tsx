@@ -24,6 +24,14 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { toast } from "sonner";
 import { Plus, Edit, Trash2, Layers, Loader2 } from "lucide-react";
 import {
   useAllCombos,
@@ -32,11 +40,15 @@ import {
   useCreateComboWithSlots,
   useUpdateComboWithSlots,
 } from "@/lib/hooks/use-combos";
+import { useAllBurgers } from "@/lib/hooks/use-menu-crud";
 import { formatCurrency } from "@/lib/utils/format";
 import { cn } from "@/lib/utils";
 import { Combo } from "@/lib/types/combo-types";
 
 /* -------------------------------------------------- */
+
+// Radix Select no admite value vacío: centinela para "sin burger obligatoria"
+const NONE_VALUE = "__none__";
 
 const EMPTY_FORM = {
   name: "",
@@ -45,6 +57,7 @@ const EMPTY_FORM = {
 
   burgers_qty: 0,
   burgers_default_meat_quantity: 2,
+  burgers_fixed_burger_id: null as string | null,
 
   include_drink: false,
   drink_qty: 1,
@@ -61,6 +74,8 @@ export default function CombosPage() {
   const updateComboWithSlots = useUpdateComboWithSlots();
   const deleteCombo = useDeleteCombo();
   const createComboWithSlots = useCreateComboWithSlots();
+  const { data: allBurgers } = useAllBurgers();
+  const availableBurgers = (allBurgers ?? []).filter((b) => b.is_available);
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -105,6 +120,7 @@ export default function CombosPage() {
       is_available: combo.is_available,
       burgers_qty: burgerSlot?.quantity ?? 0,
       burgers_default_meat_quantity: burgerSlot?.default_meat_quantity ?? 2,
+      burgers_fixed_burger_id: burgerSlot?.rules?.fixed_burger_id ?? null,
       include_drink: !!drinkSlot,
       drink_qty: drinkSlot?.quantity ?? 1,
       include_side: !!sideSlot,
@@ -126,9 +142,17 @@ export default function CombosPage() {
             default_meat_quantity: form.burgers_default_meat_quantity,
             rules: [
               {
-                rule_type: "allowed_default_meat_quantity",
+                rule_type: "allowed_meat_count",
                 rule_value: JSON.stringify([form.burgers_default_meat_quantity]),
               },
+              ...(form.burgers_fixed_burger_id
+                ? [
+                    {
+                      rule_type: "fixed_burger_id",
+                      rule_value: form.burgers_fixed_burger_id,
+                    },
+                  ]
+                : []),
               ...(!form.include_fries
                 ? [{ rule_type: "no_fries", rule_value: "true" }]
                 : []),
@@ -161,6 +185,19 @@ export default function CombosPage() {
           is_available: form.is_available,
           slots: buildSlots(),
         });
+      }
+
+      // No bloquea el guardado: avisa si la burger fija no coincide con las carnes del combo
+      const fixed = form.burgers_fixed_burger_id
+        ? (allBurgers ?? []).find((b) => b.id === form.burgers_fixed_burger_id)
+        : undefined;
+      if (
+        fixed &&
+        fixed.default_meat_quantity !== form.burgers_default_meat_quantity
+      ) {
+        toast.warning(
+          `Guardado, pero esa hamburguesa tiene ${fixed.default_meat_quantity} carnes y el combo está configurado con ${form.burgers_default_meat_quantity}`,
+        );
       }
 
       closeDialog();
@@ -342,6 +379,36 @@ export default function CombosPage() {
                   </p>
                 </div>
               </div>
+
+              {form.burgers_qty > 0 && (
+                <div className="space-y-1">
+                  <Label>Hamburguesa obligatoria (opcional)</Label>
+                  <Select
+                    value={form.burgers_fixed_burger_id ?? NONE_VALUE}
+                    onValueChange={(v) =>
+                      setForm({
+                        ...form,
+                        burgers_fixed_burger_id: v === NONE_VALUE ? null : v,
+                      })
+                    }
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={NONE_VALUE}>Cualquiera</SelectItem>
+                      {availableBurgers.map((b) => (
+                        <SelectItem key={b.id} value={b.id}>
+                          {b.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-caption text-muted-foreground">
+                    El combo viene con esta hamburguesa y no se puede cambiar por otra.
+                  </p>
+                </div>
+              )}
 
               <div className="flex items-center gap-2">
                 <Switch
