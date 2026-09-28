@@ -29,7 +29,10 @@ export function hexToRgb(hex: string): { r: number; g: number; b: number } {
   return { r, g, b };
 }
 
-function toHexChannel(value: number): string {
+// Exported so deriveSurfaceTint.ts (a separate, unrelated hex-mix pipeline
+// for the background tint) can reuse the same channel-clamping rules
+// instead of re-implementing them.
+export function toHexChannel(value: number): string {
   const clamped = Math.max(0, Math.min(255, Math.round(value)));
   return clamped.toString(16).padStart(2, "0");
 }

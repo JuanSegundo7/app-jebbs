@@ -312,6 +312,10 @@ export interface AppSettings {
   primary_color_light: string;
   primary_color_dark: string;
   logo_url: string | null;
+  // Optional brand tint mixed into --surface-0..3 (see
+  // lib/utils/deriveSurfaceTint.ts and scripts/022-appearance-tint.sql).
+  // NULL = no tint, the app/globals.css literals stand as-is.
+  surface_tint: string | null;
 }
 
 // ============================================

@@ -1,0 +1,47 @@
+-- ============================================================
+-- Jebbs Dashboard — appearance background tint (022)
+-- ============================================================
+--
+-- WHAT THIS FILE IS
+-- ------------------
+-- Adds app_settings.surface_tint: the third Apariencia color control (see
+-- components/configuracion/apariencia-card.tsx), a subtle brand tint mixed
+-- into the flat --surface-0..3 tokens (app/globals.css). Edited from
+-- Configuracion > Apariencia; read by lib/hooks/use-app-settings.ts through
+-- the same app_settings select it already uses for the two accent colors.
+--
+-- NULL MEANS "NO TINT"
+-- ---------------------
+-- The column is nullable with no default. NULL (every existing row) resolves
+-- to "leave --surface-0..3 as the app/globals.css literals" in both
+-- lib/utils/deriveSurfaceTint.ts and components/providers/theme-color-
+-- provider.tsx. Nothing changes for a business that never touches this
+-- control.
+--
+-- SCOPE, ON PURPOSE
+-- -------------------
+-- Only --surface-0..3 (the opaque planes). NOT --material-thin/regular/
+-- thick, NOT --card/--popover/--sidebar (they derive from material, with
+-- alpha calibrated for legibility over blur) -- see the header comment in
+-- lib/utils/deriveSurfaceTint.ts for why mixing color there without also
+-- touching alpha would break contrast/the glass look. This column stores a
+-- plain hex, same shape as primary_color_light/_dark above it.
+--
+-- HOW TO RUN
+-- -----------
+-- Once per client database (Supabase SQL editor). Requires 018 and 020
+-- (app_settings + its primary_color_light/_dark columns already exist).
+--
+--   SELECT column_name, data_type FROM information_schema.columns
+--   WHERE table_schema = 'public' AND table_name = 'app_settings'
+--     AND column_name = 'surface_tint';
+--
+-- Idempotent (IF NOT EXISTS): safe to re-run across many client databases.
+--
+-- REVERSIBILITY
+-- --------------
+--   ALTER TABLE app_settings DROP COLUMN surface_tint;
+--
+-- ============================================================
+
+ALTER TABLE app_settings ADD COLUMN IF NOT EXISTS surface_tint text;

@@ -45,4 +45,5 @@ Nombre Del Cliente: {{cliente}}
   primary_color_light: "#f57c00",
   primary_color_dark: "#ff9f0a",
   logo_url: null,
+  surface_tint: null,
 };
