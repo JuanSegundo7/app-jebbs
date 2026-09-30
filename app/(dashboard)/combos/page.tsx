@@ -64,6 +64,7 @@ const EMPTY_FORM = {
 
   include_side: false,
   side_qty: 1,
+  side_required: false,
 
   include_fries: true,
 };
@@ -125,6 +126,7 @@ export default function CombosPage() {
       drink_qty: drinkSlot?.quantity ?? 1,
       include_side: !!sideSlot,
       side_qty: sideSlot?.quantity ?? 1,
+      side_required: (sideSlot?.rules?.min_quantity ?? 0) > 0,
       include_fries: !burgerSlot?.rules?.no_fries,
     });
     setDialogOpen(true);
@@ -164,7 +166,21 @@ export default function CombosPage() {
       ? [{ slot_type: "drink", quantity: form.drink_qty, required: false }]
       : []),
     ...(form.include_side
-      ? [{ slot_type: "side", quantity: form.side_qty, required: false }]
+      ? [
+          {
+            slot_type: "side",
+            quantity: form.side_qty,
+            required: form.side_required,
+            rules: form.side_required
+              ? [
+                  {
+                    rule_type: "min_quantity",
+                    rule_value: String(form.side_qty),
+                  },
+                ]
+              : [],
+          },
+        ]
       : []),
   ];
 
@@ -478,6 +494,20 @@ export default function CombosPage() {
                         })
                       }
                     />
+
+                    <div className="flex items-center gap-2 pt-2">
+                      <Switch
+                        checked={form.side_required}
+                        onCheckedChange={(v) =>
+                          setForm({ ...form, side_required: v })
+                        }
+                      />
+                      <Label>Acompañamiento obligatorio</Label>
+                    </div>
+                    <p className="text-caption text-muted-foreground">
+                      Si está activo, el cliente tiene que elegir un
+                      acompañamiento (no puede dejarlo afuera del combo).
+                    </p>
                   </div>
                 )}
               </div>
