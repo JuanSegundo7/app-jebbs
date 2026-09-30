@@ -48,7 +48,11 @@ export function useComboSelection() {
   /* ================= COMBOS ================= */
 
   // `burgers` se usa para precargar la burger fija de los slots que la tengan
-  const addCombo = (combo: ComboWithSlots, burgers: Burger[] = []) => {
+  const addCombo = (
+    combo: ComboWithSlots,
+    burgers: Burger[] = [],
+    extras: Extra[] = [],
+  ) => {
     setSelectedCombos((prev) => [
       ...prev,
       {
@@ -80,6 +84,17 @@ export function useComboSelection() {
               slotState.burgers = Array.from(
                 { length: Number(slot.quantity) },
                 () => buildSelectedBurger(fixed, slotState, { locked: true }),
+              );
+            }
+          }
+
+          const fixedSideId = slot.rules?.fixed_side_id;
+          if (slotState.slotType === "side" && fixedSideId) {
+            const fixedSide = extras.find((e) => e.id === fixedSideId);
+            if (fixedSide) {
+              slotState.selectedExtras = Array.from(
+                { length: Number(slot.quantity) },
+                () => fixedSide,
               );
             }
           }

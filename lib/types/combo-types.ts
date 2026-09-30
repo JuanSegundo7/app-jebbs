@@ -54,6 +54,8 @@ export interface ComboSlotRules {
   no_fries?: boolean;
   // Hamburguesa obligatoria: el slot queda fijo en esta burger (id)
   fixed_burger_id?: string;
+  // Acompañamiento obligatorio: el slot queda fijo en este side/extra (id)
+  fixed_side_id?: string;
 }
 
 export interface ComboSlotWithRules extends ComboSlot {

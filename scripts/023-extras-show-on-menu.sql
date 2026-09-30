@@ -1,0 +1,36 @@
+-- ============================================================
+-- Jebbs Dashboard — extras.show_on_menu (023)
+-- ============================================================
+--
+-- WHAT THIS FILE IS
+-- ------------------
+-- Adds extras.show_on_menu: lets an extra/side stay usable internally
+-- (combo fixed-side picker, staff order wizard in this dashboard) while
+-- being hidden from the public jebbs-landing menu. Decoupled from
+-- is_available, which still means "usable at all, everywhere" — this new
+-- column only controls visibility on the public-facing menu.
+--
+-- Edited from Extras > editar item (see app/(dashboard)/extras/page.tsx).
+-- This dashboard's own internal pickers (combos "acompañamiento fijo",
+-- order wizard) deliberately ignore this column and keep filtering only on
+-- is_available, so a side hidden from the public menu stays fully usable
+-- here. jebbs-landing's own extras/sides query (separate repo) needs its
+-- own matching filter on show_on_menu = true to actually hide it publicly.
+--
+-- DEFAULT TRUE, ON PURPOSE
+-- -------------------------
+-- Every existing row gets show_on_menu = true, so nothing already on the
+-- public menu disappears until someone explicitly hides it.
+--
+-- HOW TO RUN
+-- -----------
+-- Once per client database (Supabase SQL editor). Idempotent
+-- (IF NOT EXISTS): safe to re-run across many client databases.
+--
+-- REVERSIBILITY
+-- --------------
+--   ALTER TABLE extras DROP COLUMN show_on_menu;
+--
+-- ============================================================
+
+ALTER TABLE extras ADD COLUMN IF NOT EXISTS show_on_menu boolean NOT NULL DEFAULT true;

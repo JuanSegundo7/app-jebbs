@@ -40,7 +40,7 @@ import {
   useCreateComboWithSlots,
   useUpdateComboWithSlots,
 } from "@/lib/hooks/use-combos";
-import { useAllBurgers } from "@/lib/hooks/use-menu-crud";
+import { useAllBurgers, useAllExtras } from "@/lib/hooks/use-menu-crud";
 import { formatCurrency } from "@/lib/utils/format";
 import { cn } from "@/lib/utils";
 import { Combo } from "@/lib/types/combo-types";
@@ -64,7 +64,7 @@ const EMPTY_FORM = {
 
   include_side: false,
   side_qty: 1,
-  side_required: false,
+  side_fixed_extra_id: null as string | null,
 
   include_fries: true,
 };
@@ -77,6 +77,10 @@ export default function CombosPage() {
   const createComboWithSlots = useCreateComboWithSlots();
   const { data: allBurgers } = useAllBurgers();
   const availableBurgers = (allBurgers ?? []).filter((b) => b.is_available);
+  const { data: allExtras } = useAllExtras();
+  const availableSides = (allExtras ?? []).filter(
+    (e) => e.category === "sides" && e.is_available,
+  );
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -126,7 +130,7 @@ export default function CombosPage() {
       drink_qty: drinkSlot?.quantity ?? 1,
       include_side: !!sideSlot,
       side_qty: sideSlot?.quantity ?? 1,
-      side_required: (sideSlot?.rules?.min_quantity ?? 0) > 0,
+      side_fixed_extra_id: sideSlot?.rules?.fixed_side_id ?? null,
       include_fries: !burgerSlot?.rules?.no_fries,
     });
     setDialogOpen(true);
@@ -170,9 +174,13 @@ export default function CombosPage() {
           {
             slot_type: "side",
             quantity: form.side_qty,
-            required: form.side_required,
-            rules: form.side_required
+            required: !!form.side_fixed_extra_id,
+            rules: form.side_fixed_extra_id
               ? [
+                  {
+                    rule_type: "fixed_side_id",
+                    rule_value: form.side_fixed_extra_id,
+                  },
                   {
                     rule_type: "min_quantity",
                     rule_value: String(form.side_qty),
@@ -495,19 +503,33 @@ export default function CombosPage() {
                       }
                     />
 
-                    <div className="flex items-center gap-2 pt-2">
-                      <Switch
-                        checked={form.side_required}
-                        onCheckedChange={(v) =>
-                          setForm({ ...form, side_required: v })
+                    <div className="space-y-1 pt-2">
+                      <Label>Acompañamiento obligatorio (opcional)</Label>
+                      <Select
+                        value={form.side_fixed_extra_id ?? NONE_VALUE}
+                        onValueChange={(v) =>
+                          setForm({
+                            ...form,
+                            side_fixed_extra_id: v === NONE_VALUE ? null : v,
+                          })
                         }
-                      />
-                      <Label>Acompañamiento obligatorio</Label>
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value={NONE_VALUE}>Cualquiera</SelectItem>
+                          {availableSides.map((s) => (
+                            <SelectItem key={s.id} value={s.id}>
+                              {s.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <p className="text-caption text-muted-foreground">
+                        El combo viene con este acompañamiento y no se puede cambiar por otro.
+                      </p>
                     </div>
-                    <p className="text-caption text-muted-foreground">
-                      Si está activo, el cliente tiene que elegir un
-                      acompañamiento (no puede dejarlo afuera del combo).
-                    </p>
                   </div>
                 )}
               </div>

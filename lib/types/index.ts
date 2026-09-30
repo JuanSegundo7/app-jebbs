@@ -58,6 +58,7 @@ export interface Extra {
   category: ExtraCategory;
   price: number;
   is_available: boolean;
+  show_on_menu: boolean; // visible en el sitio público (jebbs-landing); is_available sigue mandando en el dashboard
   created_at: string;
 }
 

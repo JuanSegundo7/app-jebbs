@@ -74,6 +74,7 @@ export default function ExtrasPage() {
     category: "extra" as ExtraCategory,
     price: "",
     is_available: true,
+    show_on_menu: true,
   });
 
   /* ---------------- FILTERS ---------------- */
@@ -100,6 +101,7 @@ export default function ExtrasPage() {
       category: category || "extra",
       price: "",
       is_available: true,
+      show_on_menu: true,
     });
     setDialogOpen(true);
   };
@@ -111,6 +113,7 @@ export default function ExtrasPage() {
       category: extra.category,
       price: extra.price.toString(),
       is_available: extra.is_available,
+      show_on_menu: extra.show_on_menu,
     });
     setDialogOpen(true);
   };
@@ -121,6 +124,7 @@ export default function ExtrasPage() {
       category: formData.category,
       price: Number(formData.price),
       is_available: formData.is_available,
+      show_on_menu: formData.show_on_menu,
     };
 
     if (editingExtra) {
@@ -218,6 +222,12 @@ export default function ExtrasPage() {
                     <Badge variant="outline" className="text-caption">
                       {extra.is_available ? "Activo" : "Inactivo"}
                     </Badge>
+
+                    {!extra.show_on_menu && (
+                      <Badge variant="outline" className="text-caption">
+                        Oculto del menú
+                      </Badge>
+                    )}
 
                     <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition">
                       <Button
@@ -348,6 +358,22 @@ export default function ExtrasPage() {
                 }
               />
               <Label>Disponible</Label>
+            </div>
+
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={formData.show_on_menu}
+                  onCheckedChange={(v) =>
+                    setFormData({ ...formData, show_on_menu: v })
+                  }
+                />
+                <Label>Visible en el menú público</Label>
+              </div>
+              <p className="text-caption text-muted-foreground">
+                Si lo desactivás, el cliente no lo ve en la página, pero
+                seguís pudiendo usarlo acá (combos, pedidos manuales).
+              </p>
             </div>
           </div>
 

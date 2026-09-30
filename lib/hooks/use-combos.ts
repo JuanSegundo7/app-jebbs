@@ -76,6 +76,10 @@ export function useAllCombos() {
             (r) => r.rule_type === "fixed_burger_id",
           );
 
+          const fixedSideRule = slot.combo_slots_rules.find(
+            (r) => r.rule_type === "fixed_side_id",
+          );
+
           const noFriesRule = slot.combo_slots_rules.find(
             (r) => r.rule_type === "no_fries",
           );
@@ -108,6 +112,7 @@ export function useAllCombos() {
                 : undefined,
               no_fries: noFriesRule?.rule_value === "true" ? true : undefined,
               fixed_burger_id: fixedBurgerRule?.rule_value || undefined,
+              fixed_side_id: fixedSideRule?.rule_value || undefined,
             },
           };
         }),

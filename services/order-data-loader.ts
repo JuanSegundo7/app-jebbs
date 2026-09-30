@@ -103,6 +103,7 @@ function loadBurgers(
             price: extraItem.unit_price,
             category: "extra" as const,
             is_available: true,
+            show_on_menu: true,
             created_at: new Date().toISOString(),
           },
           quantity: extraItem.quantity,
@@ -145,6 +146,7 @@ function loadSides(order: OrderWithItems, allExtras: Extra[]): SelectedSide[] {
           price: extraItem.unit_price,
           category: "extra" as const,
           is_available: true,
+          show_on_menu: true,
           created_at: new Date().toISOString(),
         },
         quantity: extraItem.quantity,
@@ -224,6 +226,7 @@ function loadCombos(
                       price: extraData.price,
                       category: "extra" as const,
                       is_available: true,
+                      show_on_menu: true,
                       created_at: new Date().toISOString(),
                     },
                     quantity: extraData.quantity,
@@ -262,6 +265,7 @@ function loadCombos(
                   price: se.price || 0,
                   category: "drink" as const,
                   is_available: true,
+                  show_on_menu: true,
                   created_at: new Date().toISOString(),
                 }
               );
@@ -277,6 +281,7 @@ function loadCombos(
                 price: slotData.selectedExtra.price || 0,
                 category: "drink" as const,
                 is_available: true,
+                show_on_menu: true,
                 created_at: new Date().toISOString(),
               },
             ];

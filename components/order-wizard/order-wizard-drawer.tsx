@@ -344,7 +344,9 @@ export function OrderWizardDrawer({
               {step === "combos" && (
                 <CombosStep
                   availableCombos={combos || []}
-                  onAddCombo={wizard.combos.addCombo}
+                  onAddCombo={(combo, burgers) =>
+                    wizard.combos.addCombo(combo, burgers, availableSides)
+                  }
                   onRemoveCombo={wizard.combos.removeCombo}
                   selectedCombos={wizard.combos.selectedCombos}
                   availableBurgers={burgers || []}

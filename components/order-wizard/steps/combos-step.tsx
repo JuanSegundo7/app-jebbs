@@ -24,7 +24,7 @@ interface CombosStepProps {
       maxQuantity: number;
       minQuantity: number;
       defaultMeatCount?: number;
-      rules?: { fixed_burger_id?: string };
+      rules?: { fixed_burger_id?: string; fixed_side_id?: string };
       burgers: Array<{
         id: string;
         burger: Burger;
@@ -116,12 +116,15 @@ export function CombosStep({
             .filter((c) => c.is_available)
             // Un combo con burger fija borrada/no disponible no se puede ofrecer
             .filter((c) =>
-              c.slots.every(
-                (s) =>
-                  s.slot_type !== "burger" ||
-                  !s.rules?.fixed_burger_id ||
-                  availableBurgers.some((b) => b.id === s.rules.fixed_burger_id),
-              ),
+              c.slots.every((s) => {
+                if (s.slot_type === "burger" && s.rules?.fixed_burger_id) {
+                  return availableBurgers.some((b) => b.id === s.rules.fixed_burger_id);
+                }
+                if (s.slot_type === "side" && s.rules?.fixed_side_id) {
+                  return availableSides.some((sd) => sd.id === s.rules.fixed_side_id);
+                }
+                return true;
+              }),
             )
             .map((combo) => {
               const qty = comboCount[combo.id] ?? 0;
@@ -299,6 +302,21 @@ export function CombosStep({
             }
 
             if (slot.slotType === "side") {
+              const fixedSideId = slot.rules?.fixed_side_id;
+              if (fixedSideId) {
+                const fixedSide = availableSides.find((s) => s.id === fixedSideId);
+                return (
+                  <Card key={slot.slotId}>
+                    <CardContent className="p-4">
+                      <p className="mb-1 text-caption font-medium uppercase text-muted-foreground">
+                        Acompañamiento incluido en el combo
+                      </p>
+                      <p className="font-medium">{fixedSide?.name ?? "Acompañamiento"}</p>
+                    </CardContent>
+                  </Card>
+                );
+              }
+
               const sideExtras = availableSides;
               return (
                 <Card key={slot.slotId}>
