@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog,
@@ -65,6 +66,7 @@ const EMPTY_FORM = {
   include_side: false,
   side_qty: 1,
   side_fixed_extra_id: null as string | null,
+  side_allowed_extra_ids: [] as string[],
 
   include_fries: true,
 };
@@ -131,6 +133,7 @@ export default function CombosPage() {
       include_side: !!sideSlot,
       side_qty: sideSlot?.quantity ?? 1,
       side_fixed_extra_id: sideSlot?.rules?.fixed_side_id ?? null,
+      side_allowed_extra_ids: sideSlot?.rules?.allowed_side_ids ?? [],
       include_fries: !burgerSlot?.rules?.no_fries,
     });
     setDialogOpen(true);
@@ -174,7 +177,9 @@ export default function CombosPage() {
           {
             slot_type: "side",
             quantity: form.side_qty,
-            required: !!form.side_fixed_extra_id,
+            required:
+              !!form.side_fixed_extra_id ||
+              form.side_allowed_extra_ids.length > 0,
             rules: form.side_fixed_extra_id
               ? [
                   {
@@ -186,7 +191,22 @@ export default function CombosPage() {
                     rule_value: String(form.side_qty),
                   },
                 ]
-              : [],
+              : form.side_allowed_extra_ids.length > 0
+                ? [
+                    {
+                      rule_type: "allowed_side_ids",
+                      rule_value: JSON.stringify(form.side_allowed_extra_ids),
+                    },
+                    {
+                      // La lista curada es obligatoria: el cliente tiene que
+                      // completar la cantidad del slot eligiendo de esos items
+                      // (en "combo full" con 3 permitidos y cantidad 3, eso
+                      // significa que se lleva los 3, sin margen real de elección).
+                      rule_type: "min_quantity",
+                      rule_value: String(form.side_qty),
+                    },
+                  ]
+                : [],
           },
         ]
       : []),
@@ -331,39 +351,41 @@ export default function CombosPage() {
 
       {/* ---------- CREATE / EDIT ---------- */}
       <Dialog open={dialogOpen} onOpenChange={(o) => !o && closeDialog()}>
-        <DialogContent className="rounded-2xl w-full max-w-2xl!">
+        <DialogContent className="sm:max-w-2xl md:max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl">
           <DialogHeader>
             <DialogTitle>
               {editing ? "Editar combo" : "Nuevo combo"}
             </DialogTitle>
           </DialogHeader>
 
-          <div className="space-y-6 py-4">
+          <div className="space-y-6">
             {/* Datos básicos */}
-            <div className="space-y-2">
-              <Label>Nombre</Label>
-              <Input
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                placeholder="Ej: 2x Triples"
-              />
-            </div>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-[2fr_1fr]">
+              <div className="space-y-2">
+                <Label>Nombre</Label>
+                <Input
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  placeholder="Ej: 2x Triples"
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label>Precio</Label>
-              <Input
-                type="number"
-                value={form.price}
-                onChange={(e) => setForm({ ...form, price: e.target.value })}
-                placeholder="Ej: 22000"
-              />
+              <div className="space-y-2">
+                <Label>Precio</Label>
+                <Input
+                  type="number"
+                  value={form.price}
+                  onChange={(e) => setForm({ ...form, price: e.target.value })}
+                  placeholder="Ej: 22000"
+                />
+              </div>
             </div>
 
             {/* Estructura */}
             <div className="border rounded-xl p-4 space-y-4">
               <p className="text-subheadline font-medium">Estructura del combo</p>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-1">
                   <Label>Cantidad de hamburguesas</Label>
                   <Input
@@ -444,95 +466,131 @@ export default function CombosPage() {
                 <Label>Incluye papas</Label>
               </div>
 
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Switch
-                    checked={form.include_drink}
-                    onCheckedChange={(v) =>
-                      setForm({ ...form, include_drink: v })
-                    }
-                  />
-                  <Label>Incluye bebida</Label>
-                </div>
-                {form.include_drink && (
-                  <div className="ml-10 space-y-1">
-                    <Label className="text-caption text-muted-foreground">
-                      Cantidad de bebidas
-                    </Label>
-                    <Input
-                      type="number"
-                      min={1}
-                      className="w-24"
-                      value={form.drink_qty}
-                      onChange={(e) =>
-                        setForm({
-                          ...form,
-                          drink_qty: Math.max(1, Number(e.target.value)),
-                        })
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 items-start">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={form.include_drink}
+                      onCheckedChange={(v) =>
+                        setForm({ ...form, include_drink: v })
                       }
                     />
+                    <Label>Incluye bebida</Label>
                   </div>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Switch
-                    checked={form.include_side}
-                    onCheckedChange={(v) =>
-                      setForm({ ...form, include_side: v })
-                    }
-                  />
-                  <Label>Incluye acompañamiento</Label>
-                </div>
-                {form.include_side && (
-                  <div className="ml-10 space-y-1">
-                    <Label className="text-caption text-muted-foreground">
-                      Cantidad de acompañamientos
-                    </Label>
-                    <Input
-                      type="number"
-                      min={1}
-                      className="w-24"
-                      value={form.side_qty}
-                      onChange={(e) =>
-                        setForm({
-                          ...form,
-                          side_qty: Math.max(1, Number(e.target.value)),
-                        })
-                      }
-                    />
-
-                    <div className="space-y-1 pt-2">
-                      <Label>Acompañamiento obligatorio (opcional)</Label>
-                      <Select
-                        value={form.side_fixed_extra_id ?? NONE_VALUE}
-                        onValueChange={(v) =>
+                  {form.include_drink && (
+                    <div className="ml-10 space-y-1">
+                      <Label className="text-caption text-muted-foreground">
+                        Cantidad de bebidas
+                      </Label>
+                      <Input
+                        type="number"
+                        min={1}
+                        className="w-24"
+                        value={form.drink_qty}
+                        onChange={(e) =>
                           setForm({
                             ...form,
-                            side_fixed_extra_id: v === NONE_VALUE ? null : v,
+                            drink_qty: Math.max(1, Number(e.target.value)),
                           })
                         }
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value={NONE_VALUE}>Cualquiera</SelectItem>
-                          {availableSides.map((s) => (
-                            <SelectItem key={s.id} value={s.id}>
-                              {s.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <p className="text-caption text-muted-foreground">
-                        El combo viene con este acompañamiento y no se puede cambiar por otro.
-                      </p>
+                      />
                     </div>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={form.include_side}
+                      onCheckedChange={(v) =>
+                        setForm({ ...form, include_side: v })
+                      }
+                    />
+                    <Label>Incluye acompañamiento</Label>
                   </div>
-                )}
+                  {form.include_side && (
+                    <div className="ml-10 space-y-1">
+                      <Label className="text-caption text-muted-foreground">
+                        Cantidad de acompañamientos
+                      </Label>
+                      <Input
+                        type="number"
+                        min={1}
+                        className="w-24"
+                        value={form.side_qty}
+                        onChange={(e) =>
+                          setForm({
+                            ...form,
+                            side_qty: Math.max(1, Number(e.target.value)),
+                          })
+                        }
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
+
+              {form.include_side && (
+                <div className="space-y-4 rounded-lg border border-dashed p-3">
+                  <div className="space-y-1">
+                    <Label>Acompañamiento obligatorio (opcional)</Label>
+                    <Select
+                      value={form.side_fixed_extra_id ?? NONE_VALUE}
+                      onValueChange={(v) =>
+                        setForm({
+                          ...form,
+                          side_fixed_extra_id: v === NONE_VALUE ? null : v,
+                        })
+                      }
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value={NONE_VALUE}>Cualquiera</SelectItem>
+                        {availableSides.map((s) => (
+                          <SelectItem key={s.id} value={s.id}>
+                            {s.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-caption text-muted-foreground">
+                      El combo viene con este acompañamiento y no se puede cambiar por otro.
+                    </p>
+                  </div>
+
+                  {!form.side_fixed_extra_id && (
+                    <div className="space-y-1">
+                      <Label>Acompañamientos permitidos (opcional)</Label>
+                      <p className="text-caption text-muted-foreground">
+                        Si no marcás ninguno, el combo ofrece todos los acompañamientos disponibles (opcional). Si marcás algunos, el cliente tiene que completar la cantidad de arriba eligiendo entre esos (obligatorio) — con 3 marcados y cantidad 3, se lleva los 3.
+                      </p>
+                      <div className="grid grid-cols-1 gap-x-4 gap-y-2 rounded-md border p-3 sm:grid-cols-2 md:grid-cols-3">
+                        {availableSides.map((s) => {
+                          const checked = form.side_allowed_extra_ids.includes(s.id);
+                          return (
+                            <div key={s.id} className="flex min-w-0 items-center gap-2">
+                              <Checkbox
+                                checked={checked}
+                                onCheckedChange={(v) =>
+                                  setForm({
+                                    ...form,
+                                    side_allowed_extra_ids: v
+                                      ? [...form.side_allowed_extra_ids, s.id]
+                                      : form.side_allowed_extra_ids.filter((id) => id !== s.id),
+                                  })
+                                }
+                              />
+                              <Label className="font-normal">{s.name}</Label>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="flex items-center gap-2">

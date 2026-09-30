@@ -56,6 +56,8 @@ export interface ComboSlotRules {
   fixed_burger_id?: string;
   // Acompañamiento obligatorio: el slot queda fijo en este side/extra (id)
   fixed_side_id?: string;
+  // Curated list of sides offered for this slot (ignored if fixed_side_id is set)
+  allowed_side_ids?: string[];
 }
 
 export interface ComboSlotWithRules extends ComboSlot {

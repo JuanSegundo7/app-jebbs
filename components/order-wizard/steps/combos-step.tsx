@@ -24,7 +24,11 @@ interface CombosStepProps {
       maxQuantity: number;
       minQuantity: number;
       defaultMeatCount?: number;
-      rules?: { fixed_burger_id?: string; fixed_side_id?: string };
+      rules?: {
+        fixed_burger_id?: string;
+        fixed_side_id?: string;
+        allowed_side_ids?: string[];
+      };
       burgers: Array<{
         id: string;
         burger: Burger;
@@ -317,7 +321,11 @@ export function CombosStep({
                 );
               }
 
-              const sideExtras = availableSides;
+              const allowedSideIds = slot.rules?.allowed_side_ids;
+              const sideExtras =
+                allowedSideIds && allowedSideIds.length > 0
+                  ? availableSides.filter((s) => allowedSideIds.includes(s.id))
+                  : availableSides;
               return (
                 <Card key={slot.slotId}>
                   <CardContent className="p-4">
