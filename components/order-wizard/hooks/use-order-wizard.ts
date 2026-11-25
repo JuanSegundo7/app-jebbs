@@ -19,6 +19,7 @@ import type { Extra, OrderWithItems } from "@/lib/types";
 import { loadOrderIntoWizard } from "@/services/order-data-loader";
 import { useUpdateOrder } from "@/lib/hooks/orders/use-update-order";
 import { useSidesSelection } from "./use-side-selection";
+import { normalizeDiscountInputs, toLegacyDiscount } from "@/lib/utils/discount";
 
 interface UseOrderWizardParams {
   meatExtra?: { price: number } | null;
@@ -76,10 +77,10 @@ export function useOrderWizard({
   const discountAmount = useMemo(() => {
     return OrderPriceCalculator.calculateDiscountAmount(
       subtotal,
-      settings.discountType,
-      settings.discountValue,
+      settings.discountPercentage,
+      settings.discountFixed,
     );
-  }, [subtotal, settings.discountType, settings.discountValue]);
+  }, [subtotal, settings.discountPercentage, settings.discountFixed]);
 
   // PedidosYa handles its own delivery — the shop's delivery type/fee must
   // never factor into a PedidosYa order's total, regardless of whatever
@@ -106,16 +107,13 @@ export function useOrderWizard({
       deliveryFee: settings.deliveryFee,
       meatExtra,
       friesExtra,
-      discountType: settings.discountType,
-      discountValue: settings.discountValue,
+      discountPercentage: settings.discountPercentage,
+      discountFixed: settings.discountFixed,
       priceAdjustment: settings.priceAdjustment,
     });
 
-    // Si el descuento es 100%, el total es 0 (incluye delivery fee)
-    if (
-      settings.discountType === "percentage" &&
-      settings.discountValue >= 100
-    ) {
+    // Si el descuento porcentual es 100%, el total es 0 (incluye delivery fee)
+    if (settings.discountPercentage >= 100) {
       return 0;
     }
 
@@ -128,8 +126,8 @@ export function useOrderWizard({
     settings.deliveryFee,
     meatExtra,
     friesExtra,
-    settings.discountType,
-    settings.discountValue,
+    settings.discountPercentage,
+    settings.discountFixed,
     settings.priceAdjustment,
   ]);
 
@@ -256,6 +254,30 @@ export function useOrderWizard({
             ? "pickup"
             : settings.deliveryType;
 
+      // 🔑 discount_amount guardado en DB también refleja el total real
+      // (incluye delivery fee cuando el descuento es 100%)
+      const persistedDiscountAmount =
+        orderTotal === 0
+          ? subtotal +
+            (effectiveDeliveryType === "delivery" ? settings.deliveryFee : 0)
+          : discountAmount;
+
+      // Legacy discount_type/discount_value are still written: the DB CHECK
+      // only allows 'amount' | 'percentage' | 'none' (see
+      // scripts/024-order-combined-discount.sql).
+      // Persist the clamped values, never the raw typed ones: the calculator
+      // already caps them, so storing 150% or -500 would leave the row
+      // disagreeing with the discount that was actually applied.
+      const persistedDiscount = normalizeDiscountInputs(
+        settings.discountPercentage,
+        settings.discountFixed,
+      );
+      const legacyDiscount = toLegacyDiscount(
+        persistedDiscount.percentage,
+        persistedDiscount.fixed,
+        persistedDiscountAmount,
+      );
+
       const orderPayload = {
         customer_id: customerId ?? null,
         customer_name:
@@ -275,15 +297,11 @@ export function useOrderWizard({
         delivery_fee:
           effectiveDeliveryType === "delivery" ? settings.deliveryFee : 0,
         payment_method: settings.paymentMethod,
-        discount_type: settings.discountType,
-        discount_value: settings.discountValue,
-        // 🔑 FIX: discount_amount guardado en DB también refleja el total real
-        // (incluye delivery fee cuando el descuento es 100%)
-        discount_amount:
-          orderTotal === 0
-            ? subtotal +
-              (effectiveDeliveryType === "delivery" ? settings.deliveryFee : 0)
-            : discountAmount,
+        discount_percentage: persistedDiscount.percentage,
+        discount_fixed: persistedDiscount.fixed,
+        discount_type: legacyDiscount.discount_type,
+        discount_value: legacyDiscount.discount_value,
+        discount_amount: persistedDiscountAmount,
         items: allItems,
         notes: settings.notes || null,
         delivery_time: settings.deliveryTime || null,

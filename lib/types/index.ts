@@ -82,6 +82,10 @@ export interface Order {
   delivery_time: string | null; // 🆕 AGREGAR
   discount_type: DiscountType | null; // 🆕 Agregado de DB
   discount_value: number; // 🆕 Agregado de DB
+  // Combined discount parts (scripts/024). Optional: absent on rows read
+  // before the migration; use resolveOrderDiscount() to read them.
+  discount_percentage?: number;
+  discount_fixed?: number;
   discount_amount: number; // 🆕 Agregado de DB
   source: OrderSource | null; // 🆕 Agregado de DB
   commission_amount: number; // 🆕 Agregado de DB

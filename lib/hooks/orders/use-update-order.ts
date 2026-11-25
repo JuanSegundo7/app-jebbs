@@ -16,6 +16,8 @@ export interface UpdateOrderPayload {
   commission_rate?: number | null;
   discount_type: "amount" | "percentage" | "none" | null;
   discount_value: number;
+  discount_percentage?: number;
+  discount_fixed?: number;
   discount_amount: number;
   price_adjustment?: number;
   items: OrderItemInput[];
@@ -95,6 +97,8 @@ export function useUpdateOrder() {
           delivery_time: payload.delivery_time ?? null,
           discount_type: payload.discount_type,
           discount_value: payload.discount_value,
+          discount_percentage: payload.discount_percentage ?? 0,
+          discount_fixed: payload.discount_fixed ?? 0,
           discount_amount: payload.discount_amount,
           price_adjustment: payload.price_adjustment ?? 0,
           total_amount: finalTotal,

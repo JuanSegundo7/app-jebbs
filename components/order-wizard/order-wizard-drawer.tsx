@@ -436,11 +436,11 @@ export function OrderWizardDrawer({
                   source={wizard.settings.source}
                   priceAdjustment={wizard.settings.priceAdjustment}
                   onPriceAdjustmentChange={wizard.settings.setPriceAdjustment}
-                  discountType={wizard.settings.discountType}
-                  discountValue={wizard.settings.discountValue}
+                  discountPercentage={wizard.settings.discountPercentage}
+                  discountFixed={wizard.settings.discountFixed}
                   discountAmount={wizard.discountAmount}
-                  onDiscountTypeChange={wizard.settings.setDiscountType}
-                  onDiscountValueChange={wizard.settings.setDiscountValue}
+                  onDiscountPercentageChange={wizard.settings.setDiscountPercentage}
+                  onDiscountFixedChange={wizard.settings.setDiscountFixed}
                   // Effective, not raw: for PedidosYa this reads "pickup"
                   // regardless of what settings.deliveryType still holds
                   // (see use-order-wizard.ts's effectiveDeliveryType) — so

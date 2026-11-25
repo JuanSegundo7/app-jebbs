@@ -1,4 +1,5 @@
 import { nanoid } from "nanoid";
+import { resolveOrderDiscount } from "@/lib/utils/discount";
 import type { Extra } from "@/lib/types";
 import type { OrderWithItems } from "@/lib/types";
 import { SelectedBurger, SelectedCombo } from "@/lib/types/combo-types";
@@ -36,6 +37,9 @@ function loadSettings(order: OrderWithItems) {
       ? "pickup"
       : (order.delivery_type as "delivery" | "pickup");
 
+  // New columns win; falls back to legacy discount_type/discount_value.
+  const resolvedDiscount = resolveOrderDiscount(order);
+
   return {
     deliveryType,
     deliveryFee: order.delivery_fee || 0,
@@ -54,9 +58,8 @@ function loadSettings(order: OrderWithItems) {
     // recomputes commission_amount from the ORIGINAL rate, not today's
     // live default — see use-order-settings.ts's commissionRate comment.
     commissionRate: order.commission_rate ?? 0,
-    discountType:
-      (order.discount_type as "amount" | "percentage" | "none") || "none",
-    discountValue: order.discount_value || 0,
+    discountPercentage: resolvedDiscount.percentage,
+    discountFixed: resolvedDiscount.fixed,
     // Frozen manual PedidosYa adjustment this order was created with (0 for
     // local orders / legacy rows). Re-threaded into wizard state so editing
     // an existing PedidosYa order doesn't lose it — see

@@ -1,4 +1,4 @@
-import { DeliveryType, DiscountType, OrderSource, PaymentMethod } from "@/lib/types";
+import { DeliveryType, OrderSource, PaymentMethod } from "@/lib/types";
 import type { AppSettings } from "@/lib/types";
 import { useRef, useState } from "react";
 
@@ -46,10 +46,9 @@ export function useOrderSettings(appSettings: AppSettings) {
     () => appSettings.pedidosya_commission_pct,
   );
   const [notes, setNotes] = useState("");
-  const [discountType, setDiscountType] = useState<
-    "amount" | "percentage" | "none"
-  >("none");
-  const [discountValue, setDiscountValue] = useState(0);
+  // Both parts apply to the items subtotal (percentage first, then fixed).
+  const [discountPercentage, setDiscountPercentage] = useState(0);
+  const [discountFixed, setDiscountFixed] = useState(0);
   // Flat manual amount, PedidosYa-only — see order-price-calculator.ts and
   // scripts/016-order-price-adjustment.sql for why this isn't a discount.
   const [priceAdjustment, setPriceAdjustment] = useState(0);
@@ -71,8 +70,8 @@ export function useOrderSettings(appSettings: AppSettings) {
     setPaymentMethod("transfer");
     setSource("local");
     setCommissionRate(current.pedidosya_commission_pct);
-    setDiscountType("none");
-    setDiscountValue(0);
+    setDiscountPercentage(0);
+    setDiscountFixed(0);
     setPriceAdjustment(0);
     setNotes("");
     setDeliveryTime(getDefaultDeliveryTime(current.default_delivery_minutes)); // recalcula al momento del reset
@@ -84,8 +83,8 @@ export function useOrderSettings(appSettings: AppSettings) {
     paymentMethod: PaymentMethod;
     source?: OrderSource | null;
     commissionRate?: number;
-    discountType: DiscountType;
-    discountValue: number;
+    discountPercentage: number;
+    discountFixed: number;
     priceAdjustment?: number;
     notes: string;
     deliveryTime?: string;
@@ -98,8 +97,8 @@ export function useOrderSettings(appSettings: AppSettings) {
     // the `source` state comment above for why this distinction matters.
     setSource(settings.source === undefined ? "local" : settings.source);
     setCommissionRate(settings.commissionRate ?? 0);
-    setDiscountType(settings.discountType);
-    setDiscountValue(settings.discountValue);
+    setDiscountPercentage(settings.discountPercentage);
+    setDiscountFixed(settings.discountFixed);
     setPriceAdjustment(settings.priceAdjustment ?? 0);
     setNotes(settings.notes);
     setDeliveryTime(settings.deliveryTime || "");
@@ -116,10 +115,10 @@ export function useOrderSettings(appSettings: AppSettings) {
     setSource,
     commissionRate,
     setCommissionRate,
-    discountType,
-    setDiscountType,
-    discountValue,
-    setDiscountValue,
+    discountPercentage,
+    setDiscountPercentage,
+    discountFixed,
+    setDiscountFixed,
     priceAdjustment,
     setPriceAdjustment,
     notes,

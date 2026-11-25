@@ -33,6 +33,8 @@ export interface CreateOrderInput {
   commission_rate?: number | null;
   discount_type?: "amount" | "percentage" | "none" | null;
   discount_value?: number;
+  discount_percentage?: number;
+  discount_fixed?: number;
   discount_amount?: number;
   price_adjustment?: number;
   items: OrderItemInput[];
@@ -98,6 +100,8 @@ export function useCreateOrder() {
           commission_rate: input.commission_rate ?? null,
           discount_type: input.discount_type ?? "none",
           discount_value: input.discount_value ?? 0,
+          discount_percentage: input.discount_percentage ?? 0,
+          discount_fixed: input.discount_fixed ?? 0,
           discount_amount: discountAmount,
           price_adjustment: input.price_adjustment ?? 0,
           total_amount: total,

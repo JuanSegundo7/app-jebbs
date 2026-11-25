@@ -14,6 +14,7 @@ import { Car, Home, MapPin, User, Edit, Clock, Phone } from "lucide-react";
 import type { Order } from "@/lib/types";
 import { useOrderWithItems } from "@/lib/hooks/orders/use-orders";
 import { formatCurrency } from "@/lib/utils/format";
+import { formatDiscountLabel, resolveOrderDiscount } from "@/lib/utils/discount";
 import { orderStatusConfig } from "@/lib/utils/order-status";
 
 interface OrderDetailsModalProps {
@@ -448,9 +449,16 @@ export function OrderDetailsModal({
             {orderWithItems.discount_amount > 0 && (
               <div className="flex justify-between text-subheadline text-green-600">
                 <span>
-                  Descuento
-                  {orderWithItems.discount_type === "percentage" &&
-                    ` (${orderWithItems.discount_value}%)`}
+                  {(() => {
+                    const { percentage, fixed } =
+                      resolveOrderDiscount(orderWithItems);
+                    const label = formatDiscountLabel(
+                      percentage,
+                      fixed,
+                      formatCurrency,
+                    ).replace(/^Desc\.\s*/, "");
+                    return label ? `Descuento (${label})` : "Descuento";
+                  })()}
                 </span>
                 <span className="font-medium">
                   -{formatCurrency(orderWithItems.discount_amount)}

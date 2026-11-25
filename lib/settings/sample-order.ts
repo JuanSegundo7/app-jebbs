@@ -42,6 +42,8 @@ export const SAMPLE_ORDER: OrderForMessage = {
   delivery_time: "15:00",
   discount_type: "percentage",
   discount_value: 10,
+  discount_percentage: 10,
+  discount_fixed: 0,
   discount_amount: 1850,
   price_adjustment: 500,
   total_amount: 19150,

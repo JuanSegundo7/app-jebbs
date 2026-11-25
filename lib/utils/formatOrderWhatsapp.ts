@@ -1,6 +1,7 @@
 import { formatCurrency, formatDateTime } from "@/lib/utils/format";
 import { renderTemplate } from "@/lib/utils/renderTemplate";
 import { DEFAULT_APP_SETTINGS } from "@/lib/settings/defaults";
+import { formatDiscountLabel, resolveOrderDiscount } from "@/lib/utils/discount";
 import type { AppSettings } from "@/lib/types";
 
 // Tipo acotado a exactamente lo que este formatter lee de una orden — no el
@@ -22,6 +23,8 @@ export interface OrderForMessage {
   delivery_time?: string | null;
   discount_type?: string | null;
   discount_value?: number | null;
+  discount_percentage?: number | null;
+  discount_fixed?: number | null;
   discount_amount: number;
   price_adjustment: number;
   total_amount: number;
@@ -171,7 +174,13 @@ export function buildOrderMessageVars(order: OrderForMessage, settings: AppSetti
     return sum + item.subtotal + extrasTotal;
   }, 0))}`);
   if (order.delivery_fee > 0) totalParts.push(`Envío ${formatCurrency(order.delivery_fee)}`);
-  const discountLabel = order.discount_type === "percentage" ? `Desc. ${order.discount_value}%` : "Desc.";
+  const { percentage: discountPercentage, fixed: discountFixed } =
+    resolveOrderDiscount(order);
+  const discountLabel = formatDiscountLabel(
+    discountPercentage,
+    discountFixed,
+    formatCurrency,
+  );
   if (order.discount_amount > 0) {
     totalParts.push(`${discountLabel} -${formatCurrency(order.discount_amount)}`);
   }

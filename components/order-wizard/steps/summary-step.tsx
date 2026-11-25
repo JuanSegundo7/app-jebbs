@@ -6,6 +6,7 @@ import { Separator } from "@/components/ui/separator";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { User, MapPin, Phone, Info, AlertCircle, Clock } from "lucide-react";
 import { formatCurrency } from "@/lib/utils/format";
+import { formatDiscountLabel } from "@/lib/utils/discount";
 import { CustomerAddress, OrderSource } from "@/lib/types";
 import { useMemo, useEffect, useRef } from "react";
 import {
@@ -96,11 +97,11 @@ interface SummaryStepProps {
 
   // Discount
   subtotal: number;
-  discountType: "amount" | "percentage" | "none";
-  discountValue: number;
+  discountPercentage: number;
+  discountFixed: number;
   discountAmount: number;
-  onDiscountTypeChange: (type: "amount" | "percentage" | "none") => void;
-  onDiscountValueChange: (value: number) => void;
+  onDiscountPercentageChange: (value: number) => void;
+  onDiscountFixedChange: (value: number) => void;
 
   // Notes
   notes: string;
@@ -132,11 +133,11 @@ export function SummaryStep({
   onPaymentMethodChange,
   priceAdjustment,
   onPriceAdjustmentChange,
-  discountType,
-  discountValue,
+  discountPercentage,
+  discountFixed,
   discountAmount,
-  onDiscountTypeChange,
-  onDiscountValueChange,
+  onDiscountPercentageChange,
+  onDiscountFixedChange,
   subtotal,
   notes,
   onNotesChange,
@@ -163,7 +164,8 @@ export function SummaryStep({
     return selectedAddress !== null;
   }, [isNewCustomer, newAddressData?.address, selectedAddress]);
 
-  const isFullDiscount = orderTotal === 0 && discountType !== "none";
+  const hasDiscount = discountPercentage > 0 || discountFixed > 0;
+  const isFullDiscount = orderTotal === 0 && hasDiscount;
 
   return (
     <div ref={topRef} className="space-y-6">
@@ -368,75 +370,61 @@ export function SummaryStep({
         <CardContent className="p-4 space-y-4">
           <h3 className="text-subheadline font-medium">Descuento</h3>
           <div className="space-y-3">
-            <Label>Tipo de descuento</Label>
-            <RadioGroup
-              value={discountType}
-              onValueChange={(value: "amount" | "percentage" | "none") => {
-                onDiscountTypeChange(value);
-                if (value === "none") onDiscountValueChange(0);
-              }}
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="none" id="discount-none" />
-                <Label htmlFor="discount-none" className="font-normal cursor-pointer">
-                  Sin descuento
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="percentage" id="discount-percentage" />
-                <Label htmlFor="discount-percentage" className="font-normal cursor-pointer">
-                  💸 Porcentaje (%)
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="amount" id="discount-amount" />
-                <Label htmlFor="discount-amount" className="font-normal cursor-pointer">
-                  💰 Monto fijo ($)
-                </Label>
-              </div>
-            </RadioGroup>
-
-            {discountType !== "none" && (
-              <div className="space-y-2">
-                <Label>
-                  {discountType === "percentage"
-                    ? "Porcentaje de descuento"
-                    : "Monto de descuento"}
-                </Label>
-                <Input
-                  type="number"
-                  min={0}
-                  max={discountType === "percentage" ? 100 : undefined}
-                  // Show empty string when value is 0 so the field starts blank
-                  value={discountValue === 0 ? "" : discountValue}
-                  onChange={(e) => {
-                    const raw = e.target.value;
-                    // Allow empty field (treat as 0 internally)
-                    onDiscountValueChange(raw === "" ? 0 : Number(raw));
-                  }}
-                  onFocus={(e) => {
-                    // Select all text on focus so typing replaces the value
-                    e.target.select();
-                  }}
-                  placeholder={
-                    discountType === "percentage" ? "Ej: 10" : "Ej: 5000"
-                  }
-                />
-                {discountAmount > 0 && (
-                  <div className="flex items-center justify-between text-subheadline rounded-md bg-[var(--status-paid-tint)] border border-[var(--status-paid)]/30 p-2">
-                    <span className="text-[var(--status-paid)]">
-                      Descuento aplicado
-                      {isFullDiscount && (
-                        <span className="ml-1 text-caption text-[var(--status-paid)]/80">
-                          (incluye envío)
-                        </span>
-                      )}
+            <div className="space-y-2">
+              <Label htmlFor="discount-percentage">
+                Descuento porcentual (%)
+              </Label>
+              <Input
+                id="discount-percentage"
+                type="number"
+                min={0}
+                max={100}
+                // Show empty string when value is 0 so the field starts blank
+                value={discountPercentage === 0 ? "" : discountPercentage}
+                onChange={(e) => {
+                  const raw = e.target.value;
+                  // Allow empty field (treat as 0 internally)
+                  onDiscountPercentageChange(raw === "" ? 0 : Number(raw));
+                }}
+                onFocus={(e) => {
+                  // Select all text on focus so typing replaces the value
+                  e.target.select();
+                }}
+                placeholder="Ej: 10"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="discount-fixed">
+                Descuento en monto fijo ($)
+              </Label>
+              <Input
+                id="discount-fixed"
+                type="number"
+                min={0}
+                value={discountFixed === 0 ? "" : discountFixed}
+                onChange={(e) => {
+                  const raw = e.target.value;
+                  onDiscountFixedChange(raw === "" ? 0 : Number(raw));
+                }}
+                onFocus={(e) => {
+                  e.target.select();
+                }}
+                placeholder="Ej: 5000"
+              />
+            </div>
+            {discountAmount > 0 && (
+              <div className="flex items-center justify-between text-subheadline rounded-md bg-[var(--status-paid-tint)] border border-[var(--status-paid)]/30 p-2">
+                <span className="text-[var(--status-paid)]">
+                  Descuento aplicado
+                  {isFullDiscount && (
+                    <span className="ml-1 text-caption text-[var(--status-paid)]/80">
+                      (incluye envío)
                     </span>
-                    <span className="font-semibold text-[var(--status-paid)]">
-                      -{formatCurrency(isFullDiscount ? orderTotal : discountAmount)}
-                    </span>
-                  </div>
-                )}
+                  )}
+                </span>
+                <span className="font-semibold text-[var(--status-paid)]">
+                  -{formatCurrency(isFullDiscount ? orderTotal : discountAmount)}
+                </span>
               </div>
             )}
           </div>
@@ -727,7 +715,8 @@ export function SummaryStep({
               <div className="flex justify-between text-green-600 dark:text-green-400">
                 <span>
                   Descuento{" "}
-                  {discountType === "percentage" && `(${discountValue}%)`}
+                  {hasDiscount &&
+                    `(${formatDiscountLabel(discountPercentage, discountFixed, formatCurrency).replace(/^Desc\. /, "")})`}
                   {isFullDiscount && (
                     <span className="ml-1 text-caption opacity-75">(incl. envío)</span>
                   )}

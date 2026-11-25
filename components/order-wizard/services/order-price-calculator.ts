@@ -1,5 +1,6 @@
 import { SelectedBurger } from "@/lib/types/combo-types";
 import { SelectedSide } from "../hooks/use-side-selection";
+import { calculateCombinedDiscount } from "@/lib/utils/discount";
 
 interface SelectedComboSlot {
   slotId: string;
@@ -29,8 +30,8 @@ interface PriceCalculatorParams {
   deliveryFee: number;
   meatExtra?: { price: number } | null;
   friesExtra?: { price: number } | null;
-  discountType?: "amount" | "percentage" | "none";
-  discountValue?: number;
+  discountPercentage?: number;
+  discountFixed?: number;
 }
 
 export class OrderPriceCalculator {
@@ -117,26 +118,14 @@ export class OrderPriceCalculator {
 
   static calculateDiscountAmount(
     subtotal: number,
-    discountType: "amount" | "percentage" | "none",
-    discountValue: number,
+    discountPercentage: number,
+    discountFixed: number,
   ): number {
-    const safeSubtotal = Number(subtotal) || 0;
-    const safeValue = Number(discountValue) || 0;
-
-    if (discountType === "none" || safeValue <= 0) {
-      return 0;
-    }
-
-    if (discountType === "amount") {
-      return Math.min(safeValue, safeSubtotal);
-    }
-
-    if (discountType === "percentage") {
-      const percentage = Math.min(safeValue, 100);
-      return (safeSubtotal * percentage) / 100;
-    }
-
-    return 0;
+    return calculateCombinedDiscount(
+      subtotal,
+      discountPercentage,
+      discountFixed,
+    ).total;
   }
 
   static calculateOrderTotal(params: {
@@ -147,8 +136,8 @@ export class OrderPriceCalculator {
     deliveryFee: number;
     meatExtra?: { price: number } | null;
     friesExtra?: { price: number } | null;
-    discountType?: string;
-    discountValue?: number;
+    discountPercentage?: number;
+    discountFixed?: number;
     priceAdjustment?: number;
   }) {
     const safeBurgers = Array.isArray(params.selectedBurgers)
@@ -171,15 +160,10 @@ export class OrderPriceCalculator {
 
     console.log("🔍 SUBTOTAL:", subtotal);
 
-    const normalizedDiscountType =
-      params.discountType === "amount" || params.discountType === "percentage"
-        ? params.discountType
-        : "none";
-
     const discountAmount = this.calculateDiscountAmount(
       subtotal,
-      normalizedDiscountType,
-      params.discountValue || 0,
+      params.discountPercentage || 0,
+      params.discountFixed || 0,
     );
 
     console.log("🔍 DISCOUNT AMOUNT:", discountAmount);
