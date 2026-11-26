@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { useBurgers, useExtras } from "@/lib/hooks/use-menu";
 import { useCustomers, useCustomerAddresses } from "@/lib/hooks/use-customers";
+import { ADDRESS_SAVING_MESSAGE } from "@/lib/utils/is-uuid";
 import { useAllCombos } from "@/lib/hooks/use-combos";
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/lib/utils/format";
@@ -176,7 +177,11 @@ export function OrderWizardDrawer({
       // drawer stayed open, isSubmittingRef reset silently in `finally`,
       // and the user had zero indication the order was never created.
       console.error("Error al guardar el pedido:", error);
-      toast.error("Error al guardar el pedido");
+      toast.error(
+        error instanceof Error && error.message === ADDRESS_SAVING_MESSAGE
+          ? error.message
+          : "Error al guardar el pedido",
+      );
     } finally {
       isSubmittingRef.current = false;
     }

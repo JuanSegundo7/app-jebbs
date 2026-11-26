@@ -7,7 +7,8 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCustomerAddresses } from "@/lib/hooks/use-customers";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
+import { isOptimisticAddress } from "@/lib/utils/is-uuid";
 import {
   Tooltip,
   TooltipContent,
@@ -26,7 +27,13 @@ export function CustomerAddressSelect({
   onChange: (addressId: string | undefined) => void;
   isLoading: boolean;
 }) {
-  const { data: addresses } = useCustomerAddresses(customerId);
+  const { data: allAddresses } = useCustomerAddresses(customerId);
+  // Optimistic (not yet saved) addresses carry a client-side id that would
+  // fail as a uuid foreign key: never offer or auto-select them.
+  const addresses = useMemo(
+    () => allAddresses?.filter((a) => !isOptimisticAddress(a)),
+    [allAddresses],
+  );
 
   const prevCustomerIdRef = useRef(customerId);
 

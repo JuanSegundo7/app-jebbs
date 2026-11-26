@@ -12,6 +12,7 @@ import { useEffect, useState } from "react";
 import { Customer } from "@/lib/types";
 import { useCustomerAddresses, useUpdateCustomer } from "@/lib/hooks/use-customers";
 import { CustomerAddressesEditor } from "./customer-adresses-editor";
+import { isOptimisticAddress } from "@/lib/utils/is-uuid";
 import { toast } from "sonner";
 import { User, Phone, MapPin, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -47,10 +48,13 @@ export function EditCustomerModal({
   }, [customer.id]);
 
   useEffect(() => {
-    if (selectedAddress || addresses.length === 0) return;
+    // Optimistic (not yet saved) addresses have a client-side id: never
+    // auto-select them. The effect re-runs when the real row replaces them.
+    const selectable = addresses.filter((a) => !isOptimisticAddress(a));
+    if (selectedAddress || selectable.length === 0) return;
 
     const current = currentAddressId
-      ? addresses.find((a) => a.id === currentAddressId)
+      ? selectable.find((a) => a.id === currentAddressId)
       : undefined;
 
     if (current) {
@@ -58,12 +62,13 @@ export function EditCustomerModal({
       return;
     }
 
-    const addr = addresses.find((a) => a.is_default) ?? addresses[0];
+    const addr = selectable.find((a) => a.is_default) ?? selectable[0];
     setSelectedAddress(addr);
     onSelectAddress?.(addr.id);
   }, [addresses, selectedAddress, currentAddressId]);
 
   const handleSelectAddress = (addr: any) => {
+    if (isOptimisticAddress(addr)) return;
     setSelectedAddress(addr);
     onSelectAddress?.(addr.id);
   };

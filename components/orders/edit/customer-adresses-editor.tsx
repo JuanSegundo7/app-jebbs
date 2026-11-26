@@ -20,6 +20,7 @@ import {
 } from "@/lib/hooks/use-customers";
 import { Trash2, Star, Check, X, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { isOptimisticAddress } from "@/lib/utils/is-uuid";
 
 export function CustomerAddressesEditor({
   customerId,
@@ -131,14 +132,26 @@ export function CustomerAddressesEditor({
       {/* Direcciones */}
       {addresses.map((addr) => {
         const isSelected = selectedAddressId === addr.id;
+        // Not saved yet: its id is client-side only and must never be
+        // selected (it would reach orders.customer_address_id).
+        const isPending = isOptimisticAddress(addr);
 
         return (
           <div
             key={addr.id}
-            onClick={() => onSelect(addr)}
+            aria-disabled={isPending || undefined}
+            onClick={() => {
+              if (isPending) return;
+              onSelect(addr);
+            }}
             className={cn(
-              "flex items-center gap-2 border rounded-md p-2 cursor-pointer transition",
-              isSelected ? "border-primary bg-primary/5" : "hover:bg-muted",
+              "flex items-center gap-2 border rounded-md p-2 transition",
+              isPending
+                ? "opacity-50 cursor-not-allowed"
+                : "cursor-pointer",
+              isSelected
+                ? "border-primary bg-primary/5"
+                : !isPending && "hover:bg-muted",
             )}
           >
             {/* Selector */}
@@ -157,7 +170,7 @@ export function CustomerAddressesEditor({
             <Button
               size="icon"
               variant="ghost"
-              disabled={addr._optimistic}
+              disabled={isPending}
               onClick={(e) => {
                 e.stopPropagation();
                 setDefault.mutate({

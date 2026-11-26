@@ -20,6 +20,13 @@ import { loadOrderIntoWizard } from "@/services/order-data-loader";
 import { useUpdateOrder } from "@/lib/hooks/orders/use-update-order";
 import { useSidesSelection } from "./use-side-selection";
 import { normalizeDiscountInputs, toLegacyDiscount } from "@/lib/utils/discount";
+import { ADDRESS_SAVING_MESSAGE, isUuid } from "@/lib/utils/is-uuid";
+
+function assertAddressIdIsSaved(addressId: string | null | undefined) {
+  if (addressId && !isUuid(addressId)) {
+    throw new Error(ADDRESS_SAVING_MESSAGE);
+  }
+}
 
 interface UseOrderWizardParams {
   meatExtra?: { price: number } | null;
@@ -210,6 +217,11 @@ export function useOrderWizard({
         throw new Error("No hay items en el pedido");
       }
 
+      // Defense in depth: an optimistic address id ("optimistic-<uuid>") is
+      // not a valid uuid and would make the orders write fail. Checked before
+      // ANY database write (customer/address creation included).
+      assertAddressIdIsSaved(customer.selectedAddress);
+
       let customerId = customer.selectedCustomer?.id;
       let customerAddressId = customer.selectedAddress;
 
@@ -277,6 +289,8 @@ export function useOrderWizard({
         persistedDiscount.fixed,
         persistedDiscountAmount,
       );
+
+      assertAddressIdIsSaved(customerAddressId);
 
       const orderPayload = {
         customer_id: customerId ?? null,
