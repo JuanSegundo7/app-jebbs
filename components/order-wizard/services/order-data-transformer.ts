@@ -124,6 +124,8 @@ export class OrderDataTransformer {
               meatCount: b.meatCount,
               isVeggie: b.isVeggie ?? false,
               friesQuantity: b.friesQuantity,
+              referenceFriesQuantity:
+                b.referenceFriesQuantity ?? b.burger.default_fries_quantity ?? 1,
               friesAdjustment: friesExtra
                 ? (b.friesQuantity - (b.referenceFriesQuantity ?? b.burger.default_fries_quantity ?? 1)) *
                   friesExtra.price *

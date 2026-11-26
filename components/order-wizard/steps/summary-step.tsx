@@ -567,7 +567,8 @@ export function SummaryStep({
                 }
                 let friesAdjustment = 0;
                 if (friesExtra) {
-                  const referenceFriesCount = burger.burger.default_fries_quantity ?? 1;
+                  const referenceFriesCount =
+                    burger.referenceFriesQuantity ?? burger.burger.default_fries_quantity ?? 1;
                   friesAdjustment = (burger.friesQuantity - referenceFriesCount) * friesExtra.price;
                 }
                 comboExtrasPrice += (burgerExtras + meatAdjustment + friesAdjustment) * burger.quantity;

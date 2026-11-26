@@ -244,6 +244,15 @@ function loadCombos(
                 meatCount: burgerData.meatCount,
                 isVeggie: burgerData.isVeggie ?? false,
                 friesQuantity: burgerData.friesQuantity,
+                // Baseline the combo price already includes. Mirrors
+                // buildSelectedBurger: no_fries slots bake in 0 fries.
+                // Legacy rows lack the persisted value, so derive it.
+                referenceFriesQuantity:
+                  typeof burgerData.referenceFriesQuantity === "number"
+                    ? burgerData.referenceFriesQuantity
+                    : originalSlot?.rules?.no_fries
+                      ? 0
+                      : Number(burger.default_fries_quantity ?? 1),
                 removedIngredients: burgerData.removedIngredients || [],
                 selectedExtras,
                 meatPriceAdjustment: 0,
